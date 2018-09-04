@@ -51,7 +51,7 @@ alias ss='open -a /System/Library/Frameworks/ScreenSaver.framework/Versions/A/Re
 alias flushdns='sudo killall -HUP mDNSResponder'
 alias md='mkdir -p'
 alias history='fc -l 1'
-alias rl='rm /tmp/.aliases; rm /tmp/.functions; rm /tmp/.pull; rm /tmp/.statuses; sh -c "$(curl -fsSL https://raw.githubusercontent.com/bhudgens/benvironment/master/install.sh)"'
+alias rl='rm /tmp/.aliases; rm /tmp/.functions; rm /tmp/.pull; rm /tmp/.statuses; sh -c "$(curl -fsSL https://raw.githubusercontent.com/bhudgens/benvironment/master/install.sh)"; source "${HOME}/.zshrc"'
 alias denv='vi ${HOME}/.devenv; source ${HOME}/.devenv'
 alias ndm='bash -c "$(STARPHLEET_HEADQUARTERS=git@github.com:glg/template-hq-dev.git#master curl -s https://raw.githubusercontent.com/glg/starphleet-dev-webinstalls/master/template)"'
 alias ol='app https://outlook.office.com/owa/'
