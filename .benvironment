@@ -9,7 +9,7 @@ export DIR_CODE="${HOME}/Dropbox/code"
 export DIR_PERSONAL="${HOME}/Dropbox/code/personal"
 export URL_PATH_TO_ENV_FILES="https://raw.githubusercontent.com/bhudgens/benvironment/master"
 
-BENVIRONMENT_FILES_TO_LOAD="${BENVIRONMENT_FILES_TO_LOAD:-functions aliases pull statuses}"
+BENVIRONMENT_FILES_TO_LOAD="${BENVIRONMENT_FILES_TO_LOAD:-colors tools functions aliases pull statuses}"
 
 for file in $(echo $BENVIRONMENT_FILES_TO_LOAD); do
   FILE_CACHE_ALIASES="/tmp/.${file}"

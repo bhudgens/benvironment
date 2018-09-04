@@ -1,0 +1,39 @@
+#############################################################################
+# Software Install
+#############################################################################
+
+brew_install () {
+  BREW_CMD="$(which brew)"
+  if [ ! -f "${BREW_CMD}" ]; then
+    echo Brew not found
+    return
+  fi
+
+  BREW_CMD="$1"
+  which "${BREW_CMD}" > /dev/null
+  if [ $? -gt 0 ]; then
+    brew install "${BREW_CMD}"
+  fi
+}
+
+# List of the things
+brew_install bat
+
+# Aliases based on successes
+if which bat > /dev/null; then
+  alias cat='bat'
+fi
+
+# Install prettyping
+if [ ! -f /usr/local/bin/prettyping ]; then
+  pushd /tmp > /dev/null
+  curl -s -O https://raw.githubusercontent.com/denilsonsa/prettyping/master/prettyping
+  cp prettyping /usr/local/bin
+  echo Installing prettyping
+  chmod +x /usr/local/bin/prettyping
+  popd > /dev/null
+fi
+
+if [ -f /usr/local/bin/prettyping ]; then
+  alias ping='prettyping --nolegend'
+fi
