@@ -500,6 +500,10 @@ cat << EOF > ./.gitignore
 *.o
 *.so
 .env
+environment
+env
+prod.env
+live.env
 
 # Packages #
 ############
