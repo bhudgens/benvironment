@@ -1,0 +1,153 @@
+#! /usr/bin/env bash
+
+##############################################################################
+## Settings
+##############################################################################
+export DIR_WORKING_PATH="${DIR_WORKING_PATH:-/tmp}"
+export DIR_ANYBAR_INSTALL_PATH="${DIR_WORKING_PATH}/AnyBar.app"
+export FILE_ANYBAR_TMP_ZIP="${DIR_WORKING_PATH}/anybar.tmp.zip"
+export FIVE_DAYS_IN_SECONDS=$((86400 * 5))
+export URL_ANYBAR_DOWNLOAD_ZIP="https://github.com/tonsky/AnyBar/releases/download/0.1.4/AnyBar-0.1.4.zip"
+export FILE_LAZY_LOAD_EXPIRE_TIME="/tmp/mydevdbexpiretime"
+
+##############################################################################
+## AnyBar Helpers
+##############################################################################
+# Function: install_anybar
+#
+# Install AnyBar if not already installed
+install_anybar() {
+  pushd "${DIR_WORKING_PATH}" > /dev/null
+  curl -L -s -o "${FILE_ANYBAR_TMP_ZIP}" "${URL_ANYBAR_DOWNLOAD_ZIP}"
+  unzip "${FILE_ANYBAR_TMP_ZIP}"
+  # Strip security from app
+  xattr -dr com.apple.quarantine "${DIR_ANYBAR_INSTALL_PATH}"
+  popd > /dev/null
+}
+
+
+# Function: run_anybar <port>
+#
+# Install & Run AnyBar on <port>
+# Will punt if port detected to be in-use
+run_anybar() {
+  ANYBAR_PORT=${1:-1738}
+  # Done installing?
+  ([ "${ANYBAR_INSTALLING}" != "${ANYBAR_PORT}" ] \
+    || netstat -an | grep udp | grep ${ANYBAR_PORT} > /dev/null) && unset ANYBAR_INSTALLING
+  # Port used? - Silently skip install
+  netstat -an | grep udp | grep ${ANYBAR_PORT} > /dev/null && return
+  # Install if necessary
+  [ -d "${DIR_ANYBAR_INSTALL_PATH}" ] || install_anybar
+
+  pushd "${DIR_WORKING_PATH}" > /dev/null
+  [ -z "${ANYBAR_INSTALLING}" ] && ANYBAR_PORT="${ANYBAR_PORT}" open -na "${DIR_ANYBAR_INSTALL_PATH}"
+  ANYBAR_INSTALLING="${ANYBAR_PORT}"
+  popd > /dev/null
+}
+
+# Function: anybar <command> <port>
+#
+# Change the status of the anybar icon
+# running on 'port'
+anybar() {
+  ANYBAR_COMMAND="${1:-white}"
+  ANYBAR_PORT="${2:-1738}"
+  run_anybar "${ANYBAR_PORT}"
+  echo -n "${ANYBAR_COMMAND}" | nc -4u -w0 localhost "${ANYBAR_PORT}";
+}
+
+# Function: anybar_good
+#
+# Wrapper to flip anybar to green
+anybar_good() {
+  anybar "green" "${1}"
+}
+
+# Function: anybar_bad
+#
+# Wrapper to flip anybar to exclamation
+anybar_bad() {
+  anybar "exclamation" "${1}"
+}
+
+# Function: anybar_warn
+#
+# Wrapper to flip anybar to red
+anybar_warn() {
+  anybar "red" "${1}"
+}
+
+# Function: update_dev_db_expire_time
+#
+# Updates the lazy load file.  These are seperate
+# so I can run this in the background and not wait
+# for the curl
+update_dev_db_expire_time() {
+  MENTION_NAME="${1}"
+
+  exec curl \
+    -s "https://services-internal.glgresearch.com/mydevdb/?user=${HIPCHAT_MENTION_NAME}" \
+    -o "${FILE_LAZY_LOAD_EXPIRE_TIME}" \
+    --connect-timeout 5 \
+    -m 5 &
+}
+
+# Function: get_devdb_expire_time
+#
+# For performance, we lazy load the
+# expire time
+get_devdb_expire_time() {
+  [ -f "${FILE_LAZY_LOAD_EXPIRE_TIME}" ] \
+  && cat "${FILE_LAZY_LOAD_EXPIRE_TIME}" \
+  | python -m json.tool 2> /dev/null \
+  | grep ExpiresInUtc \
+  | cut -f 4 -d '"' \
+  | sed -e 's|\..*||'
+}
+
+##############################################################################
+## Main - Status Implementations
+##############################################################################
+export PORT_ANYBAR_HIPCHAT=${PORT_ANYBAR_HIPCHAT:-22448}
+set_anybar_status_for_my_devdb() {
+  HIPCHAT_MENTION_NAME=${HIPCHAT_MENTION_NAME:-$1}
+
+  ((update_dev_db_expire_time "${HIPCHAT_MENTION_NAME}") &)
+  TIME_DEV_DB_EXPIRES=$(get_devdb_expire_time)
+
+  # Guard - If the above breaks - punt and set a bad status
+  #   - Can happen if we first install and have not ever gotten a status
+  #   - ..or after a reboot and not being vpn'd in
+  #   - ..or if our status call comes back empty cause our devdb is not there
+  [ -z "${TIME_DEV_DB_EXPIRES}" ] && anybar_bad "${PORT_ANYBAR_HIPCHAT}" && return
+
+  # Convert everything to Seconds
+  TIME_DEV_DB_EXPIRES_IN_SECONDS="$(date -j -f '%Y-%m-%dT%H:%M:%S' ${TIME_DEV_DB_EXPIRES} +%s)"
+  TIME_CURRENT_IN_SECONDS=$(date +%s)
+
+  EXPIRE_WARNING_IN_SECONDS="${EXPIRE_WARNING_IN_SECONDS:-${FIVE_DAYS_IN_SECONDS}}"
+
+  # Warn if expiring soon
+  if [ $((${TIME_DEV_DB_EXPIRES_IN_SECONDS} - ${TIME_CURRENT_IN_SECONDS})) -lt ${EXPIRE_WARNING_IN_SECONDS} ]; then
+    anybar_warn "${PORT_ANYBAR_HIPCHAT}" && return
+  fi
+
+  # Good if older than a day
+  if [ $((${TIME_DEV_DB_EXPIRES_IN_SECONDS} - ${TIME_CURRENT_IN_SECONDS})) -gt ${EXPIRE_WARNING_IN_SECONDS} ]; then
+    anybar_good "${PORT_ANYBAR_HIPCHAT}" && return
+  fi
+
+  # How'd we get here?
+  echo "Broken"
+  anybar_bad "${PORT_ANYBAR_HIPCHAT}"
+}
+
+# [ -n "${HIPCHAT_MENTION_NAME}" ] && set_anybar_status_for_my_devdb
+
+statusAnything() {
+  export PORT_ANYBAR_STATUS_ANYTHING="5959"
+  anybar_good "${PORT_ANYBAR_STATUS_ANYTHING}"
+  $*
+  anybar_bad "${PORT_ANYBAR_STATUS_ANYTHING}"
+}

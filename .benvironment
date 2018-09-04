@@ -1,0 +1,21 @@
+#! /usr/bin/env bash
+
+export DIR_REVERTS="${HOME}/reverts"
+export DIR_GLG="${HOME}/Dropbox/code/glg"
+export DIR_STARPHLEET="${DIR_REVERTS}/starphleet"
+export DIR_STARPHLEET_DEV="${HOME}/starphleet_dev"
+export DIR_STARPHLEET_DATA="${HOME}/starphleet_data"
+export DIR_CODE="${HOME}/Dropbox/code"
+export DIR_PERSONAL="${HOME}/Dropbox/code/personal"
+export URL_PATH_TO_ENV_FILES="https://raw.githubusercontent.com/bhudgens/benvironment/master"
+
+BENVIRONMENT_FILES_TO_LOAD="${BENVIRONMENT_FILES_TO_LOAD:-functions aliases pull statuses}"
+
+for file in $(echo $BENVIRONMENT_FILES_TO_LOAD); do
+  FILE_CACHE_ALIASES="/tmp/.${file}"
+  [ ! -f "${FILE_CACHE_ALIASES}" ] && curl -s "${URL_PATH_TO_ENV_FILES}/${file}" -o "${FILE_CACHE_ALIASES}"
+  source "${FILE_CACHE_ALIASES}"
+  echo "${blue}$file ${green}Loaded...${end}"
+done
+
+echo "${yellow}Benvironment ${green}Loaded...${end}"

@@ -1,0 +1,138 @@
+#######################################################################
+# Author:           Benjamin Hudgens
+# Date:             April 9, 2015
+#
+# Description:      Aliases and Shortcuts
+#######################################################################
+
+#############################################################################
+# Rapid Reverts
+#############################################################################
+# -New- rv.. purges previous dir
+alias nrv='rm -rf "${DIR_REVERTS}"; mkdir -p "${DIR_REVERTS}"; cd "${DIR_REVERTS}"'
+alias rv='mkdir -p "${DIR_REVERTS}"; cd "${DIR_REVERTS}"'
+# Revert the last normal commit
+alias gr='git revert HEAD~1..HEAD'
+# Revert the last commit if it's a merge
+alias gmr='git revert -m 1 HEAD~1..HEAD'
+
+#############################################################################
+# Quick Edits
+#############################################################################
+alias t='atom /Users/benjamin/Dropbox/code/templates'
+alias sql='code /Users/benjamin/Dropbox/code/sql'
+
+#############################################################################
+# Navigation
+#############################################################################
+alias priv='cat ${HOME}/.ssh/id_rsa | pbcopy'
+alias pub='cat ${HOME}/.ssh/id_rsa.pub | pbcopy'
+alias glg='cd "${DIR_GLG}"'
+alias sc='cd "${DIR_GLG}"/starphleet-enhance; ./connect.sh'
+alias se='cd "${DIR_GLG}"/starphleet-enhance'
+alias sd='cd ${DIR_STARPHLEET_DEV}'
+alias term='"${DIR_GLG}"/starphleet-enhance/terminate-instance'
+alias ssh='ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null'
+# ls shortcuts
+alias ls='ls -G'
+alias ll='ls -lh'
+alias lsa='ls -lah'
+alias la='ls -lAh'
+alias l='ls -lah'
+
+#############################################################################
+# Screen Saver
+#############################################################################
+alias ss='open -a /System/Library/Frameworks/ScreenSaver.framework/Versions/A/Resources/ScreenSaverEngine.app'
+
+#############################################################################
+# Shell Shortcuts
+#############################################################################
+alias flushdns='sudo killall -HUP mDNSResponder'
+alias md='mkdir -p'
+alias history='fc -l 1'
+alias rl='rm /tmp/.aliases; rm /tmp/.functions; rm /tmp/.pull; rm /tmp/.statuses; source ${HOME}/.zshrc'
+alias denv='vi ${HOME}/.devenv; source ${HOME}/.devenv'
+alias ndm='bash -c "$(STARPHLEET_HEADQUARTERS=git@github.com:glg/template-hq-dev.git#master curl -s https://raw.githubusercontent.com/glg/starphleet-dev-webinstalls/master/template)"'
+alias ol='app https://outlook.office.com/owa/'
+alias vpn="sudo vpn-client"
+alias vpne="sudo vpn-client -e"
+alias new="cp -r ${HOME}/Dropbox/code/glg/node_boilerplate "
+alias ttl="sudo sysctl -w net.inet.ip.ttl=65"
+alias bus="sudo sysctl -w net.inet.ip.ttl=66"
+alias dm="${HOME}/reverts/devmode/bin/devmode \
+            --ldapUsername bhudgens \
+            --starphleetSourceDir '${HOME}/reverts/starphleet'"
+
+#############################################################################
+# Git Shortcuts
+#############################################################################
+alias g='git'
+alias ggpull='git pull origin $(current_branch)'
+alias gwc='git whatchanged -p --abbrev-commit --pretty=medium'
+alias gunwip='git log -n 1 | grep -q -c 'wip' && git reset HEAD~1'
+alias glgga='git log --graph --decorate --all'
+alias ggpush='git push origin $(current_branch)'
+alias gsd='git svn dcommit'
+alias grbc='git rebase --continue'
+alias gts='git tag -s'
+alias gdt='git difftool'
+alias gstp='git stash pop'
+alias gsps='git show --pretty=short --show-signature'
+alias gc='git commit -v'
+alias gcp='git cherry-pick'
+alias gcl='git config --list'
+alias grh='git reset HEAD'
+alias gsta='git stash'
+alias gg='git gui citool'
+alias grbi='git rebase -i'
+alias gcs='git commit -S'
+alias gup='git pull --rebase'
+alias grba='git rebase --abort'
+alias gc!='git commit -v --amend'
+alias gm='git merge'
+alias glp='_git_log_prettily'
+alias glgg='git log --graph --max-count=10'
+alias gbr='git branch --remote'
+alias gdc='git diff --cached'
+alias gsts='git stash show --text'
+alias ggpur='git pull --rebase origin $(current_branch)'
+alias gunignore='git update-index --no-assume-unchanged'
+# alias ggpnp='git pull origin $(current_branch) && git push origin $(current_branch)'
+alias grv='git remote -v'
+alias gst='git status'
+alias gcm='git checkout master'
+alias gcount='git shortlog -sn'
+alias glo='git log --oneline --decorate --color'
+alias git-svn-dcommit-push='git svn dcommit && git push github master:svntrunk'
+alias gba='git branch -a'
+alias gca!='git commit -v -a --amend'
+alias gap='git add --patch'
+alias gga='git gui citool --amend'
+alias gwip='git add -A; git ls-files --deleted -z | xargs -r0 git rm; git commit -m '--wip--''
+alias gsr='git svn rebase'
+alias grup='git remote update'
+alias gk='gitk --all --branches'
+alias gco='git checkout'
+alias gstd='git stash drop'
+alias gpoat='git push origin --all && git push origin --tags'
+alias gd='git diff'
+alias gmt='git mergetool --no-prompt'
+alias grrm='git remote remove'
+alias gca='git commit -v -a'
+alias gignore='git update-index --assume-unchanged'
+alias grset='git remote set-url'
+alias gp='git push'
+alias gb='git branch'
+alias grhh='git reset HEAD --hard'
+alias gclean='git reset --hard && git clean -dfx'
+alias glog='git log --oneline --decorate --color --graph'
+alias ga='git add'
+alias gvt='git verify-tag'
+alias gcmsg='git commit -m'
+alias gl='git pull'
+alias gss='git status -s'
+
+alias zoom='open https://glgroup.zoom.us/my/bhudgens && echo https://glgroup.zoom.us/my/bhudgens | pbcopy'
+
+# All finished

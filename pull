@@ -1,0 +1,155 @@
+#! /usr/bin/env bash
+# Add the following to your .bashrc:
+#
+# Note: Grep is for bash bug on closing handles
+# source <(curl -s https://raw.githubusercontent.com/bhudgens/environment/master/pull | grep "")
+
+#############################################################################
+# Pulls
+#############################################################################
+
+# Quick helper that will add the corresponding remote to a git repo
+# to help setup a pull request
+add_remote() {
+
+  # Get the current github org
+  CURRENT_ORG=$(git remote -v | grep push | sed -e 's/.*github.com[:|\/]//' | cut -f 1 -d "/")
+  # Get the current remote assigned to this clone
+  CURRENT_REMOTE=$(git remote -v | grep push | awk '{print $2}')
+
+  # Set what our 'new' remote should be (the opposing glg remote)
+  if [ "${CURRENT_ORG}" = "glg-core" ]; then
+    NEW_ORG="glg"
+  else
+    NEW_ORG="glg-core"
+  fi
+
+  # Take the old remote and swap in our new org
+  NEW_REMOTE=$(echo "${CURRENT_REMOTE}" | sed -e "s/${CURRENT_ORG}/${NEW_ORG}/")
+
+  # Add the remote
+  git remote add "${NEW_ORG}" "${NEW_REMOTE}"
+
+}
+
+# Setup a repo to be ready for pull requests
+pullsetup() {
+
+  # See if we need to add a remote
+  NUM_OF_REMOTES=$(git remote -v | wc -l | awk '{print $1}')
+  [ "${NUM_OF_REMOTES}" -eq 2 ] && add_remote
+
+  IFS=$'\n'
+  for remote in $(git remote -v | grep push)
+  do
+    # Snag the current remote name
+    CURRENT_REMOTE_NAME=$(echo ${remote} | awk '{print $1}')
+    # Snag the current org name for this remote
+    CURRENT_ORG_NAME=$(echo ${remote} | awk '{print $2}' | sed -e 's/.*github.com[:|\/]//' | cut -f 1 -d "/")
+
+    # If they aren't the same let's rename this remote to the org name
+    if [ "${CURRENT_ORG_NAME}" != "${CURRENT_REMOTE_NAME}" ]; then
+      git remote rename "${CURRENT_REMOTE_NAME}" "${CURRENT_ORG_NAME}"
+    fi
+  done
+
+  git fetch --all > /dev/null
+  git remote -v
+
+}
+
+[ -n "${BASH}" ] && export -f pullsetup > /dev/null
+
+# Pull Request
+#
+#  Based on the current directory, open me to the pull request page
+pull() {
+
+  ###
+  # Start over
+  ###
+  unset URL
+  unset to_branch
+  unset from_branch
+  unset to_remote
+  unset from_remote
+  unset FROM_ORG
+  unset TO_URL
+
+  ###
+  # Don't allow us to run unless we don't have any commits to make
+  ###
+  unset CHECK
+  CHECK=$(git status -s 2> /dev/null)
+  if [ $? -ne 0 ] || [ -n "${CHECK}" ]; then
+    echo "You have uncommitted changes or non-git directory"
+    return
+  fi
+
+
+  # Snag the current branch we are on.  We always assume the branch we
+  # have checked out is the branch we intend to create a pull request for
+  CURRENT_BRANCH=$(git status | grep "On branch" | cut -f 3 -d " ")
+
+  ##########################################
+  # Prompt for the remote to merge from
+  ##########################################
+  # If I already have a "glg" remote - assume we want to merge 'from' glg
+  from_remote=$(git remote | grep -e "^glg$")
+  if [ -z "${from_remote}" ]; then
+    git remote -v
+    echo "Merge From:"
+    select from_remote in $(git remote)
+    do
+      break;
+    done
+    # Punt on CTRL-C
+    [ -z "${from_remote}" ] && return
+  fi
+
+  ##########################################
+  # Prompt for the remote to merge to
+  ##########################################
+  # If I already have a "glg-core" remote,
+  # assume we want to merge 'from' glg
+  to_remote=$(git remote | grep -e "^glg-core$")
+  if [ -z "${to_remote}" ]; then
+    git remote -v
+    echo "Merge Into:"
+    select to_remote in $(git remote)
+    do
+      break;
+    done
+    # Punt on CTRL-C
+    [ -z "${to_remote}" ] && return
+  fi
+
+  # Make sure all changes have been pushed to our 'source'
+  CHECK=$(git push "${from_remote}" "${CURRENT_BRANCH}" --dry-run 2>&1) # 2&> /dev/null)
+  if [ $? -ne 0 ] || [ "${CHECK}" != "Everything up-to-date" ]; then
+    echo "You still need to push your changes to [${from_remote}]"
+    return
+  fi
+
+  # Which branch to we want to merge "INTO"
+  echo "                       "
+  echo "Merge Into Which Branch"
+  echo "-----------------------"
+  echo "                       "
+  select to_branch in $(git branch -a | grep ${to_remote} | awk '{print $1}' | sed -e "s/.*${to_remote}\///")
+  do
+    break;
+  done
+  [ -z "${to_branch}" ] && to_branch="master"
+
+  # Snag the org/package so we can append it to the github url
+  TO_URL=$(git remote -v | grep "${to_remote}" | grep push | head -n 1 | awk '{print $2}' | sed -e 's/.*github.com[:|\/]//' | sed -e 's/\.git//')
+  # Grab the organization in the "FROM" result
+  FROM_ORG=$(git remote -v | grep "${from_remote}" | grep push | head -n 1 | awk '{print $2}' | sed -e 's/.*github.com[:|\/]//' | sed -e 's/\.git//' | cut -f 1 -d "/")
+  # Build the final URL
+  URL="https://github.com/${TO_URL}/compare/${to_branch}...${FROM_ORG}:${CURRENT_BRANCH}"
+  # Open the URL in a browser
+  open "${URL}"
+}
+
+[ -n "${BASH}" ] && export -f pull > /dev/null
