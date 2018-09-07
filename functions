@@ -699,7 +699,9 @@ sc () {
   if [ ! -d "${STARPHLEET_ENHANCE_CACHE}" ]; then
     git clone git@github.com:glg/starphleet-enhance.git "${STARPHLEET_ENHANCE_CACHE}"
   fi
+  pushd "${STARPHLEET_ENHANCE_CACHE}" > /dev/null
   "${STARPHLEET_ENHANCE_CACHE}/connect.sh"
+  popd > /dev/null
 }
 
 
