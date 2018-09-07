@@ -672,45 +672,51 @@ devdb () {
 }
 
 cat << EOF >> "${BENVIRONMENT_HELP_FILE}"
-## Functions - Useful Helpers
+${end}
+${red}################################################${end}
+${red}## Functions - Useful Helpers${end}
+${red}################################################${blue}
+-   ${white}admin${blue}
+    Open root user on a machine
+-   ${white}app [$url]  ${blue}
+    Open Google Chrome in Kiosk Mode
+-   ${white}gmail  ${blue}
+    Open Gmail in app mode.  Same as:
+    app <http://gmail.com>
+-   ${white}c \$file  ${blue}
+    Copy functions into clipboard
+-   ${white}ccd (check current dir)  ${blue}
+    Go through all sub dirs and check
+    for any unchecked in source code
+-   ${white}connect_to_all_machines \$m1 \$m2 \$etc${blue}
+    Connect to list of machines at once
+-   ${white}devdb  ${blue}
+    List info about a devdb
+-   ${white}envme [\$app]  ${blue}
+    Load environment from starphleet
+    with local overrides
+-   ${white}envit [\$app]  ${blue}
+    Load environment from starphleet and
+    drop results in "environment" file
+-   ${white}github_purge_password \$file  ${blue}
+    Delete a file and entire git history
+    for the file.  Used to scrub accidental
+    password commit (force push afterwards)
+-   ${white}hack_root \$server_ip  ${blue}
+    Open root user on a machine
+-   ${white}o [\$fuzzy_search]  ${blue}
+    Search for a thing and select from a
+    list to open in an atom window.
 
-| admin                                | Open root user on a machine             |
-| ------------------------------------ | --------------------------------------- |
-| app                                  | Open Google Chrome in Kiosk Mode        |
-| ------------------------------------ | -----------------------------------     |
-| gmail                                | Open Gmail in app mode.  Same as:       |
-|                                      | app <http://gmail.com>                  |
-| ------------------------------------ | -----------------------------------     |
-| c $file                              | Copy $file into clipboard               |
-| ------------------------------------ | -----------------------------------     |
-| ccd (check current dir)              | Go through all sub dirs and check       |
-|                                      | for any unchecked in source code        |
-| ------------------------------------ | -----------------------------------     |
-| connect_to_all_machines $m1 $m2 $etc | Connect to list of machines at once     |
-| ------------------------------------ | -----------------------------------     |
-| devdb                                | List info about a devdb                 |
-| ------------------------------------ | -----------------------------------     |
-| envme                                | Load environment from starphleet        |
-|                                      | with local overrides                    |
-| ------------------------------------ | -----------------------------------     |
-| envit                                | Load environment from starphleet and    |
-|                                      | drop results in "environment" file      |
-| ------------------------------------ | -----------------------------------     |
-| github_purge_password $file          | Delete a file and entire git history    |
-|                                      | for the file.  Used to scrub accidental |
-|                                      | password commit (force push afterwards) |
-| ------------------------------------ | -----------------------------------     |
-| hack_root                            | Open root user on a machine             |
-| ------------------------------------ | -----------------------------------     |
-| o                                    | Search for a thing and select from a    |
-|                                      | list to open in an atom window.         |
+${red}################################################${end}
+${red}## Default Configs - Hotkeys to Generate Default Configs
+${red}################################################${blue}
 
-## Default Configs - Hotkeys to Generate Default Configs
-
-| gi  | Drop a default gitignore file in the current dir     |
-| --- | ---------------------------------------------------- |
-| jsb | Drop a default js beautifier file in the current dir |
-| --- | ---------------------------------------------------- |
-| ei  | Drop a default eslint file in the current dir        |
+-   ${white}gi  ${blue}
+    Drop a default gitignore file in the current dir
+-   ${white}jsb ${blue}
+    Drop a default js beautifier file in the current dir
+-   ${white}ei  ${blue}
+    Drop a default eslint file in the current dir
 
 EOF

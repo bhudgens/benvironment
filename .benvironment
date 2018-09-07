@@ -25,4 +25,6 @@ echo "${yellow}Benvironment ${green}Loaded...${end}"
 echo ""
 echo "${blue}Type ${lightblue}?${blue} for more help"
 
-alias "?"="cat ${BENVIRONMENT_HELP_FILE}"
+?() {
+  echo -ne $(cat ${BENVIRONMENT_HELP_FILE} | sed  's/$/\\n/' | sed 's/ /\\a /g')
+}
