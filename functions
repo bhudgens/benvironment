@@ -210,7 +210,7 @@ app() {
 }
 
 gmail() {
-  app http://gmail.com
+  app "http://gmail.com"
 }
 
 # csd
@@ -677,7 +677,7 @@ cat << EOF >> "${BENVIRONMENT_HELP_FILE}"
 # admin $ip                           - Open root user on a machine
 # app $url                            - Open Google Chrome in Kiosk Mode
 # gmail                               - Open Gmail in app mode.  Same as:
-#                                       `app http://gmail.com`
+#                                        app http://gmail.com
 # c $file                             - Copy $file into clipboard
 # ccd (check current dir)             - Go through all sub dirs and check
 # connect_to_all_machines $m1 $m2 ... - Connect to list of machines at once

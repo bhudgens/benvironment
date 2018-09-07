@@ -25,4 +25,4 @@ echo "${yellow}Benvironment ${green}Loaded...${end}"
 echo ""
 echo "${blue}Type ${lightblue}?${blue} for more help"
 
-alias "?"="cat ${BENVIRONMENT_HELP_FILE}"
+alias "?"="\cat ${BENVIRONMENT_HELP_FILE}"
