@@ -87,9 +87,10 @@ statusAnything() {
 }
 
 cat << EOF >> "${BENVIRONMENT_HELP_FILE}"
-# Status Anything - Menu Bar indicator of running process
-# ---------------
-# Example:
-#  statusAnything ping 8.8.8.8
+## Status Anything
+
+| statusAnything ping 8.8.8.8 | Puts a green indicator on your menubar |
+|                             | until the ping is stopped.             |
+|                             | Then the status bar turns red          |
 
 EOF
