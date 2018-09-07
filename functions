@@ -1,3 +1,5 @@
+#! /usr/bin/env bash
+
 #############################################################################
 # Functions
 #############################################################################
@@ -199,57 +201,16 @@ function envme() {
   fi
 }
 
-# sfd
-#
-#  loop through each directory in the starphleet_dev dir and check for a .git dir
-#  and if it is a git repo, open these as unique roots in a single atom window
-sfd() {
-  cd ${DIR_STARPHLEET_DEV}
-  LIST=""
-  for dir in $(find ${DIR_STARPHLEET_DEV} -type d -maxdepth 1); do
-    [ -d "$dir/.git" ] && LIST="${LIST} ${dir}"
-  done
-  echo Opening ${LIST}
-  # Expand the ${LIST} before running the command with eval
-  eval atom ${LIST}
-}
-
-# sfhq
-#
-#  loop through each directory in the starphleet hq dir and check for a .git dir
-#  and if it is a git repo, open these as unique roots in a single atom window
-sfhq() {
-  cd ${HOME}/Dropbox/code/glg/sfhq
-  LIST=""
-  for dir in $(find ${HOME}/Dropbox/code/glg/sfhq -type d -maxdepth 1); do
-    [ -d "$dir/.git" ] && LIST="${LIST} ${dir}"
-  done
-  echo Opening ${LIST}
-  # Expand the ${LIST} before running the command with eval
-  eval atom ${LIST}
-}
-
-# iphb
-#
-#  loop through each directory in the iphb hq dir and check for a .git dir
-#  and if it is a git repo, open these as unique roots in a single atom window
-iphb() {
-  cd ${HOME}/Dropbox/code
-  LIST=""
-  for dir in $(ls -d iphb-*); do
-    [ -d "$dir/.git" ] && LIST="${LIST} ${dir}"
-  done
-  echo Opening ${LIST}
-  # Expand the ${LIST} before running the command with eval
-  eval atom ${LIST}
-}
-
 # app
 #
 #  Open a URL in APP Mode in Chrome
 #  If anything is not checked in yet
 app() {
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --kiosk --app="$1"
+}
+
+gmail() {
+  app http://gmail.com
 }
 
 # csd
@@ -287,36 +248,6 @@ ccd() {
     [ -d "./.git" ] && git status -s
   done
   cd ${CURRENT_DIR}
-}
-
-# gsab - Git Search All Branches
-#
-# Search all branches for a term
-# gsab() {
-#   SEARCH_FOR="${1}"
-#
-#   git grep "${SEARCH_FOR}" $(git rev-list --all) |
-# }
-
-# Wait for Container - Copyright 2016 (c) Ian Groff
-#
-# Sit tight and wait for a container to come online
-wfc() {
-  unset VERSION_SHA
-  unset URL
-  git status && VERSION_SHA=$(git log | head -n 1 | awk '{print $2}' | cut -c -7) || $2
-  [ -d "./.git" ] && URL="https://services.glgresearch.com/$(basename ${PWD})" || $1
-  URL=${URL?You must provide a starphleet url to check for a version}
-  VERSION_SHA=${VERSION_SHA?you must provide a sha to wait for}
-  if curl --head -s "${URL}" | grep ${VERSION_SHA}; then
-    echo "Version ${VERSION_SHA} appears live"
-    MSG="display notification \"${URL}\" with title \"LIVE!\""
-    osascript -e "${MSG}"
-  else
-    echo "Version not found, checking again"
-    sleep 1
-    exec $0 "$@"
-  fi
 }
 
 # Create a default git ignore
@@ -661,22 +592,6 @@ cat << EOF > ./.eslintrc.json
 EOF
 }
 
-net() {
-  while [ 1 ]; do
-    if ping -c 1 8.8.8.8; then
-      anybar_good 5999
-    else
-      anybar_bad 5999
-    fi
-    if ping -c 1 services-internal.glgresearch.com; then
-      anybar_good 6999
-    else
-      anybar_bad 6999
-    fi
-    sleep 10
-  done
-}
-
 admin() {
   ssh -i "${HOME}/Dropbox/starphleet.pem" "ubuntu@${1}"
 }
@@ -699,8 +614,14 @@ c () {
 }
 
 ##########################################################
+# Assume the person has zero tmux session open and
+# build one that connects to all the machines specified.
+# As a convenience, we also accept a list of IP addresses
+#
 # Usage:    connect_to_all_machines [$clusterName]
-# Example:  connect_to_all_machines [virginia]
+#           connect_to_all_machines $ip1 $ip2
+# Example:  connect_to_all_machines [virginia|moserca]
+#           connect_to_all_machines 10.0.0.1 10.0.0.2
 ##########################################################
 # Set to admiral or captain
 USER_TYPE="admiral"
@@ -740,7 +661,46 @@ function connect_to_all_machines() {
   tmux attach-session -t "$SESSION"
 }
 
-
+##########################################################
+# Ask the bot for info about a tags devdb
+#
+# Example:
+#   devdb continuousoperations
+##########################################################
 devdb () {
   curl -s "${DEVDB_INFO_URL}${1}" | jq
 }
+
+cat << EOF >> "${BENVIRONMENT_HELP_FILE}"
+# Functions - Useful Helpers
+# ---------------
+# admin $ip                           - Open root user on a machine
+# app $url                            - Open Google Chrome in Kiosk Mode
+# gmail                               - Open Gmail in app mode.  Same as:
+#                                       `app http://gmail.com`
+# c $file                             - Copy $file into clipboard
+# ccd (check current dir)             - Go through all sub dirs and check
+# connect_to_all_machines $m1 $m2 ... - Connect to list of machines at once
+#                                       for any unchecked in source code
+# devdb $name                         - List info about a devdb
+# envme [$app]                        - Load environment from starphleet
+#                                       with local overrides
+# envit [$app]                        - Load environment from starphleet
+#                                       and drop results in "environment" file
+# github_purge_password $file         - Delete a file and entire git history
+#                                       for the file.  Used to scrub accidental
+#                                       password commit (force push afterwards)
+# hack_root $ip                       - Open root user on a machine
+# o $fuzzy_search                     - Search for a thing and select from a list
+#                                       to open in an atom window.
+
+# Default Configs - Hotkeys to Generate Default Configs
+# ---------------
+# gi                                  - Drop a default gitignore file
+#                                       in the current dir
+# jsb                                 - Drop a default js beautifier file
+#                                       in the current dir
+# ei                                  - Drop a default eslint file
+#                                       in the current dir
+
+EOF

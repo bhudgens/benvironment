@@ -8,6 +8,9 @@ export DIR_STARPHLEET_DATA="${HOME}/starphleet_data"
 export DIR_CODE="${HOME}/Dropbox/code"
 export DIR_PERSONAL="${HOME}/Dropbox/code/personal"
 export URL_PATH_TO_ENV_FILES="https://raw.githubusercontent.com/bhudgens/benvironment/master"
+export BENVIRONMENT_HELP_FILE="/tmp/.benvironment.help"
+
+[ -f "${BENVIRONMENT_HELP_FILE}" ] && rm "${BENVIRONMENT_HELP_FILE}"
 
 BENVIRONMENT_FILES_TO_LOAD="${BENVIRONMENT_FILES_TO_LOAD:-colors tools functions aliases pull statuses}"
 
@@ -19,3 +22,7 @@ for file in $(echo $BENVIRONMENT_FILES_TO_LOAD); do
 done
 
 echo "${yellow}Benvironment ${green}Loaded...${end}"
+echo ""
+echo "${blue}Type ${lightblue}?${blue} for more help"
+
+alias "?"="cat ${BENVIRONMENT_HELP_FILE}"
