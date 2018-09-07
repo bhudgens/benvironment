@@ -671,6 +671,38 @@ devdb () {
   curl -s "${DEVDB_INFO_URL}${1}" | jq
 }
 
+##########################################################
+# Starphleet Connect
+#
+# Example:
+#  ➜  ~ sc
+#  Connect to which server:
+#   1) virginia.glgresearch.com
+#   2) singapore.glgresearch.com
+#   3) jobs.glgresearch.com
+#   4) email.glgresearch.com
+#   5) benjaminhudgens.glgresearch.com
+#   6) bulkmail.glgresearch.com
+#   7) notsplunk.glgresearch.com
+#   8) syslog.glgresearch.com
+#   9) accounting.glgresearch.com
+#  10) vpcvirginia.glgresearch.com
+#  11) vpcsingapore.glgresearch.com
+#  12) china.glgresearch.com
+#  13) moserca.glgresearch.com
+#  14) marklar.glgresearch.com
+#  15) services-buildserver.glgresearch.com
+#?
+##########################################################
+sc () {
+  STARPHLEET_ENHANCE_CACHE="/tmp/se.cache"
+  if [ ! -d "${STARPHLEET_ENHANCE_CACHE}" ]; then
+    git clone git@github.com:glg/starphleet-enhance.git "${STARPHLEET_ENHANCE_CACHE}"
+  fi
+  "${STARPHLEET_ENHANCE_CACHE}/connect.sh"
+}
+
+
 cat << EOF >> "${BENVIRONMENT_HELP_FILE}"
 ${end}
 ${red}################################################${end}
@@ -707,6 +739,8 @@ ${red}################################################${blue}
 -   ${white}o [\$fuzzy_search]  ${blue}
     Search for a thing and select from a
     list to open in an atom window.
+-   ${white}sc ${blue}
+    Starphleet Connect - Connect to starphleet ships
 
 ${red}################################################${end}
 ${red}## Default Configs - Hotkeys to Generate Default Configs
