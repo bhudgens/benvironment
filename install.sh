@@ -9,7 +9,7 @@ main() {
       echo "source ${FILE}" >> "${HOME}/${env_file}"
     fi
   done
-  echo All Done!
+  echo All Done! Open a new window!
 }
 
 main
