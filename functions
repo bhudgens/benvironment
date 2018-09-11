@@ -596,6 +596,10 @@ admin() {
   ssh -i "${HOME}/Dropbox/starphleet.pem" "ubuntu@${1}"
 }
 
+db() {
+  ssh -i "${HOME}/.ssh/dev_db.pem" "ubuntu@${1}"
+}
+
 hack_root() {
   HOST="${1}"
   ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null "admiral@${HOST}" "sudo bash -c '[ ! -f /root/.ssh/.authorized_keys.org ] && cp /root/.ssh/authorized_keys /root/.ssh/.authorized_keys.org || true'"
