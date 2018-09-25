@@ -128,9 +128,14 @@ function colortest {
 }
 
 cat << EOF >> "${BENVIRONMENT_HELP_FILE}"
-# Colors
-# ---------------
-# samples    - Examples of colors
-# colortest  - Test colors on console
+${white}
+${white}## Colors
+${blue}
+-   ${white}samples  ${blue}
+    Examples of colors
+-   ${white}jsb ${blue}
+    Drop a default js beautifier file in the current dir
+-   ${white}colortest  ${blue}
+    Test colors on console
 
 EOF
