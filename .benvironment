@@ -12,7 +12,7 @@ export BENVIRONMENT_HELP_FILE="/tmp/.benvironment.help.md"
 
 [ -f "${BENVIRONMENT_HELP_FILE}" ] && rm "${BENVIRONMENT_HELP_FILE}"
 
-BENVIRONMENT_FILES_TO_LOAD="${BENVIRONMENT_FILES_TO_LOAD:-colors tools functions aliases pull statuses}"
+BENVIRONMENT_FILES_TO_LOAD="${BENVIRONMENT_FILES_TO_LOAD:-colors tools vim functions aliases pull statuses}"
 
 for file in $(echo $BENVIRONMENT_FILES_TO_LOAD); do
   FILE_CACHE_ALIASES="/tmp/.${file}"
@@ -23,8 +23,8 @@ done
 
 echo "${yellow}Benvironment ${green}Loaded...${end}"
 echo ""
-echo "${blue}Type ${lightblue}?${blue} for more help"
+echo "${blue}Type ${lightblue}help${blue} for more help"
 
-?() {
+help() {
   echo -ne $(cat ${BENVIRONMENT_HELP_FILE} | sed  's/$/\\n/' | sed 's/ /\\a /g')
 }
