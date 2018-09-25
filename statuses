@@ -88,11 +88,9 @@ statusAnything() {
 
 cat << EOF >> "${BENVIRONMENT_HELP_FILE}"
 ${blue}
-${white}################################################
 ${white}## Status Anything
-${white}################################################
 ${blue}
--   ${purple}statusAnything \$cmd \$args ${blue}
+-   ${white}statusAnything \$cmd \$args ${blue}
     Runs any command and leaves a status bar indicator
     on your menu bar while the command is running.  Green
     while the command runs and red when it stops

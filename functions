@@ -711,53 +711,49 @@ sc () {
 
 cat << EOF >> "${BENVIRONMENT_HELP_FILE}"
 ${white}
-${white}################################################
 ${white}## Functions - Useful Helpers
-${white}################################################
 ${blue}
--   ${purple}admin${blue}
+-   ${white}admin${blue}
     Open root user on a machine
--   ${purple}app [\$url]  ${blue}
+-   ${white}app [\$url]  ${blue}
     Open Google Chrome in Kiosk Mode
--   ${purple}gmail  ${blue}
+-   ${white}gmail  ${blue}
     Open Gmail in app mode.  Same as:
     app <http://gmail.com>
--   ${purple}c \$file  ${blue}
+-   ${white}c \$file  ${blue}
     Copy \$file into clipboard
--   ${purple}ccd (check current dir)  ${blue}
+-   ${white}ccd (check current dir)  ${blue}
     Go through all sub dirs and check
     for any unchecked in source code
--   ${purple}connect_to_all_machines \$m1 \$m2 \$etc${blue}
+-   ${white}connect_to_all_machines \$m1 \$m2 \$etc${blue}
     Connect to list of machines at once
--   ${purple}devdb \$name ${blue}
+-   ${white}devdb \$name ${blue}
     List info about a devdb
--   ${purple}envme [\$app]  ${blue}
+-   ${white}envme [\$app]  ${blue}
     Load environment from starphleet
     with local overrides
--   ${purple}envit [\$app]  ${blue}
+-   ${white}envit [\$app]  ${blue}
     Load environment from starphleet and
     drop results in "environment" file
--   ${purple}github_purge_password \$file  ${blue}
+-   ${white}github_purge_password \$file  ${blue}
     Delete a file and entire git history
     for the file.  Used to scrub accidental
     password commit (force push afterwards)
--   ${purple}hack_root \$server_ip  ${blue}
+-   ${white}hack_root \$server_ip  ${blue}
     Open root user on a machine
--   ${purple}o [\$fuzzy_search]  ${blue}
+-   ${white}o [\$fuzzy_search]  ${blue}
     Search for a thing and select from a
     list to open in an atom window.
--   ${purple}sc ${blue}
+-   ${white}sc ${blue}
     Starphleet Connect - Connect to starphleet ships
 
-${purple}################################################
-${purple}## Default Configs - Generate Default Configs
-${purple}################################################
+${white}## Default Configs - Generate Default Configs
 ${blue}
--   ${purple}gi  ${blue}
+-   ${white}gi  ${blue}
     Drop a default gitignore file in the current dir
--   ${purple}jsb ${blue}
+-   ${white}jsb ${blue}
     Drop a default js beautifier file in the current dir
--   ${purple}ei  ${blue}
+-   ${white}ei  ${blue}
     Drop a default eslint file in the current dir
 
 EOF
