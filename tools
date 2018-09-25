@@ -30,7 +30,7 @@ fi
 #############################################################################
 
 apt_get_install () {
-  if ! which "$1"; then
+  if ! which "$1" > /dev/null; then
     [ -z "${RUN_ONCE}" ] && sudo apt-get update -y && RUN_ONCE=true
     sudo apt-get install -y $1
   fi
