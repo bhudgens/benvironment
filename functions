@@ -206,11 +206,27 @@ function envme() {
 #  Open a URL in APP Mode in Chrome
 #  If anything is not checked in yet
 app() {
-  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --kiosk --app="$1"
+  # Linux
+  if which google-chrome; then
+    google-chrome --kiosk --app="$1"
+  fi
+
+  # Mac
+  if [ -d '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' ]; then
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' --kiosk --app="$1"
+  fi
 }
 
 gmail() {
-  app "http://gmail.com"
+  app 'http://gmail.com'
+}
+
+teams() {
+  app 'https://teams.microsoft.com'
+}
+
+outlook() {
+  app 'http://outlook.office365.com'
 }
 
 # csd
