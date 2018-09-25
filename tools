@@ -37,8 +37,8 @@ apt_get_install () {
 }
 
 if echo $OSTYPE | grep -i linux > /dev/null; then
-  app_get_install curl
-  app_get_install wget
+  apt_get_install curl
+  apt_get_install wget
 
   if ! which bat > /dev/null; then
     pushd /tmp > /dev/null
