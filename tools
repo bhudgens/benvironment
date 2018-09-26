@@ -53,6 +53,7 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   apt_get_install openvpn
   apt_get_install traceroute
   apt_get_install strace
+  apt_get_install jq
   npm_install "glg-core/vpn-client"
   npm_install "git-clone-cli" "clone"
 
