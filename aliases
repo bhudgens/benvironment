@@ -56,7 +56,7 @@ alias rl='rm /tmp/.aliases; rm /tmp/.functions; rm /tmp/.pull; rm /tmp/.statuses
 alias denv='vi ${HOME}/.devenv; source ${HOME}/.devenv'
 alias ndm='bash -c "$(STARPHLEET_HEADQUARTERS=git@github.com:glg/template-hq-dev.git#master curl -s https://raw.githubusercontent.com/glg/starphleet-dev-webinstalls/master/template)"'
 alias ol='app https://outlook.office.com/owa/'
-alias vpn="sudo vpn-client"
+alias vpn="sudo vpn-client --openVpnBinaryPath $(which openvpn)"
 alias vpne="sudo vpn-client -e"
 alias new="cp -r ${HOME}/Dropbox/code/glg/node_boilerplate "
 alias ttl="sudo sysctl -w net.inet.ip.ttl=65"

@@ -21,7 +21,6 @@ if echo $OSTYPE | grep -i darwin > /dev/null; then
   # List of the things
   brew_install bat
   brew_install diff-so-fancy
-
   # Aliases based on successes
 fi
 
@@ -36,10 +35,24 @@ apt_get_install () {
   fi
 }
 
+npm_install () {
+  APP="$(basename $1)"
+  [ -z "$2" ] || APP="$2"
+  if ! which "${APP}" > /dev/null; then
+    sudo chown -R "${USER}:${USER}" /usr/lib/node_modules
+    sudo chown "root:adm" /usr/bin
+    sudo chmod 775 /usr/bin
+    npm install -g "$1"
+  fi
+}
+
 if echo $OSTYPE | grep -i linux > /dev/null; then
   apt_get_install curl
   apt_get_install wget
   apt_get_install tmux
+  apt_get_install openvpn
+  npm_install "glg-core/vpn-client"
+  npm_install "git-clone-cli" "clone"
 
   if ! which bat > /dev/null; then
     pushd /tmp > /dev/null
