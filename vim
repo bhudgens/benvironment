@@ -44,3 +44,5 @@ fi
 if [ ! -f "${HOME}/.vimrc.after" ]; then
   vimrc_after "${HOME}/.vimrc.after"
 fi
+
+set -o vi
