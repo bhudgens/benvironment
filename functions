@@ -201,6 +201,15 @@ function envme() {
   fi
 }
 
+rl() {
+  for file in $(echo $BENVIRONMENT_FILES_TO_LOAD); do
+    FILE_CACHE_ALIASES="/tmp/.${file}"
+    [ -f "${FILE_CACHE_ALIASES}" ] && rm "${FILE_CACHE_ALIASES}" && echo "Purged ${FILE_CACHE_ALIASES}"
+  done
+  curl -s "${URL_PATH_TO_ENV_FILES}/.benvironment" -o "${HOME}/.benvironment"
+  zsh
+}
+
 # app
 #
 #  Open a URL in APP Mode in Chrome
