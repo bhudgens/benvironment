@@ -60,6 +60,7 @@ alias vpne="sudo vpn-client -e"
 alias new="cp -r ${HOME}/Dropbox/code/glg/node_boilerplate "
 alias ttl="sudo sysctl -w net.inet.ip.ttl=65"
 alias bus="sudo sysctl -w net.inet.ip.ttl=66"
+alias remap="xmodmap ${HOME}/.keymaps"
 alias dm="${HOME}/reverts/devmode/bin/devmode \
             --ldapUsername bhudgens \
             --starphleetSourceDir '${HOME}/reverts/starphleet'"
