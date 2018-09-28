@@ -86,7 +86,7 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   fi
 
   if [ -f "${HOME}/.oh-my-zsh/themes/agnoster.zsh-theme" ] \
-  && ! grep prompt_context "${HOME}/.oh-my-zsh/themes/agnoster.zsh-theme" | grep '#'; then
+  && ! grep prompt_context "${HOME}/.oh-my-zsh/themes/agnoster.zsh-theme" | grep -v '{' | grep '#' > /dev/null; then
     sed -i 's|prompt_context|# prompt_context|' "${HOME}/.oh-my-zsh/themes/agnoster.zsh-theme"
   fi
 
