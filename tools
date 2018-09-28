@@ -80,6 +80,11 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
     ln -s "${HOME}/Dropbox/syncstuff/.zshrc" "${HOME}/.zshrc"
   fi
 
+  if [ ! -L "/usr/bin/open" ] \
+  && [ -f "${HOME}/Dropbox/syncstuff/open" ];
+    sudo ln -s "${HOME}/Dropbox/syncstuff/open" "/usr/bin/open"
+  fi
+
   if [ ! -L "${HOME}/.ssh" ] \
   && [ -d "${HOME}/Dropbox/syncstuff/.ssh" ]; then
     mv "${HOME}/.ssh" "${HOME}/.ssh.bak"
