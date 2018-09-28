@@ -41,7 +41,10 @@ npm_install () {
   APP="$(basename $1)"
   [ -z "$2" ] || APP="$2"
   if ! which "${APP}" > /dev/null; then
+    sudo mkdir -p /usr/lib/node_modules
+    sudo mkdir -p /usr/local/lib
     sudo chown -R "${USER}:${USER}" /usr/lib/node_modules
+    sudo chown -R "${USER}:${USER}" /usr/local/lib
     sudo chown "root:adm" /usr/bin
     sudo chmod 775 /usr/bin
     npm install -g "$1"
