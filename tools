@@ -75,7 +75,7 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   fi
 
   if [ ! -L "${HOME}/.zshrc" ] \
-  && [ -f "${HOME}/Dropbox/syncstuff/.zshrc" ];
+  && [ -f "${HOME}/Dropbox/syncstuff/.zshrc" ]; then
     mv "${HOME}/.zshrc" "${HOME}/.zshrc.bak"
     ln -s "${HOME}/Dropbox/syncstuff/.zshrc" "${HOME}/.zshrc"
   fi
