@@ -47,6 +47,8 @@ npm_install () {
     sudo chown -R "${USER}:${USER}" /usr/local/lib
     sudo chown "root:adm" /usr/bin
     sudo chmod 775 /usr/bin
+    sudo chown "root:adm" /usr/local/bin
+    sudo chmod 775 /usr/local/bin
     npm install -g "$1"
   fi
 }
