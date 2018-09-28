@@ -81,8 +81,13 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   fi
 
   if [ ! -L "/usr/bin/open" ] \
-  && [ -f "${HOME}/Dropbox/syncstuff/open" ];
+  && [ -f "${HOME}/Dropbox/syncstuff/open" ]; then
     sudo ln -s "${HOME}/Dropbox/syncstuff/open" "/usr/bin/open"
+  fi
+
+  if [ -f "${HOME}/.oh-my-zsh/themes/agnoster.zsh-theme" ] \
+  && ! grep prompt_context "${HOME}/.oh-my-zsh/themes/agnoster.zsh-theme" | grep '#'; then
+    sed -i 's|prompt_context|# prompt_context|' "${HOME}/.oh-my-zsh/themes/agnoster.zsh-theme"
   fi
 
   if [ ! -L "${HOME}/.ssh" ] \
