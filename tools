@@ -115,12 +115,13 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
       wget "$url"
       sudo dpkg -i "$(basename ${url})"
     done
-    if [ ! -L "${HOME}/.config/kitty/kitty.conf" ] \
-    && [ -f "${HOME}/Dropbox/syncstuff/.config/kitty/kitty.conf" ]; then
-      mv "${HOME}/.config/kitty/kitty.conf" "${HOME}/.config/kitty/kitty.conf.bak"
-      ln "${HOME}/Dropbox/syncstuff/.config/kitty/kitty.conf" "${HOME}/.config/kitty/kitty.conf"
-    fi
     popd
+  fi
+
+  if [ ! -L "${HOME}/.config/kitty/kitty.conf" ] \
+  && [ -f "${HOME}/Dropbox/syncstuff/.config/kitty/kitty.conf" ]; then
+    mv "${HOME}/.config/kitty/kitty.conf" "${HOME}/.config/kitty/kitty.conf.bak"
+    ln "${HOME}/Dropbox/syncstuff/.config/kitty/kitty.conf" "${HOME}/.config/kitty/kitty.conf"
   fi
 
 fi
