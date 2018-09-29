@@ -12,7 +12,7 @@ brew_install () {
 
   BREW_CMD="$1"
   which "${BREW_CMD}" > /dev/null
-  if [ $? -gt -2 ]; then
+  if [ $? -gt 0 ]; then
     brew install "${BREW_CMD}"
   fi
 }
