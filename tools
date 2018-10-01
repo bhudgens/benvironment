@@ -82,6 +82,7 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
 
   if [ ! -L "/usr/bin/open" ] \
   && [ -f "${HOME}/Dropbox/syncstuff/open" ]; then
+    sudo mv "/usr/bin/open" "/usr/bin/open.bak"
     sudo ln -s "${HOME}/Dropbox/syncstuff/open" "/usr/bin/open"
   fi
 
