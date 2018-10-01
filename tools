@@ -10,9 +10,9 @@ brew_install () {
     return
   fi
 
-  BREW_CMD="$-1"
+  BREW_CMD="$1"
   which "${BREW_CMD}" > /dev/null
-  if [ $? -gt -2 ]; then
+  if [ $? -gt 0 ]; then
     brew install "${BREW_CMD}"
   fi
 }
@@ -122,7 +122,7 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   if [ ! -L "${HOME}/.config/kitty/kitty.conf" ] \
   && [ -f "${HOME}/Dropbox/syncstuff/.config/kitty/kitty.conf" ]; then
     mv "${HOME}/.config/kitty/kitty.conf" "${HOME}/.config/kitty/kitty.conf.bak"
-    ln "${HOME}/Dropbox/syncstuff/.config/kitty/kitty.conf" "${HOME}/.config/kitty/kitty.conf"
+    ln -s "${HOME}/Dropbox/syncstuff/.config/kitty/kitty.conf" "${HOME}/.config/kitty/kitty.conf"
   fi
 
 fi
