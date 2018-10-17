@@ -61,22 +61,22 @@ EOF
 o() {
   SOFTWARE_TO_OPEN="/tmp/.software_to_open"
   [ -n "${DIR_STARPHLEET_DEV}" ] \
-    && FIND_CMD="find '${DIR_STARPHLEET_DEV}' -type d -name 'git' -maxdepth 2" \
+    && FIND_CMD="find '${DIR_STARPHLEET_DEV}' -maxdepth 2 -type d -name 'git'" \
     && eval $FIND_CMD | grep "${1}" > "${SOFTWARE_TO_OPEN}"
   [ -n "${DIR_REVERTS}" ] \
-    && FIND_CMD="find '${DIR_REVERTS}' -type d -maxdepth 1" \
+    && FIND_CMD="find '${DIR_REVERTS}' -maxdepth 1 -type d" \
     && eval $FIND_CMD | grep "${1}" >> "${SOFTWARE_TO_OPEN}"
   [ -n "${DIR_STARPHLEET_DATA}" ] \
-    && FIND_CMD="find '${DIR_STARPHLEET_DATA}' -type d -maxdepth 1" \
+    && FIND_CMD="find '${DIR_STARPHLEET_DATA}' -maxdepth 1 -type d" \
     && eval $FIND_CMD | grep "${1}" >> "${SOFTWARE_TO_OPEN}"
   [ -n "${DIR_GLG}" ] \
-    && FIND_CMD="find '${DIR_GLG}' -type d -maxdepth 1" \
+    && FIND_CMD="find '${DIR_GLG}' -maxdepth 1 -type d" \
     && eval $FIND_CMD | grep "${1}" >> "${SOFTWARE_TO_OPEN}"
   [ -n "${DIR_CODE}" ] \
-    && FIND_CMD="find '${DIR_CODE}' -type d -maxdepth 1" \
+    && FIND_CMD="find '${DIR_CODE}' -maxdepth 1 -type d" \
     && eval $FIND_CMD | grep "${1}" >> "${SOFTWARE_TO_OPEN}"
   [ -n "${DIR_PERSONAL}" ] \
-    && FIND_CMD="find '${DIR_PERSONAL}' -type d -maxdepth 1" \
+    && FIND_CMD="find '${DIR_PERSONAL}' -maxdepth 1 -type d" \
     && eval $FIND_CMD | grep "${1}" >> "${SOFTWARE_TO_OPEN}"
   SOFTWARE=$(cat "${SOFTWARE_TO_OPEN}")
   COUNT=$(cat "${SOFTWARE_TO_OPEN}" | wc -l)
@@ -244,13 +244,13 @@ outlook() {
 #  If anything is not checked in yet
 csd() {
   CURRENT_DIR=${PWD}
-  for dir in $(find ${DIR_STARPHLEET_DEV} -type d -name "git" -maxdepth 2)
+  for dir in $(find ${DIR_STARPHLEET_DEV} -maxdepth 2 -type d -name "git")
   do
     echo "$dir"
     cd $dir
     [ -d "./.git" ] && git status -s
   done
-  for dir in $(find ${HOME}/starphleet_data -type d -maxdepth 1)
+  for dir in $(find ${HOME}/starphleet_data -maxdepth 1 -type d)
   do
     echo "$dir"
     cd $dir
@@ -265,7 +265,7 @@ csd() {
 #  If anything is not checked in yet
 ccd() {
   CURRENT_DIR=${PWD}
-  for dir in $(find ${PWD} -type d -name ".git" -maxdepth 2)
+  for dir in $(find ${PWD} -maxdepth 2 -type d -name ".git")
   do
     CHANGE_TO=$(dirname "${dir}")
     echo "$CHANGE_TO"
