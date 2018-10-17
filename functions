@@ -216,7 +216,7 @@ rl() {
 #  If anything is not checked in yet
 app() {
   # Linux
-  if which google-chrome; then
+  if which google-chrome > /dev/null; then
     google-chrome --kiosk --app="$1"
   fi
 
