@@ -128,6 +128,7 @@ function _source_file() {
   TMP_FILE="/tmp/$$.env.tmp"
   cat "${FILE}" \
     | grep -v "getCacheValue" \
+    | grep -v 'export -f' \
     | grep export > "${TMP_FILE}"
   if [ -n "${OUTPUT_TO_FILE}" ]; then
     cat "${TMP_FILE}" >> /tmp/$$.stick.env
