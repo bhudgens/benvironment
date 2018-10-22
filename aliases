@@ -135,5 +135,6 @@ alias gl='git pull'
 alias gss='git status -s'
 
 alias zoom='open https://glgroup.zoom.us/my/bhudgens && echo https://glgroup.zoom.us/my/bhudgens | pbcopy'
+alias xcodeaccept="sudo xcodebuild -license accept"
 
 # All finished
