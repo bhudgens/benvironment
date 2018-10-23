@@ -333,7 +333,7 @@ cat << EOF > ./.jsbeautifyrc
   "brace_style": "collapse,preserve-inline",
   "object_curly_spacing": false,
   "preserve_newlines": true,
-  "remove_trailing_purplespace": true,
+  "remove_trailing_whitespace": true,
   "space_in_empty_paren": false,
   "space_after_anon_function": false,
   "space_before_conditional": true,
