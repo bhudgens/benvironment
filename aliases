@@ -137,4 +137,9 @@ alias gss='git status -s'
 alias zoom='open https://glgroup.zoom.us/my/bhudgens && echo https://glgroup.zoom.us/my/bhudgens | pbcopy'
 alias xcodeaccept="sudo xcodebuild -license accept"
 
+if ! echo $OSTYPE | grep -i "darwin"; then
+  alias pbcopy='xsel --clipboard --input'
+  alias pbpaste='xsel --clipboard --output'
+fi
+
 # All finished
