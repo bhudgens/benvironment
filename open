@@ -1,0 +1,6 @@
+#! /usr/bin/env bash
+
+URL="$(echo $* | perl -pe 's/.*(http.*)\s*/$1/')"
+USERNAME="benjamin"
+
+sudo su "${USERNAME}" -c "google-chrome '${URL}'"
