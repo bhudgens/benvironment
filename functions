@@ -670,6 +670,7 @@ function connect_to_all_machines() {
     CLUSTER_NAME="${1:-virginia}"
     [ "${CLUSTER_NAME}" = "virginia" ] && MACHINE_URL="http://eephleet-internal.glgresearch.com/forkulator/primary-phleet-instances-virginia"
     [ "${CLUSTER_NAME}" = "moserca" ] && MACHINE_URL="http://eephleet-internal.glgresearch.com/forkulator/moserca-phleet-instances"
+    [ "${CLUSTER_NAME}" = "marklar" ] && MACHINE_URL="http://eephleet-internal.glgresearch.com/forkulator/marklar-phleet-instances"
     MACHINES=$(curl -s "${MACHINE_URL}" | grep PrivateIpAddress | cut -f 4 -d '"')
   fi
 
