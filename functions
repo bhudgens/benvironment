@@ -612,7 +612,7 @@ cat << EOF > ./.eslintrc.json
     "no-var": "off",
     "no-void": "error",
     "no-warning-comments": "off",
-    "no-purplespace-before-property": "error",
+    "no-whitespace-before-property": "error",
     "no-with": "error",
     "object-curly-spacing": ["error", "always"],
     "object-shorthand": "off",
