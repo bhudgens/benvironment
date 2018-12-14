@@ -331,7 +331,7 @@ jsb() {
 cat << EOF > ./.jsbeautifyrc
 {
   "brace_style": "collapse,preserve-inline",
-  "object_curly_spacing": false,
+  "object_curly_spacing": true,
   "preserve_newlines": true,
   "remove_trailing_whitespace": true,
   "space_in_empty_paren": false,
