@@ -117,7 +117,7 @@ function epis_with_mask() {
   done
 }
 
-export HEADQUARTERS_LOCAL="/tmp/headquarters"
+export HQ_LOCAL="/tmp/headquarters"
 # Source a file's exports but
 # also cleanup known starphleet
 # things
@@ -143,7 +143,7 @@ function _source_file() {
 function senv() {
   APP=${1}
 
-  STARPHLEET_PROD_ENV_CACHE="${HEADQUARTERS_LOCAL}"
+  STARPHLEET_PROD_ENV_CACHE="${HQ_LOCAL}"
   STARPHLEET_PROD_ENV="${STARPHLEET_PROD_ENV_CACHE}/.starphleet"
   STARPHLEET_PROD_APP_ENV="${STARPHLEET_PROD_ENV_CACHE}/${APP}/orders"
 
