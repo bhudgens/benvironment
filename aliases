@@ -142,4 +142,6 @@ if ! echo $OSTYPE | grep -i "darwin"; then
   alias pbpaste='xsel --clipboard --output'
 fi
 
+alias et="docker run -it --rm -v $HOME/.ssh:/root/.ssh -v $HOME/.aws:/root/.aws bhudgens/eks-tools"
+
 # All finished
