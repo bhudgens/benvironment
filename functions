@@ -782,6 +782,15 @@ sc () {
 }
 
 
+##########################################################
+## Patch and Push
+##########################################################
+p () {
+  VERSION=$(npm version patch)
+  git push origin $VERSION
+}
+
+
 cat << EOF >> "${BENVIRONMENT_HELP_FILE}"
 ${white}
 ${white}## Functions - Useful Helpers
