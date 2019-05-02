@@ -30,8 +30,8 @@ fi
 
 apt_get_install () {
   APP="$(basename $1)"
-  [ -z "$2" ] || APP="$2"
-  if ! which "$APP" > /dev/null; then
+  [ -n "$2" ] && CHECK="$2" || CHECK="$1"
+  if ! which "$CHECK" > /dev/null; then
     [ -z "${RUN_ONCE}" ] && sudo apt-get update -y && RUN_ONCE=true
     sudo apt-get install -y $APP
   fi
