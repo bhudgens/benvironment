@@ -45,4 +45,8 @@ if [ ! -f "${HOME}/.vimrc.after" ]; then
   vimrc_after "${HOME}/.vimrc.after"
 fi
 
+if [ ! -d "${HOME}/.janus" ] && [ -d "${HOME}/Dropbox/syncstuff/.janus/" ]; then
+  rsync -rav -P "${HOME}/Dropbox/syncstuff/.janus/" "${HOME}/.janus/"
+fi
+
 set -o vi
