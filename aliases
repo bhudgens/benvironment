@@ -136,6 +136,8 @@ alias gss='git status -s'
 alias me='sudo pactl load-module module-loopback latency_msec=1'
 alias nme='sudo pactl unload-module module-loopback'
 
+alias record='pushd -q $HOME/Dropbox/code/glg/asciinema; python3 -m asciinema rec; popd -q'
+
 alias zoom='open https://glgroup.zoom.us/my/bhudgens && echo https://glgroup.zoom.us/my/bhudgens | pbcopy'
 alias xcodeaccept="sudo xcodebuild -license accept"
 
