@@ -135,6 +135,7 @@ alias gl='git pull'
 alias gss='git status -s'
 alias me='sudo pactl load-module module-loopback latency_msec=1'
 alias nme='sudo pactl unload-module module-loopback'
+alias myip='curl "https://api.ipify.org?format=json"'
 
 alias record='pushd -q $HOME/Dropbox/code/glg/asciinema; python3 -m asciinema rec; popd -q'
 
