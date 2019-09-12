@@ -239,6 +239,10 @@ outlook() {
   app 'http://outlook.office365.com'
 }
 
+docs() {
+  app 'https://devdocs.io/'
+}
+
 # csd
 #
 #  loop through each directory in the starphleet dev dir and check
