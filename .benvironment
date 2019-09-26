@@ -12,7 +12,7 @@ export BENVIRONMENT_HELP_FILE="/tmp/.benvironment.help.md"
 
 [ -f "${BENVIRONMENT_HELP_FILE}" ] && rm "${BENVIRONMENT_HELP_FILE}"
 
-BENVIRONMENT_FILES_TO_LOAD="${BENVIRONMENT_FILES_TO_LOAD:-colors tools vim functions aliases pull statuses}"
+BENVIRONMENT_FILES_TO_LOAD="${BENVIRONMENT_FILES_TO_LOAD:-colors tools vim functions aliases pull statuses ssh}"
 
 for file in $(echo $BENVIRONMENT_FILES_TO_LOAD); do
   FILE_CACHE_ALIASES="/tmp/.${file}"
