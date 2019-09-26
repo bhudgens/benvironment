@@ -1,0 +1,34 @@
+###################################################
+## SSH
+###################################################
+
+#########################################################
+## Keys
+#########################################################
+
+TMP_SSH_KEY_DIR="/tmp/.ssh"
+add_key () {
+  echo Installing Key: $2
+  lpass show "$1" --field "Private Key" > "${TMP_SSH_KEY_DIR}/$2"
+  lpass show "$1" --field "Public Key" > "${TMP_SSH_KEY_DIR}/$2.pub"
+  chmod 400 "${TMP_SSH_KEY_DIR}/$2"
+  chmod 400 "${TMP_SSH_KEY_DIR}/$2.pub"
+}
+
+keyme () {
+  echo Lastpass login...
+  2>&1 lpass ls > /dev/null || lpass login bhudgens@glgroup.com
+  echo Purging "${TMP_SSH_KEY_DIR}"
+  [ -d "${TMP_SSH_KEY_DIR}" ] && rm -rf "${TMP_SSH_KEY_DIR}"
+  echo Making tmp dir "${TMP_SSH_KEY_DIR}"...
+  mkdir -p "${TMP_SSH_KEY_DIR}" 2> /dev/null
+  chown $USER:$USER "${TMP_SSH_KEY_DIR}"
+  chmod 700 "${TMP_SSH_KEY_DIR}"
+  echo Purging "${HOME}/.ssh"
+  [ -d $HOME/.ssh ] && rm -rf $HOME/.ssh
+  ln -s "${TMP_SSH_KEY_DIR}" "${HOME}/.ssh"
+  add_key 4318807893850238648 glguser
+  add_key 8764128140835055732 starphleet
+  add_key 5866756601936395183 githubdevopsuser
+  add_key 5251408404796459452 id_rsa
+}
