@@ -31,4 +31,6 @@ keyme () {
   add_key 8764128140835055732 starphleet
   add_key 5866756601936395183 githubdevopsuser
   add_key 5251408404796459452 id_rsa
+  add_key 1175375113105532471 devship
+  add_key 8409250839622491492 devdb
 }
