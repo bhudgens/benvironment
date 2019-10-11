@@ -2,13 +2,27 @@
 ## Keys
 #########################################################
 
+_purgeIfEmpty () {
+  CHECK=$(cat $1)
+  if [ -z "${CHECK}" ]; then
+    echo Removing Empty: $1
+    rm "$1"
+  fi
+}
+
+_chmod () {
+  [ -f "$2" ] && chmod $1 "$2"
+}
+
 TMP_SSH_KEY_DIR="/tmp/.ssh"
 add_key () {
   echo Installing Key: $2
   lpass show "$1" --field "Private Key" > "${TMP_SSH_KEY_DIR}/$2"
   lpass show "$1" --field "Public Key" > "${TMP_SSH_KEY_DIR}/$2.pub"
-  chmod 400 "${TMP_SSH_KEY_DIR}/$2"
-  chmod 400 "${TMP_SSH_KEY_DIR}/$2.pub"
+  _purgeIfEmpty "${TMP_SSH_KEY_DIR}/$2"
+  _purgeIfEmpty "${TMP_SSH_KEY_DIR}/$2.pub"
+  _chmod 400 "${TMP_SSH_KEY_DIR}/$2"
+  _chmod 400 "${TMP_SSH_KEY_DIR}/$2.pub"
 }
 
 keyme () {
