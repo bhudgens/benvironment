@@ -15,7 +15,7 @@ export BENVIRONMENT_HELP_FILE="/tmp/.benvironment.help.md"
 BENVIRONMENT_FILES_TO_LOAD="${BENVIRONMENT_FILES_TO_LOAD:-colors tools vim functions aliases pull statuses keyme}"
 
 for file in $(echo $BENVIRONMENT_FILES_TO_LOAD); do
-  FILE_CACHE_ALIASES="/tmp/.${file}"
+  FILE_CACHE_ALIASES="/var/run/.${file}"
   [ ! -f "${FILE_CACHE_ALIASES}" ] && curl -s "${URL_PATH_TO_ENV_FILES}/${file}" -o "${FILE_CACHE_ALIASES}"
   source "${FILE_CACHE_ALIASES}"
   echo "${blue}$file ${green}Loaded...${end}"
