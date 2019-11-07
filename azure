@@ -88,11 +88,11 @@ function ac() {
   local machines=""
 
   # In case we haven't run the cache before
-  [ ! -f "${CACHE_FILE_SUBSCRIPTION}" ] && acrc
+  [ ! -f "${CACHE_FILE_SUBSCRIPTIONS}" ] && acrc
   for ip_file in $(find "${HOME}/run" -type f -name "az-cache-vms*")
   do
     rg_name_ip=$(jq -r '.[].virtualMachine | (.resourceGroup+"|"+.name+"|"+.network.privateIpAddresses[0])' "${ip_file}")
-    machines="${machines}${rg_name_ip}"
+    machines="${machines}${rg_name_ip}\n"
   done
   machine=$(echo "${machines}" | tr '[:upper:]' '[:lower:]' | grep -i "${search}")
   count=$(echo "${machine}" | wc -l)
