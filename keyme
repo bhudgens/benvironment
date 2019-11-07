@@ -2,6 +2,25 @@
 ## Keys
 #########################################################
 
+_keysToLoadHelp () {
+echo '
+
+Error:  Missing KEYME_KEYS_TO_LOAD Environment
+
+Syntax:
+  $last_pass_id<space>$friendly_name_on_your_disk
+
+Example:
+
+export KEYME_KEYS_TO_LOAD="
+4318234233850238648 example1
+8764128140835055732 example2
+5866756601936395183 id_rsa
+"
+'
+
+}
+
 _purgeIfEmpty () {
   CHECK=$(cat $1)
   if [ -z "${CHECK}" ]; then
@@ -26,6 +45,7 @@ add_key () {
 }
 
 keyme () {
+  [ -z "${KEYME_KEYS_TO_LOAD}" ] && _keysToLoadHelp && return
   echo Lastpass login...
   2>&1 lpass ls > /dev/null || lpass login bhudgens@glgroup.com
   echo Purging "${TMP_SSH_KEY_DIR}"
@@ -37,12 +57,12 @@ keyme () {
   echo Purging "${HOME}/.ssh"
   [ -d $HOME/.ssh ] && rm -rf $HOME/.ssh
   ln -s "${TMP_SSH_KEY_DIR}" "${HOME}/.ssh"
-  add_key 4318807893850238648 glguser
-  add_key 8764128140835055732 starphleet
-  add_key 5866756601936395183 githubdevopsuser
-  add_key 5251408404796459452 id_rsa
-  add_key 1175375113105532471 devship
-  add_key 8409250839622491492 devdb
+  IFS=$'\n'
+  for key_and_name in $(echo "${KEYME_KEYS_TO_LOAD}"); do
+    local id=$(echo $key_and_name | awk '{print $1}')
+    local name=$(echo $key_and_name | awk '{print $2}')
+    add_key "${id}" "${name}"
+  done
 }
 
 agentme () {
