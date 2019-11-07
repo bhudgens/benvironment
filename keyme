@@ -44,3 +44,10 @@ keyme () {
   add_key 1175375113105532471 devship
   add_key 8409250839622491492 devdb
 }
+
+agentme () {
+  eval `ssh-agent`
+  ssh-add "${HOME}/.ssh/"* \
+    1> /dev/null \
+    2> /dev/null
+}
