@@ -101,5 +101,6 @@ function ac() {
       [ -n "${machine}" ] && break
     done
   fi
+  echo "Selected: ${machine}"
   _connect $(echo "${machine}" | cut -f3 -d'|' )
 }
