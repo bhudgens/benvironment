@@ -54,11 +54,11 @@ function _azLoginCheck() {
 ## Runs through all of your subscriptions using the az cli
 ## and caches ip addresses and subscription ids
 ########################################################################
+CACHE_FILE_SUBSCRIPTIONS="${CACHE_DIR}/az-cache-subscriptions"
 function acrc() {
 
   _azLoginCheck
 
-  CACHE_FILE_SUBSCRIPTIONS="${CACHE_DIR}/az-cache-subscriptions"
   az account list \
     1> "${CACHE_FILE_SUBSCRIPTIONS}" \
     2> /dev/null
@@ -86,6 +86,9 @@ function acrc() {
 function ac() {
   local search="$1"
   local machines=""
+
+  # In case we haven't run the cache before
+  [ ! -f "${CACHE_FILE_SUBSCRIPTION}" ] && acrc
   for ip_file in $(find "${HOME}/run" -type f -name "az-cache-vms*")
   do
     rg_name_ip=$(jq -r '.[].virtualMachine | (.resourceGroup+"|"+.name+"|"+.network.privateIpAddresses[0])' "${ip_file}")
