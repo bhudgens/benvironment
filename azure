@@ -28,6 +28,7 @@ function _connect() {
 ## Verify the user is logged in and punt if not
 ########################################################################
 function _azLoginCheck() {
+  echo -n "Confirming you are logged into az cli..."
   az group list \
     1> /dev/null \
     2> /dev/null
@@ -42,6 +43,7 @@ function _azLoginCheck() {
     "
     exit 1
   fi
+  echo "Done"
 }
 
 
@@ -63,11 +65,13 @@ function acrc() {
     1> "${CACHE_FILE_SUBSCRIPTIONS}" \
     2> /dev/null
 
+  echo -n "Caching all the vm data..."
   for subscription_id in $(jq -r '.[].id' "${CACHE_FILE_SUBSCRIPTIONS}")
   do
     CACHE_FILE_IPS="${CACHE_DIR}/az-cache-vms-${subscription_id}"
     az vm list-ip-addresses --subscription "${subscription_id}" > "${CACHE_FILE_IPS}"
   done
+  echo "Done"
 
 }
 
