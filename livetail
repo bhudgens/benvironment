@@ -1,0 +1,86 @@
+#! /usr/bin/env bash
+URL_TO_LIVETAIL="https://github.com/SumoLogic/livetail-cli/releases/download/2.1/livetail.zip"
+INSTALL_PATH="${HOME}/run/livetail"
+
+#########################################################
+## Utils
+#########################################################
+_chmod () {
+  [ -f "$2" ] && chmod $1 "$2"
+}
+
+# Shhhh
+_which () {
+  which "$1" > /dev/null
+}
+
+#########################################################
+## Lastpass: We keep our sumolomgic keys in lastpass
+#########################################################
+_lastPassUserHelp () {
+echo '
+
+Error:  Missing LASTPASS_USER Environment
+
+Syntax:
+  export LASTPASS_USER="jdoe@email.com"
+
+You should probably set this in your bashrc or zshrc
+'
+}
+
+_lastpassLogin() {
+  [ -z "${LASTPASS_USER}" ] && _lastPassUserHelp && return
+  echo Lastpass login...
+  2>&1 lpass ls > /dev/null || lpass login "${LASTPASS_USER}"
+}
+
+#########################################################
+## Installation: Install Livetail when not installed
+#########################################################
+_installLivetail() {
+  if ! _which unzip; then
+    echo "Installing unzip..."
+    sudo apt-get update -y
+    sudo apt-get install -y unzip
+  fi
+  if ! _which curl; then
+    echo "Installing curl..."
+    sudo apt-get update -y
+    sudo apt-get install -y curl
+  fi
+  if [ ! -f "${INSTALL_PATH}" ]; then
+    echo "Installing livetail..."
+    mkdir -p $(dirname "${INSTALL_PATH}")
+    echo "Downloading livetail..."
+    [ ! -f "/tmp/livetail.zip" ] && curl -L -s -o "/tmp/livetail.zip" "${URL_TO_LIVETAIL}"
+    echo "Unzipping livetail..."
+    mkdir -p "/tmp/livetail"
+    unzip "/tmp/livetail.zip" -d "/tmp/livetail"
+    mv "/tmp/livetail/livetail" "${INSTALL_PATH}"
+    _chmod 755 "${INSTALL_PATH}"
+  fi
+}
+
+####################################
+# Function: lt
+#
+# Usage:
+#  lt [$search]
+#
+# Example:
+#  lt "_sourceCategory=starphleet/services/syslog/*"
+####################################
+lt () {
+  _lastpassLogin
+  _installLivetail
+  # ID For Sumo Logic Access Key In Lastpass
+  JSON=$(lpass show 1973380519658148854 --notes)
+  ACCESSID=$(echo "${JSON}" | jq -r '.accessid')
+  ACCESSKEY=$(echo "${JSON}" | jq -r '.accesskey')
+  LIVETAIL_REGION="2"
+  DEFAULT_SEARCH="_sourceCategory=starphleet/services/syslog/*"
+  [ -z "$1" ] \
+    && echo "${LIVETAIL_REGION}" | "${INSTALL_PATH}" -i "${ACCESSID}" -k "${ACCESSKEY}" "${DEFAULT_SEARCH}" \
+    || echo "${LIVETAIL_REGION}" | "${INSTALL_PATH}" -i "${ACCESSID}" -k "${ACCESSKEY}" "$@"
+}

@@ -21,6 +21,18 @@ export KEYME_KEYS_TO_LOAD="
 
 }
 
+_lastPassUserHelp () {
+echo '
+
+Error:  Missing LASTPASS_USER Environment
+
+Syntax:
+  export LASTPASS_USER="jdoe@email.com"
+
+You should probably set this in your bashrc or zshrc
+'
+}
+
 _purgeIfEmpty () {
   CHECK=$(cat $1)
   if [ -z "${CHECK}" ]; then
@@ -46,8 +58,9 @@ add_key () {
 
 keyme () {
   [ -z "${KEYME_KEYS_TO_LOAD}" ] && _keysToLoadHelp && return
+  [ -z "${LASTPASS_USER}" ] && _lastPassUserHelp && return
   echo Lastpass login...
-  2>&1 lpass ls > /dev/null || lpass login bhudgens@glgroup.com
+  2>&1 lpass ls > /dev/null || lpass login "${LASTPASS_USER}"
   echo Purging "${TMP_SSH_KEY_DIR}"
   [ -d "${TMP_SSH_KEY_DIR}" ] && rm -rf "${TMP_SSH_KEY_DIR}"
   echo Making tmp dir "${TMP_SSH_KEY_DIR}"...
