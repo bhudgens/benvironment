@@ -41,7 +41,7 @@ function _azLoginCheck() {
 
     az login
     "
-    exit 1
+    return false
   fi
   echo "Done"
 }
