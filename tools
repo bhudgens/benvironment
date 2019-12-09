@@ -24,6 +24,10 @@ if echo $OSTYPE | grep -i darwin > /dev/null; then
   # Aliases based on successes
 fi
 
+function _which () {
+  which $1 > /dev/null
+}
+
 #############################################################################
 # Software Install - Linux Poo
 #############################################################################
@@ -56,6 +60,7 @@ npm_install () {
 if echo $OSTYPE | grep -i linux > /dev/null; then
   apt_get_install nodejs node
   apt_get_install npm
+  apt_get_install git
   apt_get_install curl
   apt_get_install wget
   apt_get_install tmux
@@ -128,17 +133,40 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
 
 fi
 
+if ! _which lpass; then
+  apt_get_install bash-completion
+  apt_get_install build-essential
+  apt_get_install cmake
+  apt_get_install git
+  apt_get_install libcurl4
+  apt_get_install libcurl4-openssl-dev
+  apt_get_install libssl-dev
+  apt_get_install libxml2
+  apt_get_install libxml2-dev
+  apt_get_install libssl1.1
+  apt_get_install pkg-config
+  apt_get_install ca-certificates
+  apt_get_install xclip
+
+  TMP_LPASS_INSTALL_DIR="/tmp/lastpass-cli"
+  mkdir -p "${TMP_LPASS_INSTALL_DIR}"
+  git clone "https://github.com/lastpass/lastpass-cli.git" "${TMP_LPASS_INSTALL_DIR}"
+  pushd "${TMP_LPASS_INSTALL_DIR}" > /dev/null
+    make
+    sudo make install
+  popd > /dev/null
+fi
+
 #############################################################################
 # Global Configs
 #############################################################################
-
 # If bat successfully gets installed we will
 # swap cat with bat
-if which bat > /dev/null; then
+if _which bat; then
   alias cat='bat'
 fi
 
-if which diff-so-fancy > /dev/null; then
+if _which diff-so-fancy; then
   git config --global core.pager "diff-so-fancy | less --tabs=4 -RFX"
   git config --global color.ui true
   git config --global color.diff-highlight.oldNormal    "red bold"
@@ -167,3 +195,4 @@ fi
 if [ -f /usr/local/bin/prettyping ]; then
   alias ping='prettyping --nolegend'
 fi
+
