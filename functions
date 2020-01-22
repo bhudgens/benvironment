@@ -794,52 +794,30 @@ p () {
   git push origin $VERSION
 }
 
+##########################################################
+## Patch and Push
+##########################################################
+getpass () {
+  IFS=$'\n'
+  local account="$1"
+  local lpass_entry=$(lpass ls | grep -i "${account}")
+  local count=$(echo "${lpass_entry}" | wc -l)
 
-cat << EOF >> "${BENVIRONMENT_HELP_FILE}"
-${white}
-${white}## Functions - Useful Helpers
-${blue}
--   ${white}admin${blue}
-    Open root user on a machine
--   ${white}app [\$url]  ${blue}
-    Open Google Chrome in Kiosk Mode
--   ${white}gmail  ${blue}
-    Open Gmail in app mode.  Same as:
-    app <http://gmail.com>
--   ${white}c \$file  ${blue}
-    Copy \$file into clipboard
--   ${white}ccd (check current dir)  ${blue}
-    Go through all sub dirs and check
-    for any unchecked in source code
--   ${white}connect_to_all_machines \$m1 \$m2 \$etc${blue}
-    Connect to list of machines at once
--   ${white}devdb \$name ${blue}
-    List info about a devdb
--   ${white}envme [\$app]  ${blue}
-    Load environment from starphleet
-    with local overrides
--   ${white}envit [\$app]  ${blue}
-    Load environment from starphleet and
-    drop results in "environment" file
--   ${white}github_purge_password \$file  ${blue}
-    Delete a file and entire git history
-    for the file.  Used to scrub accidental
-    password commit (force push afterwards)
--   ${white}hack_root \$server_ip  ${blue}
-    Open root user on a machine
--   ${white}o [\$fuzzy_search]  ${blue}
-    Search for a thing and select from a
-    list to open in an atom window.
--   ${white}sc ${blue}
-    Starphleet Connect - Connect to starphleet ships
+  [ -z "${lpass_entry}" ] && return
+  if [ "${count}" -gt 1 ]; then
+    select lpass_entry in $(echo "${lpass_entry}"); do
+      [ -n "${lpass_entry}" ] && break
+    done
+  fi
+  echo "Copying Password To Clipboard: ${lpass_entry}"
 
-${white}## Default Configs - Generate Default Configs
-${blue}
--   ${white}gi  ${blue}
-    Drop a default gitignore file in the current dir
--   ${white}jsb ${blue}
-    Drop a default js beautifier file in the current dir
--   ${white}ei  ${blue}
-    Drop a default eslint file in the current dir
+  # Cuts the id out of something like:
+  #  blah blah blah [id: 234234234234234322]
+  local LPASS_ID=$(echo "${lpass_entry}" \
+                    | cut -d'[' -f 2 \
+                    | cut -d' ' -f 2 \
+                    | cut -d']' -f 1)
+  lpass show --password "${LPASS_ID}" | tr -d '\n' | xsel --clipboard --input \
+    || lpass show --field=password "${LPASS_ID}" | tr -d '\n' | xsel --clipboard --input
+}
 
-EOF
