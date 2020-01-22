@@ -795,7 +795,7 @@ p () {
 }
 
 ##########################################################
-## Patch and Push
+## Get password from Lastpass and copy to clipboard
 ##########################################################
 getpass () {
   IFS=$'\n'
