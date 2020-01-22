@@ -813,10 +813,7 @@ getpass () {
 
   # Cuts the id out of something like:
   #  blah blah blah [id: 234234234234234322]
-  local LPASS_ID=$(echo "${lpass_entry}" \
-                    | cut -d'[' -f 2 \
-                    | cut -d' ' -f 2 \
-                    | cut -d']' -f 1)
+  local LPASS_ID=$(echo "${lpass_entry}" | perl -pe 's|.*?\s+(\d+)\]$|$1|')
   lpass show --password "${LPASS_ID}" | tr -d '\n' | xsel --clipboard --input \
     || lpass show --field=password "${LPASS_ID}" | tr -d '\n' | xsel --clipboard --input
 }
