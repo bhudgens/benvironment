@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+LASTPASS_MFA_SECRETS_ID="${LASTPASS_MFA_SECRETS_ID:-3112380442678857043}"
+
+function _which() {
+  which $1 > /dev/null
+}
+
+function _punt() {
+  echo "$1"
+  exit 1
+}
+
+function _message() {
+local account="$1"
+local code="$2"
+cat << EOF
+Code copied to your clipboard
+
+  Account: ${account}
+  Code   : ${code}
+EOF
+}
+
+function mfa() {
+  _which lpass || _punt "You need to install the lpass cli"
+  _which oathtool || _punt "You need to install oathtool"
+
+  MFA_SECRETS=$(lpass show --note "${LASTPASS_MFA_SECRETS_ID}")
+
+  select account in $(echo "${MFA_SECRETS}" | jq -cr 'keys[]'); do
+    local secret=$(echo "${MFA_SECRETS}" | jq -r ".${account}")
+    local code=$(oathtool -b --totp "${secret}")
+    _which xsel && echo -n "${code}" | xsel --clipboard --input
+    _which pbcopy && echo -n "${code}" | pbcopy
+    _message "${account}" "${code}"
+    break;
+  done
+}
