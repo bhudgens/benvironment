@@ -1,6 +1,22 @@
 #!/usr/bin/env bash
 
-LASTPASS_MFA_SECRETS_ID="${LASTPASS_MFA_SECRETS_ID:-3112380442678857043}"
+############################################################################
+## How to use:
+##
+## - Create a new private note in lastpass
+## - Make the note a json with the following form:
+##   {
+##     "Provider":"MFA Secret"
+##   }
+## - Save private note
+## - Set the following environment variable to the ID of the lastpass note:
+##   export LASTPASS_MFA_SECRETS_ID="Your Secret Note ID"
+## - Source this file
+## - Run `mfa`
+##
+## This tool will use the keys from the note and let you select which code
+## you want to grab.  This will automatically copy the code to your clipboard
+############################################################################
 
 function _which() {
   which $1 > /dev/null
@@ -23,6 +39,8 @@ EOF
 }
 
 function mfa() {
+  LASTPASS_MFA_SECRETS_ID="${LASTPASS_MFA_SECRETS_ID:-3112380442678857043}"
+
   _which lpass || _punt "You need to install the lpass cli"
   _which oathtool || _punt "You need to install oathtool"
 
