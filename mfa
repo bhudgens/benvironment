@@ -49,8 +49,8 @@ function mfa() {
   select account in $(echo "${MFA_SECRETS}" | jq -cr 'keys[]'); do
     local secret=$(echo "${MFA_SECRETS}" | jq -r ".${account}")
     local code=$(oathtool -b --totp "${secret}")
-    _which xsel && echo -n "${code}" | xsel --clipboard --input
     _which pbcopy && echo -n "${code}" | pbcopy
+    _which xsel && echo -n "${code}" | xsel --clipboard --input
     _message "${account}" "${code}"
     break;
   done
