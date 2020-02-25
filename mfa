@@ -27,7 +27,7 @@ function _punt() {
   exit 1
 }
 
-function _message() {
+function _sendMessage() {
 local account="$1"
 local code="$2"
 cat << EOF
@@ -51,7 +51,7 @@ function mfa() {
     local code=$(oathtool -b --totp "${secret}")
     _which pbcopy && echo -n "${code}" | pbcopy
     _which xsel && echo -n "${code}" | xsel --clipboard --input
-    _message "${account}" "${code}"
+    _sendMessage "${account}" "${code}"
     break;
   done
 }
