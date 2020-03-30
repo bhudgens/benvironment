@@ -801,7 +801,6 @@ p () {
 ## Who owns a GLG app
 ##########################################################
 function whoowns() {
-  set -x
   for github_username in $(curl -s "https://services-internal.glgresearch.com/forkulator/who-owns?service=$1" | jq -r '.[].username'); do
     USER=$(curl -s "https://services-internal.glgresearch.com/forkulator/github-username-to-glg-email?user=${github_username}" | jq -r '.email');
     echo $USER
