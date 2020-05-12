@@ -780,6 +780,9 @@ devdb () {
 ##########################################################
 sc () {
   STARPHLEET_ENHANCE_CACHE="/tmp/se.cache"
+  if [ ! -f "${STARPHLEET_ENHANCE_CACHE}/connect.sh" ]; then
+    rm -rf "${STARPHLEET_ENHANCE_CACHE}"
+  fi
   if [ ! -d "${STARPHLEET_ENHANCE_CACHE}" ]; then
     git clone git@github.com:glg/starphleet-enhance.git "${STARPHLEET_ENHANCE_CACHE}"
   fi
