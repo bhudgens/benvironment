@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+############################################################################
+## How to use:
+##
+## - Create a new private note in lastpass
+## - Make the note a json with the following form:
+##   {
+##     "Provider":"MFA Secret"
+##   }
+## - Save private note
+## - Set the following environment variable to the ID of the lastpass note:
+##   export LASTPASS_MFA_SECRETS_ID="Your Secret Note ID"
+## - Source this file
+## - Run `mfa`
+##
+## This tool will use the keys from the note and let you select which code
+## you want to grab.  This will automatically copy the code to your clipboard
+############################################################################
+
+function _which() {
+  which $1 > /dev/null
+}
+
+function _punt() {
+  echo "$1"
+  exit 1
+}
+
+
+function camera() {
+  _which nmap || _punt "You need to install nmap"
+  _which cvlc || _punt "You need to install vlc"
+  _which lpass || _punt "You need to install lpass"
+
+  LPASS_CAMERA_CREDS_ID="2738607642879788722"
+  CREDS_JSON=$(lpass show --note "${LPASS_CAMERA_CREDS_ID}")
+  CAMERA_USERNAME=$(echo "${CREDS_JSON}" | jq -r '.username')
+  CAMERA_PASSWORD=$(echo "${CREDS_JSON}" | jq -r '.password')
+  CAMERA_IP=$(nmap -v 192.168.1.0/24 -n -Pn -p 34567 --open | grep 'tcp on' | tail -n 1 | awk '{print $6}')
+  cvlc --fullscreen 'rtsp://'${CAMERA_IP}'/user='${CAMERA_USERNAME}'&password='${CAMERA_PASSWORD}'&channel=10&stream=0.sdp?real_stream'
+}
