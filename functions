@@ -856,5 +856,6 @@ purge_docker_everything () {
   docker rm $(docker container ls -q -a)
   docker rmi $(docker images -q) -f
   docker system prune -af
+  docker network prune -f
 }
 
