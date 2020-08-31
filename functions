@@ -848,3 +848,13 @@ getpass () {
     || lpass show --field=password "${LPASS_ID}" | tr -d '\n' | xsel --clipboard --input
 }
 
+##########################################################
+## Delete all things docker from my machine and start fresh
+##########################################################
+purge_docker_everything () {
+  docker stop $(docker container ls -q -a)
+  docker rm $(docker container ls -q -a)
+  docker rmi $(docker images -q) -f
+  docker system prune -af
+}
+
