@@ -71,11 +71,11 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   apt_get_install jq
   apt_get_install silversearcher-ag ag
 
-  # apt_get_install bat
-  # apt_get_install ripgrep
+  # apt_get_install bat batcat
+  # apt_get_install ripgrep rg
   # Fixing Bug: https://github.com/sharkdp/bat/issues/938#issuecomment-646745610
 
-  if ! _which bat \
+  if ! _which batcat \
   || ! _which rg; then
     sudo apt install -o Dpkg::Options::="--force-overwrite" bat ripgrep
   fi
@@ -164,8 +164,8 @@ fi
 #############################################################################
 # If bat successfully gets installed we will
 # swap cat with bat
-if _which bat; then
-  alias cat='bat'
+if _which batcat; then
+  alias cat='batcat'
 fi
 
 if _which diff-so-fancy; then
