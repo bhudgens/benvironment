@@ -75,7 +75,10 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   # apt_get_install ripgrep
   # Fixing Bug: https://github.com/sharkdp/bat/issues/938#issuecomment-646745610
 
-  sudo apt install -o Dpkg::Options::="--force-overwrite" bat ripgrep
+  if ! _which bat \
+  || ! _which rg; then
+    sudo apt install -o Dpkg::Options::="--force-overwrite" bat ripgrep
+  fi
 
   npm_install "git-clone-cli" "clone"
 
