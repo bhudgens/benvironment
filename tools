@@ -61,6 +61,7 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   apt_get_install nodejs node
   apt_get_install npm
   apt_get_install git
+  apt_get_install fzf
   apt_get_install curl
   apt_get_install wget
   apt_get_install tmux
@@ -69,15 +70,14 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   apt_get_install strace
   apt_get_install jq
   apt_get_install silversearcher-ag ag
-  npm_install "git-clone-cli" "clone"
 
-  if ! which bat > /dev/null; then
-    pushd /tmp > /dev/null
-    URL='https://github.com/sharkdp/bat/releases/download/v0.7.1/bat-musl_0.7.1_amd64.deb'
-    wget "${URL}"
-    sudo dpkg -i "$(basename ${URL})"
-    popd >/dev/null
-  fi
+  # apt_get_install bat
+  # apt_get_install ripgrep
+  # Fixing Bug: https://github.com/sharkdp/bat/issues/938#issuecomment-646745610
+
+  sudo apt install -o Dpkg::Options::="--force-overwrite" bat ripgrep
+
+  npm_install "git-clone-cli" "clone"
 
   if [ ! -L "${HOME}/.zshrc" ] \
   && [ -f "${HOME}/Dropbox/syncstuff/.zshrc" ]; then
