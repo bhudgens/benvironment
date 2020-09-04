@@ -96,10 +96,11 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
     export FZF_DEFAULT_OPTS='-m --height 50% --border'
   fi
 
-  if [ ! -L "/usr/bin/open" ] \
-  && [ -f "${HOME}/Dropbox/syncstuff/open" ]; then
-    sudo mv "/usr/bin/open" "/usr/bin/open.bak"
-    sudo ln -s "${HOME}/Dropbox/syncstuff/open" "/usr/bin/open"
+  if ! _which fzf; then
+    git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"
+    pushd "$HOME/.fzf" > /dev/null
+    ./install.sh --key-bindings --completion --update-rc
+    popd > /dev/null
   fi
 
   if [ -f "${HOME}/.oh-my-zsh/themes/agnoster.zsh-theme" ] \
