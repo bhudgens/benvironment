@@ -1,6 +1,14 @@
 #! /usr/bin/env bash
 
 #############################################################################
+# Utility Function(s)
+#############################################################################
+# shhhhh
+function _which () {
+  which $1 > /dev/null
+}
+
+#############################################################################
 # Checkout our dotfiles
 #############################################################################
 DOT_FILES_REPO=${DOT_FILES_REPO:-"git@github.com:bhudgens/dotfiles.git"}
@@ -8,9 +16,6 @@ if [ ! -d "$HOME/.dotfiles" ]; then
   git checkout "${DOT_FILES_REPO}" "$HOME/.dotfiles"
 fi
 
-function _which () {
-  which $1 > /dev/null
-}
 #############################################################################
 # Software Install - Mac Poo
 #############################################################################
@@ -35,14 +40,10 @@ if echo $OSTYPE | grep -i darwin > /dev/null; then
   # Aliases based on successes
 fi
 
-function _which () {
-  which $1 > /dev/null
-}
 
 #############################################################################
 # Software Install - Linux Poo
 #############################################################################
-
 apt_get_install () {
   APP="$(basename $1)"
   [ -n "$2" ] && CHECK="$2" || CHECK="$1"
@@ -72,7 +73,6 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   apt_get_install nodejs node
   apt_get_install npm
   apt_get_install git
-  apt_get_install fzf
   apt_get_install curl
   apt_get_install wget
   apt_get_install tmux
