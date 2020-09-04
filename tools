@@ -123,13 +123,7 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
     pushd /tmp > /dev/null
     apt_get_install libjs-underscore
     apt_get_install libjs-sphinxdoc
-    for url in $(echo 'http://http.us.debian.org/debian/pool/main/k/kitty/kitty-terminfo_0.11.3-1_all.deb' \
-                      'http://http.us.debian.org/debian/pool/main/k/kitty/kitty-doc_0.11.3-1_all.deb' \
-                      'http://http.us.debian.org/debian/pool/main/k/kitty/kitty_0.11.3-1_amd64.deb'); do
-
-      wget "$url"
-      sudo dpkg -i "$(basename ${url})"
-    done
+    curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
     popd
   fi
 
