@@ -160,6 +160,9 @@ if ! _which lpass; then
   popd > /dev/null
 fi
 
+# When installing modules with npm always pin version
+npm config set save-prefix ''
+
 #############################################################################
 # Global Configs
 #############################################################################
