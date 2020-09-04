@@ -91,12 +91,9 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
     sudo apt install -o Dpkg::Options::="--force-overwrite" bat ripgrep
   fi
 
-  npm_install "git-clone-cli" "clone"
-
-  if [ ! -L "${HOME}/.zshrc" ] \
-  && [ -f "${HOME}/Dropbox/syncstuff/.zshrc" ]; then
-    mv "${HOME}/.zshrc" "${HOME}/.zshrc.bak"
-    ln -s "${HOME}/Dropbox/syncstuff/.zshrc" "${HOME}/.zshrc"
+  if type rg &> /dev/null; then
+    export FZF_DEFAULT_COMMAND='rg --files'
+    export FZF_DEFAULT_OPTS='-m --height 50% --border'
   fi
 
   if [ ! -L "/usr/bin/open" ] \
