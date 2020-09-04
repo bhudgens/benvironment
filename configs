@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+#############################################################################
+# Utility Function(s)
+#############################################################################
+# shhhhh
+function _which () {
+  which $1 > /dev/null
+}
+
+#############################################################################
+# Checkout our dotfiles
+#############################################################################
+DOT_FILES_REPO=${DOT_FILES_REPO:-"git@github.com:bhudgens/dotfiles.git"}
+if [ ! -d "$HOME/.dotfiles" ]; then
+  git checkout "${DOT_FILES_REPO}" "$HOME/.dotfiles"
+fi
+
+#############################################################################
+# Install Root Level dotfiles
+#############################################################################
+for file in .zshrc .tmux.conf .vimrc; do
+  if [ ! -L "${HOME}/${FILE}" ] \
+  && [ -f "${HOME}/.dotfiles/${FILE}" ]; then
+    mv "${HOME}/${FILE}" "${HOME}/${FILE}.bak"
+    ln -s "${HOME}/.dotfiles/${FILE}" "${HOME}/${FILE}"
+  fi
+done
+
