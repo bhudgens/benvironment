@@ -172,24 +172,8 @@ if _which batcat; then
   alias cat='batcat'
 fi
 
-if _which diff-so-fancy; then
-  git config --global core.pager "diff-so-fancy | less --tabs=4 -RFX"
-  git config --global color.ui true
-  git config --global color.diff-highlight.oldNormal    "red bold"
-  git config --global color.diff-highlight.oldHighlight "red bold 52"
-  git config --global color.diff-highlight.newNormal    "green bold"
-  git config --global color.diff-highlight.newHighlight "green bold 22"
-
-  git config --global color.diff.meta       "yellow"
-  git config --global color.diff.frag       "magenta bold"
-  git config --global color.diff.commit     "yellow bold"
-  git config --global color.diff.old        "red bold"
-  git config --global color.diff.new        "green bold"
-  git config --global color.diff.whitespace "red reverse"
-fi
-
 # Install prettyping
-if [ ! -f /usr/local/bin/prettyping ]; then
+if ! _which prettyping; then
   pushd /tmp > /dev/null
   curl -s -O https://raw.githubusercontent.com/denilsonsa/prettyping/master/prettyping
   sudo cp prettyping /usr/local/bin
