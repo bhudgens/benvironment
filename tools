@@ -119,20 +119,6 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
     sed -i 's|prompt_context$|# prompt_context$|' "${HOME}/.oh-my-zsh/themes/agnoster.zsh-theme"
   fi
 
-  if [ ! -L "${HOME}/.ssh" ] \
-  && [ -d "${HOME}/Dropbox/syncstuff/.ssh" ]; then
-    mv "${HOME}/.ssh" "${HOME}/.ssh.bak"
-    ln -s "${HOME}/Dropbox/syncstuff/.ssh" "${HOME}/.ssh"
-    for file in $(echo id_rsa \
-                       id_dsa \
-                       glguser \
-                       beta_bot); do
-      pushd "${HOME}/.ssh" > /dev/null
-      chmod 400 "${file}"
-      popd > /dev/null
-    done
-  fi
-
   if ! which kitty > /dev/null; then
     pushd /tmp > /dev/null
     apt_get_install libjs-underscore
