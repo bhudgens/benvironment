@@ -128,9 +128,10 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   fi
 
   if [ ! -L "${HOME}/.config/kitty/kitty.conf" ] \
-  && [ -f "${HOME}/Dropbox/syncstuff/.config/kitty/kitty.conf" ]; then
-    mv "${HOME}/.config/kitty/kitty.conf" "${HOME}/.config/kitty/kitty.conf.bak"
-    ln -s "${HOME}/Dropbox/syncstuff/.config/kitty/kitty.conf" "${HOME}/.config/kitty/kitty.conf"
+  && [ -f "${HOME}/.dotfiles/kitty.conf" ]; then
+    mkdir -p $(dirname "${HOME}/.config/kitty/kitty.conf")
+    [ -f "${HOME}/.config/kitty/kitty.conf" ] && mv "${HOME}/.config/kitty/kitty.conf" "${HOME}/.config/kitty/kitty.conf.bak"
+    ln -s "${HOME}/.dotfiles/kitty.conf" "${HOME}/.config/kitty/kitty.conf"
   fi
 
 fi
