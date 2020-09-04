@@ -103,6 +103,17 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
     popd > /dev/null
   fi
 
+  export GITHUB_ORGS=${GITHUB_ORGS:-"glg,glg-core,custom-elements,igroff,wballard,bhudgens"}
+  npm_install "git-clone-cli" "clone"
+
+  for file in .zshrc .tmux.conf; do
+    if [ ! -L "${HOME}/${FILE}" ] \
+    && [ -f "${HOME}/.dotfiles/${FILE}" ]; then
+      mv "${HOME}/${FILE}" "${HOME}/${FILE}.bak"
+      ln -s "${HOME}/.dotfiles/${FILE}" "${HOME}/${FILE}"
+    fi
+  done
+
   if [ -f "${HOME}/.oh-my-zsh/themes/agnoster.zsh-theme" ] \
   && ! grep prompt_context "${HOME}/.oh-my-zsh/themes/agnoster.zsh-theme" | grep -v '{' | grep '#' > /dev/null; then
     sed -i 's|prompt_context$|# prompt_context$|' "${HOME}/.oh-my-zsh/themes/agnoster.zsh-theme"
