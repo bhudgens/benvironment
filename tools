@@ -82,10 +82,10 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   apt_get_install jq
   apt_get_install silversearcher-ag ag
 
+  # These two collide right now so this is temporary.  See issue below
   # apt_get_install bat batcat
   # apt_get_install ripgrep rg
   # Fixing Bug: https://github.com/sharkdp/bat/issues/938#issuecomment-646745610
-
   if ! _which batcat \
   || ! _which rg; then
     sudo apt install -o Dpkg::Options::="--force-overwrite" bat ripgrep
