@@ -1,6 +1,17 @@
 #! /usr/bin/env bash
 
 #############################################################################
+# Checkout our dotfiles
+#############################################################################
+DOT_FILES_REPO=${DOT_FILES_REPO:-"git@github.com:bhudgens/dotfiles.git"}
+if [ ! -d "$HOME/.dotfiles" ]; then
+  git checkout "${DOT_FILES_REPO}" "$HOME/.dotfiles"
+fi
+
+function _which () {
+  which $1 > /dev/null
+}
+#############################################################################
 # Software Install - Mac Poo
 #############################################################################
 brew_install () {
