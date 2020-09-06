@@ -12,7 +12,7 @@ function _which () {
 #############################################################################
 DOT_FILES_REPO=${DOT_FILES_REPO:-"git@github.com:bhudgens/dotfiles.git"}
 if [ ! -d "$HOME/.dotfiles" ]; then
-  git checkout "${DOT_FILES_REPO}" "$HOME/.dotfiles"
+  git clone "${DOT_FILES_REPO}" "$HOME/.dotfiles"
 fi
 
 #############################################################################
@@ -25,4 +25,3 @@ for dotfile in .zshrc .tmux.conf .vimrc; do
     ln -s "${HOME}/.dotfiles/${dotfile}" "${HOME}/${dotfile}"
   fi
 done
-
