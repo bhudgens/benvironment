@@ -329,6 +329,10 @@ node_modules
 *.tfstate
 *.tfstate.backup
 .terraform
+
+# Often don't want to lock till I'm ready #
+######################
+package-lock.json
 EOF
 }
 
