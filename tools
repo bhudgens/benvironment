@@ -83,7 +83,8 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   apt_get_install silversearcher-ag ag
   # Needed for coc-lua lsp server vim plugin
   # Link: https://stackoverflow.com/questions/20079572/srlua-makefile-error-lua-h-no-such-file-or-directory/20080097
-  apt_get_install liblua5.3-dev
+  apt_get_install lua lua
+  apt_get_install liblua5.3-dev lua
 
   # These two collide right now so this is temporary.  See issue below
   # apt_get_install bat batcat
