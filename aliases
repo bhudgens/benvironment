@@ -145,12 +145,11 @@ alias record='pushd -q $HOME/Dropbox/code/glg/asciinema; python3 -m asciinema re
 
 alias zoom='open https://glgroup.zoom.us/my/bhudgens && echo https://glgroup.zoom.us/my/bhudgens | pbcopy'
 alias xcodeaccept="sudo xcodebuild -license accept"
+alias dev="cd $HOME/Dropbox/code/glg/ec2.starphleet.dev.headquarters"
 
 if ! echo $OSTYPE | grep -i "darwin"; then
   alias pbcopy='xsel --clipboard --input'
   alias pbpaste='xsel --clipboard --output'
 fi
-
-alias et="mkdir -p $HOME/.kube; docker run -it --rm -v $HOME/.ssh:/root/.ssh -v $HOME/.aws:/root/.aws -v $HOME/.docker:/root/.docker -v $HOME/.kube:/root/.kube bhudgens/eks-tools"
 
 # All finished
