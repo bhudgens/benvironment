@@ -18,11 +18,11 @@ fi
 #############################################################################
 # Install Root Level dotfiles
 #############################################################################
-for file in .zshrc .tmux.conf .vimrc; do
-  if [ ! -L "${HOME}/${FILE}" ] \
-  && [ -f "${HOME}/.dotfiles/${FILE}" ]; then
-    mv "${HOME}/${FILE}" "${HOME}/${FILE}.bak"
-    ln -s "${HOME}/.dotfiles/${FILE}" "${HOME}/${FILE}"
+for dotfile in .zshrc .tmux.conf .vimrc; do
+  if [ ! -L "${HOME}/${dotfile}" ] \
+  && [ -f "${HOME}/.dotfiles/${dotfile}" ]; then
+    mv "${HOME}/${dotfile}" "${HOME}/${dotfile}.bak"
+    ln -s "${HOME}/.dotfiles/${dotfile}" "${HOME}/${dotfile}"
   fi
 done
 
