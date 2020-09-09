@@ -52,7 +52,6 @@ alias ss='open -a /System/Library/CoreServices/ScreenSaverEngine.app'
 alias flushdns='sudo killall -HUP mDNSResponder'
 alias md='mkdir -p'
 alias history='fc -l 1'
-alias denv='vi ${HOME}/.devenv; source ${HOME}/.devenv'
 alias ndm='bash -c "$(STARPHLEET_HEADQUARTERS=git@github.com:glg/template-hq-dev.git#master curl -s https://raw.githubusercontent.com/glg/starphleet-dev-webinstalls/master/template)"'
 alias ol='app https://outlook.office.com/owa/'
 alias new="cp -r ${HOME}/Dropbox/code/glg/node_boilerplate "
@@ -140,6 +139,7 @@ alias me='sudo pactl load-module module-loopback latency_msec=1'
 alias nme='sudo pactl unload-module module-loopback'
 alias myip='curl "https://api.ipify.org?format=json"'
 alias boatvpn='sudo glgroup openvpn connect && sudo route add -host 172.27.4.14 gw 172.27.128.1'
+alias denv='source <(lpass show --note 8477325966344808802)'
 
 alias record='pushd -q $HOME/Dropbox/code/glg/asciinema; python3 -m asciinema rec; popd -q'
 
