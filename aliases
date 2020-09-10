@@ -140,6 +140,7 @@ alias nme='sudo pactl unload-module module-loopback'
 alias myip='curl "https://api.ipify.org?format=json"'
 alias boatvpn='sudo glgroup openvpn connect && sudo route add -host 172.27.4.14 gw 172.27.128.1'
 alias denv='source <(lpass show --note 8477325966344808802)'
+alias aws='docker run --rm -it -v ~/.aws:/root/.aws -v $(pwd):/aws amazon/aws-cli'
 
 alias record='pushd -q $HOME/Dropbox/code/glg/asciinema; python3 -m asciinema rec; popd -q'
 
