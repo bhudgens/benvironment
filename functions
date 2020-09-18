@@ -714,14 +714,6 @@ c () {
 # Set to admiral or captain
 USER_TYPE="admiral"
 function connect_to_all_machines() {
-  # TODO: This could be smarter - right now, we just assume
-  #       we will be the only tmux window/session.  If one
-  #       already exists we will break
-  if tmux list-sessions; then
-    echo This only works if no Tmux sessions exist
-    return
-  fi
-
   if [ "$#" -gt 1 ]; then
     MACHINES=$@
   else
@@ -733,11 +725,16 @@ function connect_to_all_machines() {
   fi
 
   CLUSTER_NAME=${CLUSTER_NAME:-virginia}
-  tmux new-session -d
-  PANE_ID=0
-  SESSION=0
-  window=${SESSION}:0
-
+  if [ -z "${TMUX}" ]; then
+    tmux new-session -d
+    PANE_ID=0
+    SESSION=0
+    window=${SESSION}:0
+  else
+    PANE_ID=0
+    SESSION=$(tmux display-message -p '#S')
+    window=${SESSION}:$(tmux display-message -p '#I')
+  fi
 
   for machine in $(echo $MACHINES); do
     [ $PANE_ID -gt 0 ] && tmux split-window
@@ -747,7 +744,10 @@ function connect_to_all_machines() {
     tmux send-keys -t "$pane" "clear" Enter
   done
   tmux setw sync
-  tmux attach-session -t "$SESSION"
+
+  if [ -z "${TMUX}" ]; then
+    tmux attach-session -t "$SESSION"
+  fi
 }
 
 ##########################################################
