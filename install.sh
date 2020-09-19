@@ -1,3 +1,32 @@
+
+function _osType() {
+  local _type="$1"
+  echo "$OSTYPE" | grep "$_type" > /dev/null
+}
+
+function _commandExists() {
+  local _cmd="$1"
+  which "$_cmd" > /dev/null
+}
+
+for _command in curl zsh git; do
+  if _osType linux \
+  && _commandExists apt-get \
+  && ! _commandExists _command; then
+    APPS_TO_INSTALL="$APPS_TO_INSTALL $_command"
+  fi
+done
+
+if [ -n "$APPS_TO_INSTALL" ]; then
+  [ "$EUID" -ne 0 ] && SUDO="sudo "
+  eval "$SUDO apt-get update -y"
+  eval "$SUDO apt-get install -y $APPS_TO_INSTALL"
+fi
+
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+fi
+
 main() {
   URL_PATH_TO_ENV_FILES="https://raw.githubusercontent.com/bhudgens/benvironment/master"
   FILE=".benvironment"
