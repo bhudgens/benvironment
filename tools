@@ -25,7 +25,7 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   # Fixing Bug: https://github.com/sharkdp/bat/issues/938#issuecomment-646745610
   if ! _which batcat \
   || ! _which rg; then
-    sudo apt install -o Dpkg::Options::="--force-overwrite" bat ripgrep
+    eval "$SUDO apt-get install -o Dpkg::Options::='--force-overwrite' -y bat ripgrep"
   fi
 
   if type rg &> /dev/null; then
@@ -85,7 +85,7 @@ if ! _which lpass; then
   git clone "https://github.com/lastpass/lastpass-cli.git" "${TMP_LPASS_INSTALL_DIR}"
   pushd "${TMP_LPASS_INSTALL_DIR}" > /dev/null
     make
-    sudo make install
+    eval "$SUDO make install"
   popd > /dev/null
 fi
 
@@ -105,9 +105,9 @@ fi
 if ! _which prettyping; then
   pushd /tmp > /dev/null
   curl -s -O https://raw.githubusercontent.com/denilsonsa/prettyping/master/prettyping
-  sudo cp prettyping /usr/local/bin
+  eval "$SUDO cp prettyping /usr/local/bin"
   echo Installing prettyping
-  sudo chmod +x /usr/local/bin/prettyping
+  eval "$SUDO chmod +x /usr/local/bin/prettyping"
   popd > /dev/null
 fi
 
