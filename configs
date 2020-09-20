@@ -20,7 +20,7 @@ fi
 for dotfile in .zshrc .tmux.conf .vimrc; do
   if [ ! -L "${HOME}/${dotfile}" ] \
   && [ -f "${HOME}/.dotfiles/${dotfile}" ]; then
-    mv "${HOME}/${dotfile}" "${HOME}/${dotfile}.bak"
-    ln -s "${HOME}/.dotfiles/${dotfile}" "${HOME}/${dotfile}"
+   [ -f "${HOME}/${dotfile}" ] && mv "${HOME}/${dotfile}" "${HOME}/${dotfile}.bak"
+   ln -s "${HOME}/.dotfiles/${dotfile}" "${HOME}/${dotfile}"
   fi
 done
