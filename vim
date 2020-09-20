@@ -76,7 +76,5 @@ if [ ! -f "$HOME/.vim/autoload/plug.vim" ]; then
   _install_temp_vimrc
   vim +'PlugInstall --sync' +qa
   install_dot_file .vimrc
-  mkdir -p "$HOME/.config/coc"
-  vim -c 'CocInstall -sync|q' 
 fi
 
