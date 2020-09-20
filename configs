@@ -14,13 +14,6 @@ if [ ! -d "$HOME/.dotfiles" ]; then
   2>&1 git clone "${DOT_FILES_REPO}" "$HOME/.dotfiles" > /dev/null
 fi
 
-#############################################################################
-# Install Root Level dotfiles
-#############################################################################
-for dotfile in .zshrc .tmux.conf .vimrc; do
-  if [ ! -L "${HOME}/${dotfile}" ] \
-  && [ -f "${HOME}/.dotfiles/${dotfile}" ]; then
-   [ -f "${HOME}/${dotfile}" ] && mv "${HOME}/${dotfile}" "${HOME}/${dotfile}.bak"
-   ln -s "${HOME}/.dotfiles/${dotfile}" "${HOME}/${dotfile}"
-  fi
+for dotfile in .zshrc .tmux.conf; do
+  install_dot_file "$dotfile"
 done
