@@ -9,9 +9,9 @@ function _which () {
 #############################################################################
 # Checkout our dotfiles
 #############################################################################
-DOT_FILES_REPO=${DOT_FILES_REPO:-"git@github.com:bhudgens/dotfiles.git"}
+DOT_FILES_REPO=${DOT_FILES_REPO:-"https://github.com/bhudgens/dotfiles.git"}
 if [ ! -d "$HOME/.dotfiles" ]; then
-  git clone "${DOT_FILES_REPO}" "$HOME/.dotfiles"
+  2>&1 git clone "${DOT_FILES_REPO}" "$HOME/.dotfiles" > /dev/null
 fi
 
 #############################################################################
