@@ -1,0 +1,58 @@
+#! /usr/bin/env bash
+
+#############################################################################
+# Utility Function(s)
+#############################################################################
+# shhhhh
+function _which () {
+  which $1 > /dev/null
+}
+
+[ "$EUID" -ne 0 ] && _which sudo && SUDO="sudo -E "
+
+#############################################################################
+# Software Install - Mac Poo
+#############################################################################
+brew_install () {
+  BREW_CMD="$(which brew)"
+  if [ ! -f "${BREW_CMD}" ]; then
+    echo Brew not found
+    return
+  fi
+
+  BREW_CMD="$1"
+  which "${BREW_CMD}" > /dev/null
+  if [ $? -gt 0 ]; then
+    brew install "${BREW_CMD}"
+  fi
+}
+
+#############################################################################
+# Software Install - Linux Poo
+#############################################################################
+apt_get_install () {
+  APP="$(basename $1)"
+  [ -n "$2" ] && CHECK="$2" || CHECK="$1"
+  if ! _which "$CHECK"; then
+    [ -z "${RUN_ONCE}" ] && eval "$SUDO apt-get update -y" && RUN_ONCE=true
+    eval "DEBIAN_FRONTEND=noninteractive $SUDO apt-get -y -o Dpkg::Options::='--force-confdef' -o Dpkg::Options::='--force-confold' install -y $APP"
+  fi
+}
+
+npm_install () {
+  APP="$(basename $1)"
+  [ -z "$2" ] || APP="$2"
+  if ! _which "${APP}" \
+  && _which npm; then
+    eval "$SUDO mkdir -p /usr/lib/node_modules"
+    eval "$SUDO mkdir -p /usr/local/lib"
+    eval "$SUDO chown -R ${USER}:${USER} /usr/lib/node_modules"
+    eval "$SUDO chown -R ${USER}:${USER} /usr/local/lib"
+    eval "$SUDO chown root:adm /usr/bin"
+    eval "$SUDO chmod 775 /usr/bin"
+    eval "$SUDO chown root:adm /usr/local/bin"
+    eval "$SUDO chmod 775 /usr/local/bin"
+    npm install -g "$1"
+  fi
+}
+
