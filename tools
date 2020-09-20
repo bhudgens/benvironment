@@ -34,7 +34,7 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   fi
 
   if ! _which fzf \
-  && [ ! -f "$HOME/.fzf" ]; then
+  && [ ! -d "$HOME/.fzf" ]; then
     git clone --depth 1 "https://github.com/junegunn/fzf.git" "$HOME/.fzf"
     pushd "$HOME/.fzf" > /dev/null
     "$HOME/.fzf/install" --key-bindings --completion --update-rc
