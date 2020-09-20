@@ -1,76 +1,9 @@
 #! /usr/bin/env bash
 
-#############################################################################
-# Utility Function(s)
-#############################################################################
-# shhhhh
-function _which () {
-  which $1 > /dev/null
-}
-
-#############################################################################
-# Checkout our dotfiles
-#############################################################################
-DOT_FILES_REPO=${DOT_FILES_REPO:-"git@github.com:bhudgens/dotfiles.git"}
-if [ ! -d "$HOME/.dotfiles" ]; then
-  git checkout "${DOT_FILES_REPO}" "$HOME/.dotfiles"
-fi
-
-#############################################################################
-# Software Install - Mac Poo
-#############################################################################
-brew_install () {
-  BREW_CMD="$(which brew)"
-  if [ ! -f "${BREW_CMD}" ]; then
-    echo Brew not found
-    return
-  fi
-
-  BREW_CMD="$1"
-  which "${BREW_CMD}" > /dev/null
-  if [ $? -gt 0 ]; then
-    brew install "${BREW_CMD}"
-  fi
-}
-
-if echo $OSTYPE | grep -i darwin > /dev/null; then
-  # List of the things
-  brew_install bat
-  brew_install diff-so-fancy
-  # Aliases based on successes
-fi
-
-
-#############################################################################
-# Software Install - Linux Poo
-#############################################################################
-apt_get_install () {
-  APP="$(basename $1)"
-  [ -n "$2" ] && CHECK="$2" || CHECK="$1"
-  if ! which "$CHECK" > /dev/null; then
-    [ -z "${RUN_ONCE}" ] && sudo apt-get update -y && RUN_ONCE=true
-    sudo apt-get install -y $APP
-  fi
-}
-
-npm_install () {
-  APP="$(basename $1)"
-  [ -z "$2" ] || APP="$2"
-  if ! which "${APP}" > /dev/null; then
-    sudo mkdir -p /usr/lib/node_modules
-    sudo mkdir -p /usr/local/lib
-    sudo chown -R "${USER}:${USER}" /usr/lib/node_modules
-    sudo chown -R "${USER}:${USER}" /usr/local/lib
-    sudo chown "root:adm" /usr/bin
-    sudo chmod 775 /usr/bin
-    sudo chown "root:adm" /usr/local/bin
-    sudo chmod 775 /usr/local/bin
-    npm install -g "$1"
-  fi
-}
-
 if echo $OSTYPE | grep -i linux > /dev/null; then
+  apt_get_install apt-utils apt-extracttemplates
   apt_get_install nodejs node
+  apt_get_install vim
   apt_get_install npm
   apt_get_install git
   apt_get_install curl
