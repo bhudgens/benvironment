@@ -38,7 +38,11 @@ main() {
 
       URL_PATH_TO_ENV_FILES="https://raw.githubusercontent.com/bhudgens/benvironment/master"
       FILE=".benvironment"
-      curl -s "${URL_PATH_TO_ENV_FILES}/${FILE}" -o "${HOME}/${FILE}"
+      if [ -f "./${FILE}" ]; then
+        cp "./${FILE}" "${HOME}/${FILE}"
+      else
+        curl -s "${URL_PATH_TO_ENV_FILES}/${FILE}" -o "${HOME}/${FILE}"
+      fi
 
       echo Installing benvironment into ${env_file}
       echo "source ${FILE}" >> "${HOME}/${env_file}"
