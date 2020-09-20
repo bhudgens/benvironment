@@ -3,7 +3,7 @@
 if echo $OSTYPE | grep -i linux > /dev/null; then
   apt_get_install apt-utils apt-extracttemplates
   apt_get_install nodejs node
-  apt_get_install vim
+  apt_get_install locales update-locale
   apt_get_install npm
   apt_get_install git
   apt_get_install curl
