@@ -116,3 +116,7 @@ if [ -f /usr/local/bin/prettyping ]; then
   alias ping='prettyping --nolegend'
 fi
 
+if _which locale-gen; then
+  locale-gen "en_US.UTF-8"
+  update-locale "en_US.UTF-8"
+fi
