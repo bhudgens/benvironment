@@ -17,7 +17,13 @@ BENVIRONMENT_FILES_TO_LOAD="${BENVIRONMENT_FILES_TO_LOAD:-colors shared configs 
 mkdir -p "${HOME}/run"
 for file in $(echo $BENVIRONMENT_FILES_TO_LOAD); do
   FILE_CACHE_ALIASES="${HOME}/run/.${file}"
-  [ ! -f "${FILE_CACHE_ALIASES}" ] && curl -s "${URL_PATH_TO_ENV_FILES}/${file}" -o "${FILE_CACHE_ALIASES}"
+  if [ ! -f "${FILE_CACHE_ALIASES}" ]; then
+    if [ -f "./${file}" ]; then
+      cp "${file}" "${FILE_CACHE_ALIASES}"
+    else
+      curl -s "${URL_PATH_TO_ENV_FILES}/${file}" -o "${FILE_CACHE_ALIASES}"
+    fi
+  fi
   source "${FILE_CACHE_ALIASES}"
   echo "${blue}$file ${green}Loaded...${end}"
 done
