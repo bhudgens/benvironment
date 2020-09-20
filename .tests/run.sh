@@ -1,1 +1,1 @@
-docker run -it --init --rm -v "$PWD:/env" -w "/env" ubuntu bash
+docker run -it --rm --init test
