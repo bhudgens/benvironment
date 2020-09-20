@@ -56,3 +56,14 @@ npm_install () {
   fi
 }
 
+#############################################################################
+# Install Root Level dotfiles
+#############################################################################
+function install_dot_file () {
+  local dotfile="$1"
+  if [ ! -L "${HOME}/${dotfile}" ] \
+  && [ -f "${HOME}/.dotfiles/${dotfile}" ]; then
+   [ -f "${HOME}/${dotfile}" ] && mv "${HOME}/${dotfile}" "${HOME}/${dotfile}.bak"
+   ln -s "${HOME}/.dotfiles/${dotfile}" "${HOME}/${dotfile}"
+  fi
+}
