@@ -49,7 +49,7 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
     sed -i 's|prompt_context$|# prompt_context$|' "${HOME}/.oh-my-zsh/themes/agnoster.zsh-theme"
   fi
 
-  if ! which kitty > /dev/null; then
+  if ! _which kitty; then
     pushd /tmp > /dev/null
     apt_get_install libjs-underscore
     apt_get_install libjs-sphinxdoc
