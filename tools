@@ -59,6 +59,9 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
     ln -s "${HOME}/.dotfiles/kitty.conf" "${HOME}/.config/kitty/kitty.conf"
   fi
 
+  # Let's me clean up markdown
+  npm_install "bhudgens/tidy-markdown" "tidy-markdown"
+
 fi
 
 if ! _which lpass; then
