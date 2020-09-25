@@ -748,7 +748,11 @@ c () {
 USER_TYPE="admiral"
 function connect_to_all_machines() {
   if [ "$#" -gt 1 ]; then
-    MACHINES=$@
+    sh admiral@172.27.4.176
+    clear
+    ssh admiral@172.27.10.91
+    clear
+    ACHINES=$@
   else
     CLUSTER_NAME="${1:-virginia}"
     [ "${CLUSTER_NAME}" = "virginia" ] && MACHINE_URL="http://eephleet-internal.glgresearch.com/forkulator/primary-phleet-instances-virginia"
