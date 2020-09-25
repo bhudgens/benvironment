@@ -8,31 +8,22 @@ INSTANCES_JSON="$HOME/run/ec2-instances.json"
 # The formatting takes a bit so lets cache that too
 INSTANCES_CACHE="$HOME/run/ec2-instances.cache"
 
-function _punt() {
-  echo "$1"
-  exit 1
-}
-
 function _loggedIntoAwsCli() {
-  2>&1 aws sts get-caller-identity > /dev/null
+  aws sts get-caller-identity > /dev/null 2> /dev/null
 }
 
 function _getInstancesTable() {
-  set -x
-
   local search="$1"
 
   # Skip all this if we already have the cache
   if [ ! -f "$INSTANCES_JSON" ]; then
-    # Warn about not being logged in
-    if ! _loggedIntoAwsCli; then
-      _punt "You need to login to the AWS CLI"
-    fi
-
+    ! _loggedIntoAwsCli && echo "Not logged into AWS CLI" && return
+    echo "Caching All EC2 Instance Info..."
     aws --region us-east-1 ec2 describe-instances > "$INSTANCES_JSON"
   fi
 
   if [ ! -f "$INSTANCES_CACHE" ]; then
+    echo "Formatting for Search (Takes a bit the first time)..."
     # Using ^ as a delim since | is used a lot in practice
     # The below acts as a 'header'
     printf -v OUTPUT 'InstanceId^Name^PrivateIp^PublicIp'
@@ -60,7 +51,9 @@ function _getInstancesTable() {
 }
 
 function con() {
-  _getInstancesTable "$1"
-  SELECTED_INSTANCE=$(echo "$TABLE" | fzf --layout=reverse --header-lines=1 ${search:+"-q $search"} | awk '{print $1}')
+  local search="$1"
+  if _getInstancesTable "$search" && [ -n "$TABLE" ]; then
+    SELECTED_INSTANCE=$(echo "$TABLE" | fzf --layout=reverse --header-lines=1 ${search:+"-q $search"} | awk '{print $1}')
+    [ -n "$SELECTED_INSTANCE" ] && aws --region us-east-1 ssm start-session --target "$SELECTED_INSTANCE"
+  fi
 }
-
