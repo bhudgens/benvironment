@@ -50,10 +50,42 @@ function _getInstancesTable() {
   TABLE=$(echo "$OUTPUT" | column -s'^' -t)
 }
 
+
+function _ssh_into() {
+  local ip="$1"
+  echo "Connecting to ${1}"
+  for user in admiral ubuntu captain ec2-user; do
+    if ssh "${user}@${ip}" echo 2> /dev/null; then
+      ssh "${user}@${ip}"
+      return
+    fi
+  done
+
+  # Couldn't connect
+  false
+}
+
+
+
 function con() {
   local search="$1"
   if _getInstancesTable "$search" && [ -n "$TABLE" ]; then
-    SELECTED_INSTANCE=$(echo "$TABLE" | fzf --layout=reverse --header-lines=1 ${search:+"-q $search"} | awk '{print $1}')
-    [ -n "$SELECTED_INSTANCE" ] && aws --region us-east-1 ssm start-session --target "$SELECTED_INSTANCE"
+    SELECTED_INSTANCE=$(echo "$TABLE" | fzf --layout=reverse --header-lines=1 ${search:+"-q $search"})
+    set -x
+    INSTANCE_ID=$(echo "$SELECTED_INSTANCE" | awk '{print $1}')
+    PRIVATE_IP=$(echo "$SELECTED_INSTANCE" | perl -pe 's|.*?([\.\d]{1,})\s+([\.\dnul]{1,})$|$1|')
+
+    PUBLIC_IP=$(echo "$SELECTED_INSTANCE" | perl -pe 's|.*?([\.\d]{1,})\s+([\.\dnul]{1,})$|$2|')
+    # We'll just use the fact that this is empty to skip trying it
+    [ "$PUBLIC_IP" = "null" ] && PUBLIC_IP=""
+    
+    # Basically, if ssh doesn't work we'll try ssm
+    for the_ip in $PRIVATE_IP $PUBLIC_IP; do
+      _ssh_into "$the_ip" \
+        && break \
+        || KEEP_TRYING=true
+    done
+
+    [ -n "$KEEP_TRYING" ] && [ -n "$INSTANCE_ID" ] && aws --region us-east-1 ssm start-session --target "$INSTANCE_ID" 
   fi
 }
