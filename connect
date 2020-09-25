@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+#############################################################################
+# Dynamically Connect to AWS Resources
+#############################################################################
+
+# The request from amazon
+INSTANCES_JSON="$HOME/run/ec2-instances.json"
+# The formatting takes a bit so lets cache that too
+INSTANCES_CACHE="$HOME/run/ec2-instances.cache"
+
+function _punt() {
+  echo "$1"
+  exit 1
+}
+
+function _loggedIntoAwsCli() {
+  2>&1 aws sts get-caller-identity > /dev/null
+}
+
+function _getInstancesTable() {
+  set -x
+
+  local search="$1"
+
+  # Skip all this if we already have the cache
+  if [ ! -f "$INSTANCES_JSON" ]; then
+    # Warn about not being logged in
+    if ! _loggedIntoAwsCli; then
+      _punt "You need to login to the AWS CLI"
+    fi
+
+    aws --region us-east-1 ec2 describe-instances > "$INSTANCES_JSON"
+  fi
+
+  if [ ! -f "$INSTANCES_CACHE" ]; then
+    # Using ^ as a delim since | is used a lot in practice
+    # The below acts as a 'header'
+    printf -v OUTPUT 'InstanceId^Name^PrivateIp^PublicIp'
+
+    # Now lets make it fzf friendly
+    for instance_id in $(jq -r '.Reservations[].Instances[].InstanceId' "$INSTANCES_JSON"); do
+      INSTANCE=$(jq ".Reservations[].Instances[] | select(.InstanceId == \"$instance_id\")" "$INSTANCES_JSON") 
+      # Not all instances will have a name so we set a default
+      NAME=$(echo "$INSTANCE" | jq -r '.Tags[] | select(.Key == "Name") | .Value')
+      [ -z "$NAME" ] && NAME="Not Set"
+      # The rest of this is normal
+      INSTANCE_ID=$(echo "$INSTANCE" | jq -r '.InstanceId')
+      PUBLIC_IP_ADDRESS=$(echo "$INSTANCE" | jq -r '.PublicIpAddress')
+      PRIVATE_IP_ADDRESS=$(echo "$INSTANCE" | jq -r '.PrivateIpAddress')
+      printf -v OUTPUT "$OUTPUT"'\n'"$INSTANCE_ID^$NAME^$PRIVATE_IP_ADDRESS^$PUBLIC_IP_ADDRESS"
+    done
+
+    # And remember our work for next time
+    echo "$OUTPUT" > "$INSTANCES_CACHE"
+  else
+    OUTPUT=$(cat "$INSTANCES_CACHE")
+  fi
+
+  TABLE=$(echo "$OUTPUT" | column -s'^' -t)
+}
+
+function con() {
+  _getInstancesTable "$1"
+  SELECTED_INSTANCE=$(echo "$TABLE" | fzf --layout=reverse --header-lines=1 ${search:+"-q $search"} | awk '{print $1}')
+}
+
