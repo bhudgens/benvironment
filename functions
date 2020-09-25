@@ -288,16 +288,27 @@ ccd_clean() {
   CURRENT_DIR=${PWD}
   for dir in $(find ${PWD} -maxdepth 2 -type d -name ".git")
   do
-    unset CHECK
     CHANGE_TO=$(dirname "${dir}")
     echo "$CHANGE_TO"
     cd $CHANGE_TO
+
+    unset CHECK
     CHECK=$([ -d "./.git" ] && git status -s)
-    echo "$CHECK"
-    if [ -z "$CHECK" ]; then
-      cd ..
-      echo rm -rf "$CHANGE_TO"
+    if [ -n "$CHECK" ]; then
+      echo "You have code to commit: $CHANGE_TO"
+      continue
     fi
+
+    # Make sure all changes have been pushed to our 'source'
+    unset CHECK
+    CHECK=$(git diff)
+    if [ $? -ne 0 ] || [ -n "$CHECK" ]; then
+      echo "You still need to push your changes in $CHANGE_TO"
+      continue
+    fi
+
+    cd ..
+    rm -rf "$CHANGE_TO"
   done
   cd ${CURRENT_DIR}
 }
