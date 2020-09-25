@@ -142,7 +142,7 @@ alias boatvpn='sudo glgroup openvpn connect && sudo route add -host 172.27.4.14 
 alias denv='source <(lpass show --note 8477325966344808802)'
 alias aws='docker run --rm -it -v ~/.aws:/root/.aws -v $(pwd):/aws --env AWS_ACCESS_KEY_ID --env AWS_SECRET_ACCESS_KEY --env AWS_PAGER="" bhudgens/aws-cli'
 
-alias record='pushd -q $HOME/Dropbox/code/glg/asciinema; python3 -m asciinema rec; popd -q'
+alias record='asciinema rec'
 
 alias zoom='open https://glgroup.zoom.us/my/bhudgens && echo https://glgroup.zoom.us/my/bhudgens | pbcopy'
 alias xcodeaccept="sudo xcodebuild -license accept"
