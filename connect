@@ -85,8 +85,7 @@ function con() {
     done
 
     if [ $(echo "$SELECTED_INSTANCES" | wc -l) -gt 1 ]; then
-      IFS=' ' read -A THE_LIST <<< "$THE_LIST"
-      connect_to_all_machines ${THE_LIST[@]}
+      eval connect_to_all_machines $THE_LIST
       return
     fi
 
