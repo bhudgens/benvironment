@@ -280,6 +280,28 @@ ccd() {
   cd ${CURRENT_DIR}
 }
 
+# ccd_clean
+#
+#  loop through each directory in the current dir and check
+#  If anything is not checked in yet
+ccd_clean() {
+  CURRENT_DIR=${PWD}
+  for dir in $(find ${PWD} -maxdepth 2 -type d -name ".git")
+  do
+    unset CHECK
+    CHANGE_TO=$(dirname "${dir}")
+    echo "$CHANGE_TO"
+    cd $CHANGE_TO
+    CHECK=$([ -d "./.git" ] && git status -s)
+    echo "$CHECK"
+    if [ -z "$CHECK" ]; then
+      cd ..
+      echo rm -rf "$CHANGE_TO"
+    fi
+  done
+  cd ${CURRENT_DIR}
+}
+
 # Create a default git ignore
 #
 gi() {
