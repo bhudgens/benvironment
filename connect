@@ -70,22 +70,33 @@ function _ssh_into() {
 function con() {
   local search="$1"
   if _getInstancesTable "$search" && [ -n "$TABLE" ]; then
-    SELECTED_INSTANCE=$(echo "$TABLE" | fzf --layout=reverse --header-lines=1 ${search:+"-q $search"})
+    unset THE_LIST
     set -x
-    INSTANCE_ID=$(echo "$SELECTED_INSTANCE" | awk '{print $1}')
-    PRIVATE_IP=$(echo "$SELECTED_INSTANCE" | perl -pe 's|.*?([\.\d]{1,})\s+([\.\dnul]{1,})$|$1|')
+    SELECTED_INSTANCES=$(echo "$TABLE" | fzf --layout=reverse --header-lines=1 ${search:+"-q $search"})
 
-    PUBLIC_IP=$(echo "$SELECTED_INSTANCE" | perl -pe 's|.*?([\.\d]{1,})\s+([\.\dnul]{1,})$|$2|')
+    OLD="$IFS"
+    IFS=$'\n'
+    for SELECTED_INSTANCE in $(echo "$SELECTED_INSTANCES"); do
+      INSTANCE_ID=$(echo "$SELECTED_INSTANCE" | awk '{print $1}')
+      PRIVATE_IP=$(echo "$SELECTED_INSTANCE" | perl -pe 's|.*?([\.\d]{1,})\s+([\.\dnul]{1,})$|$1|')
+      PUBLIC_IP=$(echo "$SELECTED_INSTANCE" | perl -pe 's|.*?([\.\d]{1,})\s+([\.\dnul]{1,})$|$2|')
+    
+      THE_LIST="$PRIVATE_IP $THE_LIST"
+    done
+
+    if [ $(echo "$SELECTED_INSTANCES" | wc -l) -gt 1 ]; then
+      eval connect_to_all_machines $THE_LIST
+      return
+    fi
+
     # We'll just use the fact that this is empty to skip trying it
     [ "$PUBLIC_IP" = "null" ] && PUBLIC_IP=""
     
     # Basically, if ssh doesn't work we'll try ssm
     for the_ip in $PRIVATE_IP $PUBLIC_IP; do
-      _ssh_into "$the_ip" \
-        && break \
-        || KEEP_TRYING=true
+      _ssh_into "$the_ip" && return
     done
 
-    [ -n "$KEEP_TRYING" ] && [ -n "$INSTANCE_ID" ] && aws --region us-east-1 ssm start-session --target "$INSTANCE_ID" 
+    [ -n "$INSTANCE_ID" ] && aws --region us-east-1 ssm start-session --target "$INSTANCE_ID" 
   fi
 }
