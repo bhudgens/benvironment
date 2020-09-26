@@ -206,7 +206,11 @@ rl() {
   for file in $(echo $BENVIRONMENT_FILES_TO_LOAD); do
     FILE_CACHE_ALIASES="${HOME}/run/.${file}"
     [ -f "${FILE_CACHE_ALIASES}" ] && rm "${FILE_CACHE_ALIASES}" && echo "Purged ${FILE_CACHE_ALIASES}"
+    if [ -f "./${file}" ]; then
+      cp "./${file}" "${FILE_CACHE_ALIASES}"
+    fi
   done
+
   curl -s "${URL_PATH_TO_ENV_FILES}/.benvironment" -o "${HOME}/.benvironment"
   zsh
 }
