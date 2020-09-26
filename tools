@@ -129,3 +129,9 @@ then
   eval "$SUDO locale-gen 'en_US.UTF-8'"
   eval "$SUDO update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8"
 fi
+
+if [ ! -f "$HOME/.gitconfig" ]; then
+  git config --global user.email "benjamin@benjamindavid.com"
+  git config --global user.name "Benjamin Hudgens"
+fi
+
