@@ -56,6 +56,7 @@ function _ssh_into() {
   echo "Connecting to ${1}"
   for user in admiral ubuntu captain ec2-user; do
     if ssh "${user}@${ip}" echo 2> /dev/null; then
+      echo "Trying: ssh ${user}@${ip}"
       ssh "${user}@${ip}"
       return
     fi
@@ -71,7 +72,6 @@ function con() {
   local search="$1"
   if _getInstancesTable "$search" && [ -n "$TABLE" ]; then
     unset THE_LIST
-    set -x
     SELECTED_INSTANCES=$(echo "$TABLE" | fzf --layout=reverse --header-lines=1 ${search:+"-q $search"})
 
     OLD="$IFS"
@@ -97,6 +97,7 @@ function con() {
       _ssh_into "$the_ip" && return
     done
 
+    echo "Trying: aws --region us-east-1 ssm start-session --target $INSTANCE_ID" 
     [ -n "$INSTANCE_ID" ] && aws --region us-east-1 ssm start-session --target "$INSTANCE_ID" 
   fi
 }
