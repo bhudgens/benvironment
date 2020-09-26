@@ -59,9 +59,18 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
     ln -s "${HOME}/.dotfiles/kitty.conf" "${HOME}/.config/kitty/kitty.conf"
   fi
 
+  if ! _which docker; then
+    bash -c "$(curl -sLo- 'https://get.docker.com')"
+    eval "$SUDO usermod -aG docker '$USER'"
+  fi
+
+  if ! _which docker-compose; then
+    eval "$SUDO curl -L 'https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)' -o '/usr/local/bin/docker-compose'"
+    eval "$SUDO chmod +x '/usr/local/bin/docker-compose'"
+  fi
+
   # Let's me clean up markdown
   npm_install "bhudgens/tidy-markdown" "tidy-markdown"
-
 fi
 
 if ! _which lpass; then
