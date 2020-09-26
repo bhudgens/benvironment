@@ -897,3 +897,15 @@ purge_docker_everything () {
   docker network prune -f
 }
 
+
+##########################################################
+## XXX: Some sync help
+##########################################################
+
+dr() {
+  CURRENT_DIR="$PWD/"
+  DEST_DIR=$(echo "$CURRENT_DIR" | perl -pe s'|$HOME/Dropbox.bak|$HOME/Dropbox|')
+  THE_CMD="rsync --dry-run --delete -ravP '$CURRENT_DIR' '$DEST_DIR'"
+  eval "$THE_CMD"
+  echo "$THE_CMD"
+}
