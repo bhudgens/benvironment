@@ -8,6 +8,7 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   apt_get_install git
   apt_get_install curl
   apt_get_install xsel
+  apt_get_install sudo
   apt_get_install wget
   apt_get_install tmux
   apt_get_install openvpn
