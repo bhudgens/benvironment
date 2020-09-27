@@ -1,1 +1,1 @@
-docker run -it --rm --init test
+docker run -it --rm --init -v "$PWD:/app" test
