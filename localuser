@@ -37,9 +37,10 @@ function mlu() {
   _createUser "$_user"
   sudo touch "/home/$_user/.zshrc"
   sudo chmod 777 "/home/$_user/.zshrc"
+
   # From: %sudo ALL=(ALL:ALL) ALL
   # To:   %sudo ALL=(ALL:ALL) NOPASSWD:ALL
-  sudo sed -I 's|(sudo.*)ALL|\1NOPASSWD:ALL|' /etc/sudoers.test
+  sudo sed -i -E 's|(sudo.*)ALL|\1NOPASSWD:ALL|' /etc/sudoers
 
   sudo usermod -a -G sudo "$_user"
   sudo usermod -a -G adm "$_user"
