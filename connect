@@ -55,8 +55,8 @@ function _ssh_into() {
   local ip="$1"
   echo "Connecting to ${1}"
   for user in admiral ubuntu captain ec2-user; do
+    echo "Trying: ssh ${user}@${ip}"
     if ssh "${user}@${ip}" echo 2> /dev/null; then
-      echo "Trying: ssh ${user}@${ip}"
       ssh "${user}@${ip}"
       return
     fi
