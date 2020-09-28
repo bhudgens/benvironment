@@ -72,7 +72,14 @@ function con() {
   local search="$1"
   if _getInstancesTable "$search" && [ -n "$TABLE" ]; then
     unset THE_LIST
+    unset SELECTED_INSTANCES
+    unset SELECTED_INSTANCE
     SELECTED_INSTANCES=$(echo "$TABLE" | fzf --layout=reverse --header-lines=1 ${search:+"-q $search"})
+
+    if [ $? -gt 0 ]; then
+      echo "User cancelled"
+      return 
+    fi
 
     OLD="$IFS"
     IFS=$'\n'
