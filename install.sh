@@ -10,8 +10,9 @@ function _commandExists() {
 }
 
 main() {
+  BENVIRONMENT_LOAD_FILE=".benvironment"
   for env_file in .zshrc; do
-    if ! grep "${FILE}" "${HOME}/${env_file}" 2>&1 > /dev/null; then
+    if ! grep "${BENVIRONMENT_LOAD_FILE}" "${HOME}/${env_file}" 2>&1 > /dev/null; then
       # GITHUB_USERNAME=$(sh -c 'ssh -o "IdentitiesOnly=yes" git@github.com 2>&1 | grep "successfully authenticated" | cut -f2 -d" " | cut -f1 -d"!"')
       # [ -z "$GITHUB_USERNAME" ] && _punt "You need to setup your key with github"
 
@@ -37,11 +38,10 @@ main() {
       fi
 
       URL_PATH_TO_ENV_FILES="https://raw.githubusercontent.com/bhudgens/benvironment/master"
-      FILE=".benvironment"
-      if [ -f "./${FILE}" ]; then
-        cp "./${FILE}" "${HOME}/${FILE}"
+      if [ -f "./${BENVIRONMENT_LOAD_FILE}" ]; then
+        cp "./${BENVIRONMENT_LOAD_FILE}" "${HOME}/${BENVIRONMENT_LOAD_FILE}"
       else
-        curl -s "${URL_PATH_TO_ENV_FILES}/${FILE}" -o "${HOME}/${FILE}"
+        curl -s "${URL_PATH_TO_ENV_FILES}/${BENVIRONMENT_LOAD_FILE}" -o "${HOME}/${FILE}"
       fi
 
       echo Installing benvironment into ${env_file}
