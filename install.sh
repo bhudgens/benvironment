@@ -41,11 +41,11 @@ main() {
       if [ -f "./${BENVIRONMENT_LOAD_FILE}" ]; then
         cp "./${BENVIRONMENT_LOAD_FILE}" "${HOME}/${BENVIRONMENT_LOAD_FILE}"
       else
-        curl -s "${URL_PATH_TO_ENV_FILES}/${BENVIRONMENT_LOAD_FILE}" -o "${HOME}/${FILE}"
+        curl -s "${URL_PATH_TO_ENV_FILES}/${BENVIRONMENT_LOAD_FILE}" -o "${HOME}/${BENVIRONMENT_LOAD_FILE}"
       fi
 
       echo Installing benvironment into ${env_file}
-      echo "source ${FILE}" >> "${HOME}/${env_file}"
+      echo "source ${BENVIRONMENT_LOAD_FILE}" >> "${HOME}/${env_file}"
     fi
   done
   echo All Done! Open a new window!
