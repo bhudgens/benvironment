@@ -108,3 +108,9 @@ function con() {
     [ -n "$INSTANCE_ID" ] && aws --region us-east-1 ssm start-session --target "$INSTANCE_ID" 
   fi
 }
+
+function con_refresh() {
+  rm "${INSTANCES_JSON}"
+  rm "${INSTANCES_CACHE}"
+  con "$@"
+}
