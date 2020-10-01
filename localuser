@@ -8,11 +8,11 @@ function _userExists(){
 function _createUser() {
   local _user="$1"
   if ! _userExists "$_user"; then
-    $SUDO useradd \
+    eval $SUDO useradd \
        --create-home \
        --system \
        --shell /usr/bin/zsh \
-       --comment 'User for Benvironment' \
+       --comment 'Benvironment' \
        --home "/home/$_user" \
        "$_user"
   fi
