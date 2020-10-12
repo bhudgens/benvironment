@@ -38,5 +38,5 @@ function camera() {
   CAMERA_USERNAME=$(echo "${CREDS_JSON}" | jq -r '.username')
   CAMERA_PASSWORD=$(echo "${CREDS_JSON}" | jq -r '.password')
   CAMERA_IP=$(nmap -v 192.168.1.0/24 -n -Pn -p 34567 --open | grep 'tcp on' | tail -n 1 | awk '{print $6}')
-  cvlc --fullscreen 'rtsp://'${CAMERA_IP}'/user='${CAMERA_USERNAME}'&password='${CAMERA_PASSWORD}'&channel=10&stream=0.sdp?real_stream'
+  cvlc --fullscreen 'rtsp://'${CAMERA_IP}'/user='${CAMERA_USERNAME}'&password='${CAMERA_PASSWORD}'&channel=10&stream=0.sdp?real_stream' --rate 10
 }
