@@ -45,7 +45,7 @@ _chmod () {
   [ -f "$2" ] && chmod $1 "$2"
 }
 
-TMP_SSH_KEY_DIR="/tmp/.ssh"
+TMP_SSH_KEY_DIR="${XDG_RUNTIME_DIR:-/tmp}/.ssh"
 add_key () {
   echo Installing Key: $2
   lpass show "$1" --field "Private Key" > "${TMP_SSH_KEY_DIR}/$2"
