@@ -913,3 +913,12 @@ dr() {
   eval "$THE_CMD"
   echo "$THE_CMD"
 }
+
+function check_deploy() {
+  local app="$1"
+  for machine in $(curl -s 'http://eephleet-internal.glgresearch.com/forkulator/primary-phleet-instances-virginia' | grep PrivateIpAddress | cut -f 4 -d '"'); do
+    CONTAINER=$(2>&1 curl -v -X HEAD "http://$machine/$app/" | grep "X-Starphleet-Container" | awk '{print $3}')
+    echo "Machine: $machine | Container: $CONTAINER"
+  done
+}
+
