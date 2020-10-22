@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 
-function _userExists(){ 
+function _userExists(){
   id "$1" &>/dev/null
-} 
+}
 
 function _createUser() {
   local _user="$1"
@@ -36,7 +36,8 @@ function mlu() {
 
   _createUser "$_user"
   sudo touch "/home/$_user/.zshrc"
-  sudo chmod 777 "/home/$_user/.zshrc"
+  sudo chmod 644 "/home/$_user/.zshrc"
+  sudo chown "$_user:$_user" "/home/$_user/.zshrc"
 
   # From: %sudo ALL=(ALL:ALL) ALL
   # To:   %sudo ALL=(ALL:ALL) NOPASSWD:ALL
