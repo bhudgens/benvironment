@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+
+function _userExists(){
+  id "$1" &>/dev/null
+}
+
+function _createUser() {
+  local _user="$1"
+  if ! _userExists "$_user"; then
+    eval $SUDO useradd \
+       --create-home \
+       --system \
+       --shell /usr/bin/zsh \
+       --comment 'Benvironment' \
+       --home "/home/$_user" \
+       "$_user"
+  fi
+}
+
+#############################################################################
+# fuction: mlu (Make Local User)
+#
+# Allow me to run this on a system where my environment is installed
+# by the user I login with is dynamic. This will create a user that
+# persists so I have a place to run tmux statically and persist it
+#############################################################################
+function mlu() {
+  local _user="$1"
+
+  [ -z "$_user" ] && echo "You must specify a username" && return
+
+  if ! _which sudo; then
+    _punt "Sudo is required for this command"
+  fi
+
+  _createUser "$_user"
+  sudo touch "/home/$_user/.zshrc"
+  sudo chmod 644 "/home/$_user/.zshrc"
+  sudo chown "$_user:$_user" "/home/$_user/.zshrc"
+
+  # From: %sudo ALL=(ALL:ALL) ALL
+  # To:   %sudo ALL=(ALL:ALL) NOPASSWD:ALL
+  sudo sed -i -E 's|(sudo.*)ALL|\1NOPASSWD:ALL|' /etc/sudoers
+
+  sudo usermod -a -G sudo "$_user"
+  sudo usermod -a -G adm "$_user"
+  sudo -i -u "$_user" -- eval 'bash -c "$(curl -sLo- http://b.environ.men/t)"'
+}
+
+mlu bhudgens
