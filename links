@@ -10,9 +10,6 @@ function _popd() {
   popd > /dev/null
 }
 
-function _getGDSRepo() {
-}
-
 function _getClusterConfigsAndServices() {
   _pushd "$GDS_REPO_DIR"
   egrep '\[Link\]' ./clusterconfigs/* \
