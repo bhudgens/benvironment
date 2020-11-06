@@ -30,7 +30,7 @@ function _getInstancesTable() {
 
     # Now lets make it fzf friendly
     for instance_id in $(jq -r '.Reservations[].Instances[].InstanceId' "$INSTANCES_JSON"); do
-      INSTANCE=$(jq ".Reservations[].Instances[] | select(.InstanceId == \"$instance_id\")" "$INSTANCES_JSON") 
+      INSTANCE=$(jq ".Reservations[].Instances[] | select(.InstanceId == \"$instance_id\")" "$INSTANCES_JSON")
       # Not all instances will have a name so we set a default
       NAME=$(echo "$INSTANCE" | jq -r '.Tags[] | select(.Key == "Name") | .Value')
       [ -z "$NAME" ] && NAME="Not Set"
@@ -78,7 +78,7 @@ function con() {
 
     if [ $? -gt 0 ]; then
       echo "User cancelled"
-      return 
+      return
     fi
 
     OLD="$IFS"
@@ -87,7 +87,7 @@ function con() {
       INSTANCE_ID=$(echo "$SELECTED_INSTANCE" | awk '{print $1}')
       PRIVATE_IP=$(echo "$SELECTED_INSTANCE" | perl -pe 's|.*?([\.\d]{1,})\s+([\.\dnul]{1,})$|$1|')
       PUBLIC_IP=$(echo "$SELECTED_INSTANCE" | perl -pe 's|.*?([\.\d]{1,})\s+([\.\dnul]{1,})$|$2|')
-    
+
       THE_LIST="$PRIVATE_IP $THE_LIST"
     done
 
@@ -98,14 +98,14 @@ function con() {
 
     # We'll just use the fact that this is empty to skip trying it
     [ "$PUBLIC_IP" = "null" ] && PUBLIC_IP=""
-    
+
     # Basically, if ssh doesn't work we'll try ssm
     for the_ip in $PRIVATE_IP $PUBLIC_IP; do
       _ssh_into "$the_ip" && return
     done
 
-    echo "Trying: aws --region us-east-1 ssm start-session --target $INSTANCE_ID" 
-    [ -n "$INSTANCE_ID" ] && aws --region us-east-1 ssm start-session --target "$INSTANCE_ID" 
+    echo "Trying: aws --region us-east-1 ssm start-session --target $INSTANCE_ID"
+    [ -n "$INSTANCE_ID" ] && aws --region us-east-1 ssm start-session --target "$INSTANCE_ID"
   fi
 }
 
