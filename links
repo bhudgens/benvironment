@@ -17,8 +17,17 @@ function _getClusterConfigsAndServices() {
 }
 
 function _tinyUrl() {
-  local url=$(python3 -c "import urllib.parse; print(urllib.parse.quote_plus('$1'))");
-  curl -sLo- "http://tny.im/yourls-api.php?action=shorturl&format=simple&url=$url"
+  local url="$1"
+  local scrubbedUrl=$(python3 -c "import urllib.parse; print(urllib.parse.quote_plus('$url'))");
+  local tiny=$(curl -sLo- "http://tny.im/yourls-api.php?action=shorturl&format=simple&url=$scrubbedUrl")
+
+  # The tiny url thing has conservative limits; if we blow 'em stop using it
+  if echo "$tiny" | grep "Slow down please" > /dev/null; then
+    false
+  else
+    echo "$tiny"
+  fi
+
 }
 
 function links() {
@@ -26,6 +35,8 @@ function links() {
   local search="$1"
   local everything=$(_getClusterConfigsAndServices)
   local onlyClusterAndService=$(echo "$everything" | cut -f1,2 -d " ")
+  local THROTTLED=""
+
   local table="Cluster Service"$'\n'"$onlyClusterAndService"
   table=$(echo "$table" | column -s' ' -t)
   IFS=$'\n'
@@ -42,15 +53,29 @@ function links() {
     local sumoServiceDashboard=$(echo "$everything" | egrep "^$cluster\s+$service\s+" | awk '{print $6}')
     local ECSService=$(echo "$everything" | egrep "^$cluster\s+$service\s+" | awk '{print $7}')
     local githubOrders=$(echo "$everything" | egrep "^$cluster\s+$service\s+" | awk '{print $8}')
+
+    # Handle tinyurl limits
+    if [ -z "$THROTTLED" ]; then
+      local sumoClusterLink=$(_tinyUrl "$sumoClusterDashboard")
+      [ -z "$sumoClusterLink" ] && THROTTLED=yes
+      local sumoServiceLink=$(_tinyUrl "$sumoServiceDashboard")
+      [ -z "$sumoServiceLink" ] && THROTTLED=yes
+    fi
+
+    if [ -n "$THROTTLED" ]; then
+      local sumoClusterLink="$sumoClusterDashboard"
+      local sumoServiceLink="$sumoServiceDashboard"
+    fi
+
     echo -e "${white}${cluster} | ${service}${end}"
     echo -e "
       ${blue}CC Watcher | ${yellow}$ccWatcherLink${end}
       ${blue}ECS Cluster | ${yellow}$ECSCluster${end}
-      ${blue}Sumo Cluster | ${yellow}$(_tinyUrl "$sumoClusterDashboard")${end}
+      ${blue}Sumo Cluster | ${yellow}$sumoClusterLink${end}
       ${blue}Github | ${yellow}$gitRepo${end}
       ${blue}Healthcheck | ${yellow}$healthcheck${end}
       ${blue}Deploy Logs | ${yellow}$deployLogs${end}
-      ${blue}Sumo Service | ${yellow}$(_tinyUrl $sumoServiceDashboard)${end}
+      ${blue}Sumo Service | ${yellow}$sumoServiceLink${end}
       ${blue}ECS Service | ${yellow}$ECSService${end}
       ${blue}Orders File | ${yellow}$githubOrders${end}
     " | column -s"|" -t
