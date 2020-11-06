@@ -62,6 +62,6 @@ function links() {
   # --
   # We'll update our links passively at the end which will be fine
   # -most- of the time
-  _pushd "$GDS_REPO_DIR"; 2>&1 git pull > /dev/null; _popd
+  _pushd "$GDS_REPO_DIR"; 2>&1 /usr/bin/git pull > /dev/null; _popd
 }
 
