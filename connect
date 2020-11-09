@@ -56,7 +56,7 @@ function _ssh_into() {
   echo "Connecting to ${1}"
   for user in admiral ubuntu captain ec2-user; do
     echo "Trying: ssh ${user}@${ip}"
-    if ssh -o ConnectTimeout=1 "${user}@${ip}" echo 2> /dev/null; then
+    if ssh -o ConnectTimeout=3 "${user}@${ip}" echo 2> /dev/null; then
       ssh "${user}@${ip}"
       return
     fi
