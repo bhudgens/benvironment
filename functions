@@ -280,6 +280,8 @@ ccd() {
     echo "$CHANGE_TO"
     cd $CHANGE_TO
     [ -d "./.git" ] && git status -s
+    CHECK=$(git diff $(git remote | head -n 1)/$(git branch --show-current) 2> /dev/null)
+    [ $? -eq 0 ] && [ -n "$CHECK" ] && echo -e "   ${red}Needs Push${end}"
   done
   cd ${CURRENT_DIR}
 }
@@ -305,7 +307,7 @@ ccd_clean() {
 
     # Make sure all changes have been pushed to our 'source'
     unset CHECK
-    CHECK=$(git diff)
+    CHECK=$(git diff $(git remote | head -n 1)/$(git branch --show-current) 2> /dev/null)
     if [ $? -ne 0 ] || [ -n "$CHECK" ]; then
       echo "You still need to push your changes in $CHANGE_TO"
       continue
