@@ -21,6 +21,10 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   apt_get_install "lua5.3" lua
   apt_get_install "liblua5.3-dev" lua
 
+  if [ ! -f "/usr/bin/lua" ] \
+  && [ -f "/usr/bin/lua5.3" ]; then
+    ln -s "/usr/bin/lua5.3" "/usr/bin/lua"
+  fi
   # These two collide right now so this is temporary.  See issue below
   # apt_get_install bat batcat
   # apt_get_install ripgrep rg
@@ -126,7 +130,7 @@ if [ -f /usr/local/bin/prettyping ]; then
 fi
 
 if _which locale-gen \
-&& ! grep 'en_US.UTF-8' /etc/default/locale > /dev/null; 
+&& ! grep 'en_US.UTF-8' /etc/default/locale > /dev/null;
 then
   eval "$SUDO locale-gen 'en_US.UTF-8'"
   eval "$SUDO update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8"
