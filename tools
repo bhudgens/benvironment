@@ -29,7 +29,7 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   # apt_get_install bat batcat
   # apt_get_install ripgrep rg
   # Fixing Bug: https://github.com/sharkdp/bat/issues/938#issuecomment-646745610
-  if ! _which batcat \
+  if (! _which batcat && ! _which bat) \
   || ! _which rg; then
     eval "$SUDO apt-get install -o Dpkg::Options::='--force-overwrite' -y bat ripgrep"
   fi
