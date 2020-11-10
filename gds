@@ -20,7 +20,7 @@ export GDS_CODEPIPELINES_CACHE="$GDS_HELPER_CACHE_DIR/.codepipelines"
 
 function _updateCodePipelineCache() {
   aws --region us-east-1 codepipeline list-pipelines > "$GDS_CODEPIPELINES_CACHE.tmp"
-  mv "$GDS_CODEPIPELINES_CACHE.tmp" "$GDS_CODEPIPELINES_CACHE"
+  [ $? -eq 0 ] && mv "$GDS_CODEPIPELINES_CACHE.tmp" "$GDS_CODEPIPELINES_CACHE"
 }
 
 function _getCodePipelines() {
