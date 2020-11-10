@@ -99,13 +99,14 @@ function con() {
     # We'll just use the fact that this is empty to skip trying it
     [ "$PUBLIC_IP" = "null" ] && PUBLIC_IP=""
 
+    echo "Trying: aws --region us-east-1 ssm start-session --target $INSTANCE_ID"
+    [ -n "$INSTANCE_ID" ] && aws --region us-east-1 ssm start-session --target "$INSTANCE_ID" && return
+
     # Basically, if ssh doesn't work we'll try ssm
     for the_ip in $PRIVATE_IP $PUBLIC_IP; do
       _ssh_into "$the_ip" && return
     done
 
-    echo "Trying: aws --region us-east-1 ssm start-session --target $INSTANCE_ID"
-    [ -n "$INSTANCE_ID" ] && aws --region us-east-1 ssm start-session --target "$INSTANCE_ID"
   fi
 }
 
