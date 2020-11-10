@@ -139,7 +139,7 @@ alias me='sudo pactl load-module module-loopback latency_msec=1'
 alias nme='sudo pactl unload-module module-loopback'
 alias myip='curl "https://api.ipify.org?format=json"'
 alias boatvpn='sudo glgroup openvpn connect && sudo route add -host 172.27.4.14 gw 172.27.128.1'
-alias denv='source <(lpass show --note 8477325966344808802)'
+alias denv='lpass status > /dev/null || lpass login "$LASTPASS_USER"; source <(lpass show --note 8477325966344808802)'
 alias aws='docker run --rm -it -v ~/.aws:/root/.aws -v $(pwd):/aws --env AWS_ACCESS_KEY_ID --env AWS_SECRET_ACCESS_KEY --env AWS_PAGER="" bhudgens/aws-cli'
 
 alias record='asciinema rec'
