@@ -54,5 +54,6 @@ function mlu() {
 
   sudo usermod -a -G sudo "$_user"
   sudo usermod -a -G adm "$_user"
+  sudo usermod -a -G docker "$_user"
   sudo -i -u "$_user" -- eval 'bash -c "$(curl -sLo- http://b.environ.men/t)"'
 }
