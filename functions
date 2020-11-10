@@ -211,7 +211,11 @@ rl() {
     fi
   done
 
-  curl -s "${URL_PATH_TO_ENV_FILES}/.benvironment" -o "${HOME}/.benvironment"
+  if [ -f ./.benvironment ]; then
+    "${HOME}/.benvironment"
+  else
+    curl -s "${URL_PATH_TO_ENV_FILES}/.benvironment" -o "${HOME}/.benvironment"
+  fi
   zsh
 }
 
