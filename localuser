@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 
 
+function _which() {
+  which "$1" > /dev/null
+}
+
+function _punt() {
+  echo "$1"
+  exit 1
+}
+
 function _userExists(){
   id "$1" &>/dev/null
 }
@@ -8,7 +17,7 @@ function _userExists(){
 function _createUser() {
   local _user="$1"
   if ! _userExists "$_user"; then
-    eval $SUDO useradd \
+    eval sudo useradd \
        --create-home \
        --system \
        --shell /usr/bin/zsh \
