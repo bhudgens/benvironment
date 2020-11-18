@@ -1,0 +1,24 @@
+if ! which bat > /dev/null; then
+  curl -sLo /tmp/batcat.deb 'https://github.com/sharkdp/bat/releases/download/v0.16.0/bat_0.16.0_amd64.deb'
+  sudo dpkg --install /tmp/batcat.deb
+fi
+
+if ! which rg > /dev/null; then
+  sudo snap install ripgrep --classic 
+fi
+
+if node --version | grep -q 'v8'; then
+  sudo bash -c "$(curl -sLo- https://deb.nodesource.com/setup_14.x)"
+  sudo apt-get update -y
+  sudo apt-get install -y nodejs build-essential gcc g++ make
+fi
+
+if ! vim --version | head -n 1 | grep -q 8.2; then
+  sudo add-apt-repository ppa:jonathonf/vim
+  sudo apt update
+  sudo apt install vim
+fi
+
+
+
+
