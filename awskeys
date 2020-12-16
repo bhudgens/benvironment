@@ -141,7 +141,7 @@ function _login() {
   ######################################################################################
   # CLI Command: create-token
   #
-  # Generates an actual access token after the user logs in. We were sent
+  # Generates an access token after the user logs in. We were sent
   # the appropriate pulse to check for the key in the previous step so
   # we poll AWS until the user logs in. Response object is:
   # {
@@ -175,8 +175,8 @@ function _login() {
 #
 # The process to update the roles per account takes a bit of time
 # and we do not do it very often so I'm exporting this as a unique
-# command. It will automatically be run if `keys` is call for the 
-# first time. Essentially we ask AWS for an account list and then
+# command. It will automatically be run if `keys` is called the 
+# first time. We ask AWS for an account list and then
 # a list of roles for each account.
 ######################################################################################
 function updateRolesCache() {
@@ -202,11 +202,13 @@ function updateRolesCache() {
 ######################################################################################
 # Function: keys
 #
-# The process to update the roles per account takes a bit of time
-# and we do not do it very often so I'm exporting this as a unique
-# command. It will automatically be run if `keys` is call for the 
-# first time. Essentially we ask AWS for an account list and then
-# a list of roles for each account.
+# The primary export is "keys".  Usage:
+#
+# keys [search]
+#
+# It takes an optional search as a defualt to fzf. The user is presented with
+# a list of roles and account. If they select the role, an ephemeral set of
+# keys from the SSO console are loaded into the user's environment.
 ######################################################################################
 function keys() {
   local search="$1"
@@ -226,7 +228,7 @@ function keys() {
   ACCOUNT_NAME=$(echo "$SELECTED_ACCOUNT" | perl -pe 's|(.*)\s+[a-z0-9-]+\s+\d+$|$1|i' | xargs)
 
   # The most likely reason this will fail is because the user needs to login
-  # again we I'm just going to assume things will work out or the user can
+  # again. I'm going to assume things will work out or the user can
   # CTRL-C outta the loop
   while ! CREDS=$(_aws sso get-role-credentials \
          --role-name "$ROLE_NAME" \
