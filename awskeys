@@ -1,0 +1,247 @@
+#! /usr/bin/env
+
+export AWS_REGION=${AWS_REGION:-"us-east-1"}
+export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-$AWS_REGION}
+
+SSO_START_URL=${SSO_START_URL:-"https://glgresearch.awsapps.com/start#/"}
+ACCOUNTS_AND_ROLES_CACHE_DIR="$HOME/run"
+AWS_ACCOUNTS_CACHE="$ACCOUNTS_AND_ROLES_CACHE_DIR/aws-accounts.json"
+ACCESS_TOKEN_CACHE="${XDG_RUNTIME_DIR:-/tmp}/.awsAccessToken"
+
+######################################################################################
+# Helpers
+######################################################################################
+
+# Wrap Key Snagging from JQ
+# ...sometimes we wanna make this noisy and it's
+#    easier to do it in one place
+function _getJsonKey() {
+  local json="$1"
+  local key="$2"
+  echo "$json" | jq -r ".$key" || exit 1
+}
+
+# Let's use docker for a consistent experience
+function _aws() {
+    # --env AWS_ACCESS_KEY_ID \
+    # --env AWS_SECRET_ACCESS_KEY \
+    # -v ~/.aws:/root/.aws \
+  [ -t 0 ] && USE_TTY=t
+  docker run \
+    -i${USE_TTY} \
+    --rm \
+    -v "$(pwd):/aws" \
+    --env AWS_REGION \
+    --env AWS_DEFAULT_REGION \
+    --env AWS_PAGER="" \
+    amazon/aws-cli "$@" 
+}
+
+# If there's an error just return empty
+function _getAwsAccountsJson() {
+  cat "$AWS_ACCOUNTS_CACHE" || echo "[]"
+}
+
+# If there's an error just return empty
+function _getAwsRolesJson() {
+  local accountId="$1"
+  cat "$ACCOUNTS_AND_ROLES_CACHE_DIR/aws-roles-$accountId.json" || echo "[]"
+}
+
+# Builds a pipe delimited table of "AccountName|Role|AccountID".
+# This will be what generally gets displayed to the user.
+function _getTable() {
+  echo "Account|Role|Account Id"
+  IFS=$'\n'
+  for accountid_and_name in $(_getAwsAccountsJson | jq -r '.[] | .accountId + "|" + .accountName'); do
+    accountId=$(echo $accountid_and_name | cut -f1 -d'|')
+    accountName=$(echo $accountid_and_name | cut -f2 -d'|')
+    for role in $(_getAwsRolesJson "$accountId" | jq -r '.[].roleName'); do
+      echo "$accountName|$role|$accountId"
+    done
+  done
+}
+
+# We're going to use our public ip address as an identifier
+# we'll snag an IP like 1.2.3.4 and return 1_2_3_4
+function _myIpWithoutDots() {
+  curl -s "https://api.ipify.org?format=json" \
+    | jq -r '.ip' \
+    | perl -pe 's|\.|_|g'
+}
+
+# Try to get our access Token from ramdrive. We'll use this to get
+# AWS creds
+function _getAccessToken() {
+  [ -f "$ACCESS_TOKEN_CACHE" ] && cat "$ACCESS_TOKEN_CACHE" | jq -r '.accessToken'
+}
+
+# We'll check for anything we are missing that would require
+# the user to login and update the cache again.
+function _weAreMissingSomething() {
+  [ ! -f "$AWS_ACCOUNTS_CACHE" ] \
+  || [ ! -f "$ACCESS_TOKEN_CACHE" ] \
+  || [ -z "$(jq -r '.accessToken' "$ACCESS_TOKEN_CACHE")" ]
+}
+
+function _login() {
+  ######################################################################################
+  # CLI Command: register-client
+  #
+  # Grabs a cliendId and clientSecret that get used by subsequent commands to
+  # identify this fella during the auth process. The shape of the JSON object
+  # looks like:
+  # {
+  #   "clientId": "",
+  #   "clientSecret": "",
+  #   "clientIdIssuedAt": 1608105941,
+  #   "clientSecretExpiresAt": 1615881941
+  # }
+  ######################################################################################
+  CLIENT_JSON=$(_aws sso-oidc register-client \
+                --client-name "$(_myIpWithoutDots)" \
+                --client-type public)
+
+  CLIENT_ID="$(_getJsonKey "$CLIENT_JSON" clientId)"
+  CLIENT_SECRET="$(_getJsonKey "$CLIENT_JSON" clientSecret)"
+
+  ######################################################################################
+  # CLI Command: start-device-authorization
+  #
+  # Grabs the URL intended for the user to login and provides a token that
+  # we will use to identify us for this session of an auth login. AWS
+  # provides an interval telling us how fast we can poll them to ask
+  # if the user has completed their auth sequence. The shape of the JSON
+  # object is:
+  # {
+  #   "deviceCode": "",
+  #   "userCode": "",
+  #   "verificationUri": "https://device.sso.us-east-1.amazonaws.com/",
+  #   "verificationUriComplete": "https://device.sso.us-east-1.amazonaws.com/?user_code=ABCD-EFGH",
+  #   "expiresIn": 600,
+  #   "interval": 1
+  # }
+  ######################################################################################
+  if ! DEVICE_TOKENS_JSON=$(_aws sso-oidc start-device-authorization \
+                        --client-id "$CLIENT_ID" \
+                        --client-secret "$CLIENT_SECRET" \
+                        --start-url "$SSO_START_URL"); then
+    echo -e "${red}Could not acquire device token"
+  fi
+
+  DEVICE_CODE="$(_getJsonKey "$DEVICE_TOKENS_JSON" deviceCode)"
+  POLL_INTERVAL="$(_getJsonKey "$DEVICE_TOKENS_JSON" interval)"
+  LOGIN_URL="$(_getJsonKey "$DEVICE_TOKENS_JSON" verificationUriComplete)"
+
+  echo -e "${green}You need to login:
+
+  ${yellow}$LOGIN_URL
+	"
+
+  ######################################################################################
+  # CLI Command: create-token
+  #
+  # Generates an actual access token after the user logs in. We were sent
+  # the appropriate pulse to check for the key in the previous step so
+  # we poll AWS until the user logs in. Response object is:
+  # {
+  #   "accessToken": "",
+  #   "tokenType": "Bearer",
+  #   "expiresIn": 28800
+  # }
+  ######################################################################################
+  COUNT=0
+  unset ONLY_ONCE
+  while ! _aws sso-oidc create-token \
+            --client-id "$CLIENT_ID" \
+            --client-secret "$CLIENT_SECRET" \
+            --grant-type "urn:ietf:params:oauth:grant-type:device_code" \
+            --device-code "$DEVICE_CODE" \
+            2> "/dev/null" \
+            1> "$ACCESS_TOKEN_CACHE"
+  do
+    [ -z "$ONLY_ONCE" ] && echo -e -n "${yellow}Waiting for authentication.." && ONLY_ONCE="done"
+    echo -e -n "${blue}$((++COUNT))"
+    sleep "$POLL_INTERVAL"
+  done 
+
+  echo ""
+  echo ""
+  echo -e "${green}Login Success"
+}
+
+######################################################################################
+# Function: updateRolesCache
+#
+# The process to update the roles per account takes a bit of time
+# and we do not do it very often so I'm exporting this as a unique
+# command. It will automatically be run if `keys` is call for the 
+# first time. Essentially we ask AWS for an account list and then
+# a list of roles for each account.
+######################################################################################
+function updateRolesCache() {
+  local accessToken="$(_getAccessToken)"
+
+  echo -e "${green}Caching Accounts..."
+  [ -n "$ACCOUNTS_AND_ROLES_CACHE_DIR" ] && mkdir -p "$ACCOUNTS_AND_ROLES_CACHE_DIR"
+  _aws sso list-accounts --access-token "$accessToken" \
+    | jq '.accountList' \
+    2> /dev/null \
+    1> "$AWS_ACCOUNTS_CACHE" \
+  || (_login && updateRolesCache)
+
+  for accountId in $(cat "$AWS_ACCOUNTS_CACHE" | jq -r '.[].accountId'); do
+    echo -e "  ${blue}Caching Roles for account ${accountId}"
+    _aws sso list-account-roles --account-id "$accountId" --access-token "$accessToken" \
+      | jq '.roleList' \
+      2> /dev/null \
+      1> "$ACCOUNTS_AND_ROLES_CACHE_DIR/aws-roles-$accountId.json"
+  done
+}
+
+######################################################################################
+# Function: keys
+#
+# The process to update the roles per account takes a bit of time
+# and we do not do it very often so I'm exporting this as a unique
+# command. It will automatically be run if `keys` is call for the 
+# first time. Essentially we ask AWS for an account list and then
+# a list of roles for each account.
+######################################################################################
+function keys() {
+  local search="$1"
+
+  if _weAreMissingSomething; then
+    _login && updateRolesCache
+  fi
+
+  TABLE=$(_getTable | column -s'|' -t)
+  if ! SELECTED_ACCOUNT=$(echo "$TABLE" | fzf --layout=reverse --header-lines=1 ${search:+"-q $search"}); then
+    echo -e "${red}Cancelled"
+    return
+  fi
+
+  ROLE_NAME=$(echo "$SELECTED_ACCOUNT" | perl -pe 's|.*\s+([a-z0-9-]+)\s+\d+$|$1|i')
+  ACCOUNT_ID=$(echo "$SELECTED_ACCOUNT" | perl -pe 's|.*\s+[a-z0-9-]+\s+(\d+)$|$1|i')
+  ACCOUNT_NAME=$(echo "$SELECTED_ACCOUNT" | perl -pe 's|(.*)\s+[a-z0-9-]+\s+\d+$|$1|i' | xargs)
+
+  # The most likely reason this will fail is because the user needs to login
+  # again we I'm just going to assume things will work out or the user can
+  # CTRL-C outta the loop
+  while ! CREDS=$(_aws sso get-role-credentials \
+         --role-name "$ROLE_NAME" \
+         --account-id "$ACCOUNT_ID" \
+         --access-token "$(_getAccessToken)" \
+         | jq '.roleCredentials'); do
+    _login
+  done
+
+  export AWS_ACCESS_KEY_ID=$(echo "$CREDS" | jq -r '.accessKeyId')
+  export AWS_SECRET_ACCESS_KEY=$(echo "$CREDS" | jq -r '.secretsAccessKey')
+  export AWS_SESSION_TOKEN=$(echo "$CREDS" | jq -r '.sessionToken')
+
+  echo -e "${green}Keys Loaded..."
+
+  [ -z "$OLD_PROMPT" ] && OLD_PROMPT="$PROMPT"
+  PROMPT="AWS:$ACCOUNT_NAME(${ROLE_NAME})|$OLD_PROMPT"
+}
