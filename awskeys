@@ -78,10 +78,15 @@ function _getAccessToken() {
 
 # We'll check for anything we are missing that would require
 # the user to login and update the cache again.
-function _weAreMissingSomething() {
-  [ ! -f "$AWS_ACCOUNTS_CACHE" ] \
-  || [ ! -f "$ACCESS_TOKEN_CACHE" ] \
+function _weAreMissingALoginToken() {
+  [ ! -f "$ACCESS_TOKEN_CACHE" ] \
   || [ -z "$(jq -r '.accessToken' "$ACCESS_TOKEN_CACHE")" ]
+}
+
+# We'll check for anything we are missing that would require
+# the user to login and update the cache again.
+function _weAreMissingAccountsCache() {
+  [ ! -f "$AWS_ACCOUNTS_CACHE" ]
 }
 
 function _login() {
@@ -213,8 +218,13 @@ function updateRolesCache() {
 function keys() {
   local search="$1"
 
-  if _weAreMissingSomething; then
-    _login && updateRolesCache
+  if _weAreMissingALoginToken; then
+    _login
+  fi
+
+  if _weAreMissingAccountsCache; then
+    echo -e "${yellow}Cache does not exist"
+    updateRolesCache
   fi
 
   TABLE=$(_getTable | column -s'|' -t)
