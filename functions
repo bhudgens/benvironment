@@ -907,18 +907,19 @@ purge_docker_everything () {
   docker network prune -f
 }
 
+function get_wiki_repo() {
+  local wikiRepo=$(git remote -v \
+                     | egrep 'origin.*push' \
+                     | awk '{print $2}' \
+                     | perl -pe 's|\.git$|\.wiki\.git|')
+
+  git clone "$wikiRepo" ../$(basename $PWD).wiki
+}
+
 
 ##########################################################
 ## XXX: Some sync help
 ##########################################################
-
-dr() {
-  CURRENT_DIR="$PWD/"
-  DEST_DIR=$(echo "$CURRENT_DIR" | perl -pe s'|$HOME/Dropbox.bak|$HOME/Dropbox|')
-  THE_CMD="rsync --dry-run --delete -ravP '$CURRENT_DIR' '$DEST_DIR'"
-  eval "$THE_CMD"
-  echo "$THE_CMD"
-}
 
 function check_deploy() {
   local app="$1"
@@ -927,4 +928,3 @@ function check_deploy() {
     echo "Machine: $machine | Container: $CONTAINER"
   done
 }
-
