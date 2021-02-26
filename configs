@@ -15,7 +15,7 @@ if [ ! -d "$HOME/.dotfiles" ]; then
 fi
 
 pushd "$HOME/.dotfiles" > /dev/null
-  git pull
+  2>&1 git pull > /dev/null
 popd
 
 for dotfile in .zshrc .tmux.conf; do
