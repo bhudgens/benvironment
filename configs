@@ -16,7 +16,7 @@ fi
 
 pushd "$HOME/.dotfiles" > /dev/null
   2>&1 git pull > /dev/null
-popd
+popd > /dev/null
 
 for dotfile in .zshrc .tmux.conf; do
   install_dot_file "$dotfile"
