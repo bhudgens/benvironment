@@ -47,7 +47,7 @@ function _getInstancesTable() {
     OUTPUT=$(cat "$INSTANCES_CACHE")
   fi
 
-  TABLE=$(echo "$OUTPUT" | column -s'^' -t)
+  INSTANCES_TABLE=$(echo "$OUTPUT" | column -s'^' -t)
 }
 
 
@@ -70,11 +70,11 @@ function _ssh_into() {
 
 function con() {
   local search="$1"
-  if _getInstancesTable "$search" && [ -n "$TABLE" ]; then
+  if _getInstancesTable "$search" && [ -n "$INSTANCES_TABLE" ]; then
     unset THE_LIST
     unset SELECTED_INSTANCES
     unset SELECTED_INSTANCE
-    SELECTED_INSTANCES=$(echo "$TABLE" | fzf --layout=reverse --header-lines=1 ${search:+"-q $search"})
+    SELECTED_INSTANCES=$(echo "$INSTANCES_TABLE" | fzf --layout=reverse --header-lines=1 ${search:+"-q $search"})
 
     if [ $? -gt 0 ]; then
       echo "User cancelled"
