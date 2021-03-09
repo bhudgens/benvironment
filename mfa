@@ -27,31 +27,26 @@ function _punt() {
   exit 1
 }
 
-function _sendMessage() {
-local account="$1"
-local code="$2"
+function _outputMFACode() {
+local code="$1"
 cat << EOF
 Code copied to your clipboard
 
-  Account: ${account}
   Code   : ${code}
 EOF
 }
 
 function mfa() {
-  LASTPASS_MFA_SECRETS_ID="${LASTPASS_MFA_SECRETS_ID:-3112380442678857043}"
+  _bwUnlock
 
-  _which lpass || _punt "You need to install the lpass cli"
-  _which oathtool || _punt "You need to install oathtool"
+  local header='Name|Id'
+  local list="$(bw list items | jq -r '.[] | select(.login.totp != null) | .name + "|" + .id')"
+  local table="$(echo ${header}$'\n'${list} | column -s'|' -t)"
 
-  MFA_SECRETS=$(lpass show --note "${LASTPASS_MFA_SECRETS_ID}")
-
-  select account in $(echo "${MFA_SECRETS}" | jq -cr 'keys[]'); do
-    local secret=$(echo "${MFA_SECRETS}" | jq -r ".${account}")
-    local code=$(oathtool -b --totp "${secret}")
-    _which pbcopy && echo -n "${code}" | pbcopy
-    _which xsel && echo -n "${code}" | xsel --clipboard --input
-    _sendMessage "${account}" "${code}"
-    break;
-  done
+  local selectedAccount=$(echo "$table" | fzf --layout=reverse --header-lines=1)
+  local id=$(echo $selectedAccount | perl -pe 's|.*(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})|$1|')
+  local code=$(bw get totp "$id")
+  _which pbcopy && echo -n "${code}" | pbcopy
+  _which xsel && echo -n "${code}" | xsel --clipboard --input
+  _outputMFACode "$code"
 }
