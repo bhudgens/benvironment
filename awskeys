@@ -23,18 +23,19 @@ function _getJsonKey() {
 
 # Let's use docker for a consistent experience
 function _aws() {
-    # --env AWS_ACCESS_KEY_ID \
-    # --env AWS_SECRET_ACCESS_KEY \
     # -v ~/.aws:/root/.aws \
   [ -t 0 ] && USE_TTY=t
   docker run \
     -i${USE_TTY} \
     --rm \
     -v "$(pwd):/aws" \
+    --env AWS_ACCESS_KEY_ID \
+    --env AWS_SECRET_ACCESS_KEY \
+    --env AWS_SESSION_TOKEN \
     --env AWS_REGION \
     --env AWS_DEFAULT_REGION \
     --env AWS_PAGER="" \
-    amazon/aws-cli "$@" 
+    bhudgens/aws-cli "$@" 
 }
 
 # If there's an error just return empty
