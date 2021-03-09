@@ -153,6 +153,6 @@ if ! echo $OSTYPE | grep -i "darwin"; then
   alias pbpaste='xsel --clipboard --output'
 fi
 
-alias prompt="export PROMPT='%{%f%b%k%}$(build_prompt)'"
+alias prompt="export PROMPT='%{%f%b%k%}\$(build_prompt) '"
 
 # All finished
