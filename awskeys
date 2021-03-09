@@ -250,7 +250,7 @@ function keys() {
   done
 
   export AWS_ACCESS_KEY_ID=$(echo "$CREDS" | jq -r '.accessKeyId')
-  export AWS_SECRET_ACCESS_KEY=$(echo "$CREDS" | jq -r '.secretsAccessKey')
+  export AWS_SECRET_ACCESS_KEY=$(echo "$CREDS" | jq -r '.secretAccessKey')
   export AWS_SESSION_TOKEN=$(echo "$CREDS" | jq -r '.sessionToken')
 
   echo -e "${green}Keys Loaded..."
