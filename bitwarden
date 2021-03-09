@@ -28,3 +28,4 @@ function bwGetNote() {
 
   bw get item "$note" | jq -r ".notes"
 }
+
