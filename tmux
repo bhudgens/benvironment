@@ -4,11 +4,9 @@ function ide() {
     :
   fi
 
-  set -x
   tmux split-window -h
   tmux split-window -v
   tmux split-window -h
   tmux select-layout main-horizontal
-  tmux resize-pane -D 25
-  set +x
+  tmux resize-pane -D 10
 }
