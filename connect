@@ -4,52 +4,179 @@
 #############################################################################
 
 # The request from amazon
-INSTANCES_JSON="$HOME/run/ec2-instances.json"
+EC2_INSTANCES_DETAILS_JSON="$HOME/run/ec2-instances.json"
 # The formatting takes a bit so lets cache that too
-INSTANCES_CACHE="$HOME/run/ec2-instances.cache"
+FZF_TABLE_CACHE="$HOME/run/ec2-instances.cache"
+# All ECS Clusters by ARN
+ECS_CLUSTERS_CACHE="$HOME/run/ecs-clusters.cache"
+# All ECS Instances by ARN
+ECS_INSTANCES_CACHE="$HOME/run/ecs-instances.cache"
+# All Task Arns
+ECS_TASKS_CACHE="$HOME/run/ecs-tasks.cache"
+# A directory with a bunch of JSON about gds clusters
+
 
 function _loggedIntoAwsCli() {
   aws sts get-caller-identity > /dev/null 2> /dev/null
 }
 
-function _getInstancesTable() {
-  local search="$1"
-
-  # Skip all this if we already have the cache
-  if [ ! -f "$INSTANCES_JSON" ]; then
-    ! _loggedIntoAwsCli && echo "Not logged into AWS CLI" && return
-    echo "Caching All EC2 Instance Info..."
-    aws --region us-east-1 ec2 describe-instances > "$INSTANCES_JSON"
-  fi
-
-  if [ ! -f "$INSTANCES_CACHE" ]; then
-    echo "Formatting for Search (Takes a bit the first time)..."
-    # Using ^ as a delim since | is used a lot in practice
-    # The below acts as a 'header'
-    printf -v OUTPUT 'InstanceId^Name^PrivateIp^PublicIp'
-
-    # Now lets make it fzf friendly
-    for instance_id in $(jq -r '.Reservations[].Instances[].InstanceId' "$INSTANCES_JSON"); do
-      INSTANCE=$(jq ".Reservations[].Instances[] | select(.InstanceId == \"$instance_id\")" "$INSTANCES_JSON")
-      # Not all instances will have a name so we set a default
-      NAME=$(echo "$INSTANCE" | jq -r '.Tags[] | select(.Key == "Name") | .Value')
-      [ -z "$NAME" ] && NAME="Not Set"
-      # The rest of this is normal
-      INSTANCE_ID=$(echo "$INSTANCE" | jq -r '.InstanceId')
-      PUBLIC_IP_ADDRESS=$(echo "$INSTANCE" | jq -r '.PublicIpAddress')
-      PRIVATE_IP_ADDRESS=$(echo "$INSTANCE" | jq -r '.PrivateIpAddress')
-      printf -v OUTPUT "$OUTPUT"'\n'"$INSTANCE_ID^$NAME^$PRIVATE_IP_ADDRESS^$PUBLIC_IP_ADDRESS"
-    done
-
-    # And remember our work for next time
-    echo "$OUTPUT" > "$INSTANCES_CACHE"
-  else
-    OUTPUT=$(cat "$INSTANCES_CACHE")
-  fi
-
-  INSTANCES_TABLE=$(echo "$OUTPUT" | column -s'^' -t)
+function _run_lots_of_commands_at_once() {
+  local commandFile="$1"
+  parallel --progress < "$commandFile"
+  # rm "$commandFile"
 }
 
+function _cacheAllECSClusters() {
+  aws --region us-east-1 ecs list-clusters \
+    | jq -r '.clusterArns[] | match("arn:[\\w\\-]+:ecs:[\\w\\-]+:\\d+:cluster\\/v\\d+-[ipsj]\\d+").string' \
+    > "$ECS_CLUSTERS_CACHE"
+}
+
+function _cacheAllECSInstances() {
+  [ -f "$ECS_INSTANCES_CACHE" ] && rm "$ECS_INSTANCES_CACHE"
+
+  local _commands=$(mktemp)
+  for clusterArn in $(cat "$ECS_CLUSTERS_CACHE"); do
+    # clusterArn^InstanceArn
+    local _jqRecipe='.containerInstanceArns[] | "'$clusterArn^'" + .'
+    echo "aws --region us-east-1 ecs list-container-instances --cluster '$clusterArn' | jq -r '$_jqRecipe' >> '$ECS_INSTANCES_CACHE'" >> ${_commands};
+  done
+  _run_lots_of_commands_at_once "$_commands"
+}
+
+function _cacheAllECSInstanceDetails() {
+  setopt localoptions rmstarsilent
+  local gdsClusterInstanceDetailsCacheDir="$HOME/run/gds-cluster-instance-details-cache"
+  mkdir -p "${gdsClusterInstanceDetailsCacheDir}"
+  rm -rf "${gdsClusterInstanceDetailsCacheDir}"/*
+
+  local _commands=$(mktemp)
+  while IFS=^ read -r clusterArn instanceArn; do
+    local fileName=$(echo "$instanceArn" | perl -pe 's|arn.*/(.*)$|$1|')
+    echo "aws --region us-east-1 ecs describe-container-instances --cluster '$clusterArn' --container-instances '$instanceArn' >> '$gdsClusterInstanceDetailsCacheDir/$fileName'" >> ${_commands}
+  done < "$ECS_INSTANCES_CACHE"
+  _run_lots_of_commands_at_once "${_commands}"
+}
+
+function _awsWithoutTTY() {
+  docker run --rm -v ~/.aws:/root/.aws -v $(pwd):/aws --env AWS_SESSION_TOKEN --env AWS_ACCESS_KEY_ID --env AWS_SECRET_ACCESS_KEY --env AWS_PAGER="" bhudgens/aws-cli "$@"
+}
+
+# get a local copy of the ECS instances
+function _cacheAllTasks() {
+  [ -f "$ECS_TASKS_CACHE" ] && rm "$ECS_TASKS_CACHE"
+
+  local _commands=$(mktemp)
+  for clusterArn in $(cat "$ECS_CLUSTERS_CACHE"); do
+    # clusterArn^InstanceArn
+    # This cleans up some nasty characters coming from AWS also
+    local _jqRecipe='.taskArns[] | "'$clusterArn^'" + .'
+    echo "aws --region 'us-east-1' ecs list-tasks --cluster '$clusterArn' | jq -r '$_jqRecipe' | xargs | perl -pe 's| |\\\n|g' >> '$ECS_TASKS_CACHE'" >> ${_commands};
+  done
+  _run_lots_of_commands_at_once "$_commands"
+}
+
+function _cacheAllECSTaskDetails() {
+  setopt localoptions rmstarsilent
+  local gdsClusterTaskDetailsCache="$HOME/run/gds-cluster-task-details-cache"
+  mkdir -p "${gdsClusterTaskDetailsCache}"
+  rm -rf "${gdsClusterTaskDetailsCache}"/* 2> /dev/null
+
+  local _commands=$(mktemp)
+  IFS=$'\n'
+  while IFS=^ read -r clusterArn taskArn; do
+    if [ -n "$clusterArn" ] && [ -n "$taskArn" ]; then
+      local fileName=$(echo "$taskArn" | perl -pe 's|arn.*/(.*)$|$1|')
+      echo "aws --region us-east-1 ecs describe-tasks --cluster '$clusterArn' --task '$taskArn' >> '$gdsClusterTaskDetailsCache/$fileName'" >> ${_commands}
+    fi
+  done < "$ECS_TASKS_CACHE"
+  _run_lots_of_commands_at_once "${_commands}"
+}
+
+function _getContainerInstanceDetailsById() {
+  local instanceId="$1"
+  local gdsClusterInstanceDetailsCacheDir="$HOME/run/gds-cluster-instance-details-cache"
+  [ -f "${gdsClusterInstanceDetailsCacheDir}/${instanceId}" ] && cat "${gdsClusterInstanceDetailsCacheDir}/${instanceId}"
+}
+
+function _addTaskDefinitionDetailToFZFTable() {
+  local taskDetailsId="$1"
+  local gdsClusterTaskDetailsCache="$HOME/run/gds-cluster-task-details-cache"
+
+  if [ -f "$gdsClusterTaskDetailsCache/$taskDetailsId" ]; then
+    local cluster=$(jq -r '.tasks[0].group' "$gdsClusterTaskDetailsCache/$taskDetailsId" \
+      | cut -f'2' -d':' \
+      | cut -f'1' -d'_' \
+      | cut -f'2' -d'-')
+
+    local service=$(jq -r '.tasks[0].group' "$gdsClusterTaskDetailsCache/$taskDetailsId" \
+      | cut -f'2' -d':' \
+      | cut -f'2' -d'_')
+
+    local containerInstanceId=$(jq -r '.tasks[0].containerInstanceArn' "$gdsClusterTaskDetailsCache/$taskDetailsId" \
+      | perl -pe 's|.*/(.*)$|$1|' )
+
+    local ec2InstanceId=$(_getContainerInstanceDetailsById "$containerInstanceId" \
+      | jq -r '.containerInstances[0].ec2InstanceId')
+
+    local ec2InstanceIp=$(jq -r ".Reservations[].Instances[] | select(.InstanceId == \"$ec2InstanceId\") | .PrivateIpAddress" "$EC2_INSTANCES_DETAILS_JSON")
+  fi
+
+  if [ -z "$service" ] \
+  || [ -z "$cluster" ] \
+  || [ -z "$ec2InstanceId" ] \
+  || [ -z "$ec2InstanceIp" ]; then
+    return
+  fi
+  echo "$ec2InstanceId^$ec2InstanceIp^$service^$cluster" >> "$FZF_TABLE_CACHE"
+}
+
+function _addAllTaskDefinitionDetailsToFZFTable() {
+  local gdsClusterTaskDetailsCache="$HOME/run/gds-cluster-task-details-cache"
+
+  pushd "$gdsClusterTaskDetailsCache" > /dev/null
+
+  for taskDetailsId in $(ls); do
+    (_addTaskDefinitionDetailToFZFTable "$taskDetailsId" &)
+  done
+
+  wait
+
+  popd > /dev/null
+}
+
+function _addEC2InstanceDetailsToFZFTable() {
+  local keysToSkip=""
+  for keyToSkip in "aws:autoscaling:groupName" \
+                   "Headquarters" \
+                   "Branch" \
+                   "aws:cloud9:environment" \
+                   "BusinessUnit" \
+                   "Zendesk" \
+                   "ZenDesk" \
+                   "Description" \
+                   "aws:cloudformation:logical-id" \
+                   "aws:cloudformation:stack-id" \
+                   "aws:cloudformation:stack-name"
+  do
+    keysToSkip+=" and .Key != \"$keyToSkip\""
+  done
+
+  local removeOuterNoise='.Reservations[].Instances[] '
+  local nameFromTags='(.Tags[]? | select(.Key != "AmazonECSManaged" '$keysToSkip') | .Key + "|" + .Value) as $name | select($name != "") | select(.PrivateIpAddress != null or .PrivateIpAddress != "")'
+  local format='.InstanceId + "^" + .PrivateIpAddress + "^" + $name + "^N/A"'
+
+  jq -r "$removeOuterNoise | $nameFromTags | $format" "$EC2_INSTANCES_DETAILS_JSON" | sort | uniq >> "$FZF_TABLE_CACHE"
+}
+
+function _cacheEC2InstancesDetails() {
+  aws --region us-east-1 ec2 describe-instances > "$EC2_INSTANCES_DETAILS_JSON"
+}
+
+function _resetFZFTableCache() {
+  local headers="^InstanceId^PrivateIp^Name^Cluster"
+  echo "$headers" > "$FZF_TABLE_CACHE"
+}
 
 function _ssh_into() {
   local ip="$1"
@@ -66,52 +193,96 @@ function _ssh_into() {
   false
 }
 
-
+function _getColumnVersionOfCacheFile() {
+  cat "$FZF_TABLE_CACHE" | column -s'^' -t
+}
 
 function con() {
   local search="$1"
-  if _getInstancesTable "$search" && [ -n "$INSTANCES_TABLE" ]; then
-    unset THE_LIST
-    unset SELECTED_INSTANCES
-    unset SELECTED_INSTANCE
-    SELECTED_INSTANCES=$(echo "$INSTANCES_TABLE" | fzf --layout=reverse --header-lines=1 ${search:+"-q $search"})
+  local selectedInstances=""
 
-    if [ $? -gt 0 ]; then
-      echo "User cancelled"
-      return
-    fi
+  set -x
+  selectedInstances=$(_getColumnVersionOfCacheFile | fzf --layout=reverse --header-lines=1 ${search:+"-q $search"})
 
-    OLD="$IFS"
-    IFS=$'\n'
-    for SELECTED_INSTANCE in $(echo "$SELECTED_INSTANCES"); do
-      INSTANCE_ID=$(echo "$SELECTED_INSTANCE" | awk '{print $1}')
-      PRIVATE_IP=$(echo "$SELECTED_INSTANCE" | perl -pe 's|.*?([\.\d]{1,})\s+([\.\dnul]{1,})$|$1|')
-      PUBLIC_IP=$(echo "$SELECTED_INSTANCE" | perl -pe 's|.*?([\.\d]{1,})\s+([\.\dnul]{1,})$|$2|')
-
-      THE_LIST="$PRIVATE_IP $THE_LIST"
-    done
-
-    if [ $(echo "$SELECTED_INSTANCES" | wc -l) -gt 1 ]; then
-      eval connect_to_all_machines $THE_LIST
-      return
-    fi
-
-    # We'll just use the fact that this is empty to skip trying it
-    [ "$PUBLIC_IP" = "null" ] && PUBLIC_IP=""
-
-    echo "Trying: aws --region us-east-1 ssm start-session --target $INSTANCE_ID"
-    [ -n "$INSTANCE_ID" ] && aws --region us-east-1 ssm start-session --target "$INSTANCE_ID" && return
-
-    # Basically, if ssh doesn't work we'll try ssm
-    for the_ip in $PRIVATE_IP $PUBLIC_IP; do
-      _ssh_into "$the_ip" && return
-    done
-
+  if [ $? -gt 0 ]; then
+    echo "User cancelled"
+    return
   fi
+
+  local ipAddresses=""
+  for selectedInstance in $(echo "$selectedInstances"); do
+    local ipAddress=$(echo $selectedInstance | awk '{print $2}')
+    ipAddresses+=" $ipAddress"
+  done
+
+  if [ $(echo "$selectedInstances" | wc -l) -gt 1 ]; then
+    eval connect_to_all_machines $ipAddresses
+    return
+  fi
+
+  local instanceId=$(echo $selectedInstances | awk '{print $1}')
+  local privateIp=$(echo $selectedInstances | awk '{print $2}')
+
+  echo "Trying: aws --region us-east-1 ssm start-session --target $instanceId"
+  [ -n "$instanceId" ] && aws --region us-east-1 ssm start-session --target "$instanceId" && return
+
+  # If SSM Failes, let's try to ssh
+  _ssh_into "$privateIp" && return
+  set +x
+}
+
+function _update() {
+  CURRENT_TASK="$1"
+
+  echo -e "${blue}############################################################"
+  echo -e "${blue}## ${white}$CURRENT_TASK"
+}
+
+function _done() {
+  echo -e "${blue}## ${white}$CURRENT_TASK${green}...complete"
+  echo -e "${blue}############################################################"
 }
 
 function con_refresh() {
-  rm "${INSTANCES_JSON}"
-  rm "${INSTANCES_CACHE}"
-  con "$@"
+
+  _update "Verifying You Are Logged In"
+  if ! _loggedIntoAwsCli; then
+    echo -e "${red}You need to login to AWS CLI"
+    return
+  fi
+  _done
+
+  _update "Resetting FZF Table Cache"
+  _resetFZFTableCache
+  _done
+
+  _update "Cache All Instance Details"
+  _cacheEC2InstancesDetails
+  _done
+
+  _update "Add All Instance Details to FZF Table"
+  _addEC2InstanceDetailsToFZFTable
+  _done
+
+  _update "Caching All ECS Clusters"
+  _cacheAllECSClusters
+  _done
+
+  _update "Caching All ECS Instances"
+  _cacheAllECSInstances
+  _done
+
+  _update "Caching All Task Arns"
+  _cacheAllTasks
+  _done
+
+  _update "Caching All Task Details"
+  _cacheAllECSTaskDetails
+  _done
+
+  _update "Adding Task Details to FZF Table"
+  _addAllTaskDefinitionDetailsToFZFTable
+  _done
+
+  wait
 }
