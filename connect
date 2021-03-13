@@ -201,7 +201,6 @@ function con() {
   local search="$1"
   local selectedInstances=""
 
-  set -x
   selectedInstances=$(_getColumnVersionOfCacheFile | fzf --layout=reverse --header-lines=1 ${search:+"-q $search"})
 
   if [ $? -gt 0 ]; then
@@ -228,7 +227,6 @@ function con() {
 
   # If SSM Failes, let's try to ssh
   _ssh_into "$privateIp" && return
-  set +x
 }
 
 function _update() {
