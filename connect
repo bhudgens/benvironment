@@ -167,7 +167,7 @@ function _addEC2InstanceDetailsToFZFTable() {
   local nameFromTags='(.Tags[]? | select(.Key != "AmazonECSManaged" '$keysToSkip') | .Key + "|" + .Value) as $name | select($name != "") | select(.PrivateIpAddress != null and .PrivateIpAddress != "")'
   local format='.InstanceId + "^" + .PrivateIpAddress + "^N/A^" + $name'
 
-  jq -r "$removeOuterNoise | $nameFromTags | $format" "$EC2_INSTANCES_DETAILS_JSON" | sort | uniq >> "$FZF_TABLE_CACHE"
+  jq -r "$removeOuterNoise | $nameFromTags | $format" "$EC2_INSTANCES_DETAILS_JSON" >> "$FZF_TABLE_CACHE"
 }
 
 function _cacheEC2InstancesDetails() {
