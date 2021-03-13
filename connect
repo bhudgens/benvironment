@@ -128,7 +128,8 @@ function _addTaskDefinitionDetailToFZFTable() {
   || [ -z "$ec2InstanceIp" ]; then
     return
   fi
-  echo "$ec2InstanceId^$ec2InstanceIp^$service^$cluster" >> "$FZF_TABLE_CACHE"
+
+  echo "$ec2InstanceId^$ec2InstanceIp^$cluster^$service" >> "$FZF_TABLE_CACHE"
 }
 
 function _addAllTaskDefinitionDetailsToFZFTable() {
@@ -163,8 +164,8 @@ function _addEC2InstanceDetailsToFZFTable() {
   done
 
   local removeOuterNoise='.Reservations[].Instances[] '
-  local nameFromTags='(.Tags[]? | select(.Key != "AmazonECSManaged" '$keysToSkip') | .Key + "|" + .Value) as $name | select($name != "") | select(.PrivateIpAddress != null or .PrivateIpAddress != "")'
-  local format='.InstanceId + "^" + .PrivateIpAddress + "^" + $name + "^N/A"'
+  local nameFromTags='(.Tags[]? | select(.Key != "AmazonECSManaged" '$keysToSkip') | .Key + "|" + .Value) as $name | select($name != "") | select(.PrivateIpAddress != null and .PrivateIpAddress != "")'
+  local format='.InstanceId + "^" + .PrivateIpAddress + "^N/A^" + $name'
 
   jq -r "$removeOuterNoise | $nameFromTags | $format" "$EC2_INSTANCES_DETAILS_JSON" | sort | uniq >> "$FZF_TABLE_CACHE"
 }
@@ -174,7 +175,7 @@ function _cacheEC2InstancesDetails() {
 }
 
 function _resetFZFTableCache() {
-  local headers="^InstanceId^PrivateIp^Name^Cluster"
+  local headers="^InstanceId^PrivateIp^Cluster^Name"
   echo "$headers" > "$FZF_TABLE_CACHE"
 }
 
