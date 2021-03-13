@@ -195,7 +195,7 @@ function _ssh_into() {
 }
 
 function _getColumnVersionOfCacheFile() {
-  cat "$FZF_TABLE_CACHE" | column -s'^' -t
+  (head -n 2 "$FZF_TABLE_CACHE" && tail -n +3 "$FZF_TABLE_CACHE" | sort | uniq) | column -s'^' -t
 }
 
 function con() {
