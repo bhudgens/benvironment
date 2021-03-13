@@ -29,9 +29,3 @@ for file in $(echo $BENVIRONMENT_FILES_TO_LOAD); do
 done
 
 echo "${yellow}Benvironment ${green}Loaded...${end}"
-echo ""
-echo "${blue}Type ${lightblue}help${blue} for more help"
-
-help() {
-  echo -ne $(cat ${BENVIRONMENT_HELP_FILE} | sed  's/$/\\n/' | sed 's/ /\\a /g')
-}
