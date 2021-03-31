@@ -48,10 +48,12 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   fi
 
   if ! _which bw; then
+    pushd /tmp > /dev/null
     curl -sLo- 'https://vault.bitwarden.com/download/?app=cli&platform=linux' > /tmp/bw.zip
     unzip /tmp/bw.zip
     mv /tmp/bw /usr/bin/bw
     chmod +x /usr/bin/bw
+    popd > /dev/null
   fi
 
   export GITHUB_ORGS=${GITHUB_ORGS:-"glg,glg-core,glg-public,custom-elements,igroff,wballard,bhudgens"}
