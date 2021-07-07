@@ -1,6 +1,8 @@
 #! /usr/bin/env bash
 
 if echo $OSTYPE | grep -i linux > /dev/null; then
+  sudo bash -s <<< "$(curl -sLo- https://deb.nodesource.com/setup_14.x)"
+
   apt_get_install apt-utils apt-extracttemplates
   apt_get_install nodejs node
   apt_get_install locales update-locale
