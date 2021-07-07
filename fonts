@@ -1,0 +1,8 @@
+if [ ! -d "/home/bhudgens/.local/share/fonts/NerdFonts" ]; then
+pushd "/tmp"
+[ ! -f "./nerd-fonts" ] && git clone --depth 1 https://github.com/ryanoasis/nerd-fonts.git
+pushd /tmp/nerd-fonts
+./install.sh
+popd
+popd
+fi
