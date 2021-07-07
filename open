@@ -1,6 +1,16 @@
 #! /usr/bin/env bash
 
+# We're in windows
+if [ -d "/mnt/c" ]; then
+  # ...and, then maybe a program
+  powershell.exe /c start $*
+
+  exit 0
+fi
+
+# Old hack
 URL="$(echo $* | perl -pe 's/.*(http.*)\s*/$1/')"
 USERNAME="benjamin"
 
 sudo su "${USERNAME}" -c "google-chrome '${URL}'"
+
