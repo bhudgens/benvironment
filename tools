@@ -15,6 +15,7 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   apt_get_install tmux
   apt_get_install openvpn
   apt_get_install traceroute
+  apt_get_install nmap
   apt_get_install strace
   apt_get_install jq
   apt_get_install silversearcher-ag ag
