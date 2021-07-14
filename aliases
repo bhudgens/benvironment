@@ -148,9 +148,14 @@ alias zoom='open https://glgroup.zoom.us/my/bhudgens && echo https://glgroup.zoo
 alias xcodeaccept="sudo xcodebuild -license accept"
 alias dev="cd $HOME/reverts/ec2.starphleet.dev.headquarters"
 
-if ! echo $OSTYPE | grep -i "darwin"; then
+if [ ! -d "/mnt/c" ]; then
   alias pbcopy='xsel --clipboard --input'
   alias pbpaste='xsel --clipboard --output'
+fi
+
+if [ -d "/mnt/c" ]; then
+  alias pbcopy='clip.exe'
+  alias pbpaste='powershell.exe -command "Get-Clipboard"'
 fi
 
 alias prompt="export PROMPT='%{%f%b%k%}\$(build_prompt) '"
