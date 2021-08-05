@@ -97,7 +97,7 @@ function clone() {
 
   search="$1"
 
-  header="Name|Owner"
+  header="SSH|Name|Owner"
 
   sshUrls=$(cat <(echo "$header") "$GITHUB_INFO_CACHE_FILE" \
     | column -s'|' -t \
