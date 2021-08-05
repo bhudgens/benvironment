@@ -106,7 +106,7 @@ function clone() {
   )
 
   for url in $(echo $sshUrls); do
-    echo git clone "$url"
+    git clone "$url"
   done
 }
 
