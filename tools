@@ -59,9 +59,6 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
     popd > /dev/null
   fi
 
-  export GITHUB_ORGS=${GITHUB_ORGS:-"glg,glg-core,glg-public,custom-elements,igroff,wballard,bhudgens"}
-  npm_install "git-clone-cli" "clone"
-
   if [ ! -f "$HOME/.local/kitty.app/bin/kitty" ]; then
     pushd /tmp > /dev/null
     apt_get_install libjs-underscore

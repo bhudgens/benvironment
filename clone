@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+# vim: set syntax=sh:
+#####################################################
+## Author: Benjamin Hudgens
+## Date:   8/4/2021
+##
+## Description:
+##
+## This is a helper to replace the poorly written
+## 'clone' tool I wrote a long time ago located
+## here:
+##
+## https://github.com/bhudgens/git-clone-cli
+##
+## The idea for these tools is that you cache the
+## meta data for a list of org and user github
+## repos making it instant to search and clone
+## repos you don't have locally
+#####################################################
+
+GITHUB_INFO_CACHE_FILE=${GITHUB_INFO_CACHE_FILE:-"$HOME/run/github_info.cache"}
+GITHUB_API_URL="https://api.github.com"
+
+function _getReposByPage() {
+  local url urlSha usersUrl
+
+  url="$1"
+
+  urlSha=$(shasum <<< "$url" | awk '{print $1}')
+
+  echo "$urlSha|$url"
+
+  curl \
+    --user "${GITHUB_USERNAME}:${GITHUB_API_KEY}"\
+    --dump-header "$WORKDIR/$urlSha.header" \
+    --output "$WORKDIR/$urlSha.body" \
+    --silent \
+    "$url"
+
+  fromTheHeaderFile="$WORKDIR/$urlSha.header"
+  onlyGetLinkHeaderIfNextExists='^link:.*next'
+  subOutEverythingButNextUrl='s|.*<(.*?)>; rel="next",.*|$1|'
+  theNextUrl=$(egrep "$onlyGetLinkHeaderIfNextExists" "$fromTheHeaderFile" \
+    | perl -pe "$subOutEverythingButNextUrl")
+
+  if head -n 1 "$fromTheHeaderFile" | egrep -q "404" \
+  && egrep -q '/orgs' <<< "$url";
+  then
+    usersUrl=$(perl -pe 's|/orgs|/users|' <<< "$url")
+    _getReposByPage "$usersUrl"
+    return
+  fi
+
+  [ -n "$theNextUrl" ] && _getReposByPage "$theNextUrl"
+}
+
+function _getMetaDataByOrgOrUser() {
+  local org
+  org="$1"
+
+  url="${GITHUB_API_URL}/orgs/$org/repos?per_page=100"
+
+  _getReposByPage "$url"
+
+}
+
+function _splitOnComma() {
+  perl -pe 's|,|\n|'
+}
+
+function update_local_github_cache() {
+  local user jqRecipe url
+
+  export WORKDIR=$(mktemp -d)
+  # trap "{ rm -rf '$WORKDIR' }" EXIT
+
+  url="${GITHUB_API_URL}/user/repos"
+  _getReposByPage "$url"
+
+  for user in $(_splitOnComma <<< "$GITHUB_ORGS"); do
+    _getMetaDataByOrgOrUser "$user"
+  done
+
+  jqRecipe='.[] | .ssh_url + "|" + .name + "|" + .owner.login'
+  jq -r "$jqRecipe" "$WORKDIR/"*.body \
+    2> /dev/null \
+    1> "$GITHUB_INFO_CACHE_FILE.tmp"
+
+  cat "$GITHUB_INFO_CACHE_FILE.tmp" \
+    | sort \
+    | uniq \
+    1> "$GITHUB_INFO_CACHE_FILE"
+}
+
+function clone() {
+  local header sshUrls url search
+
+  search="$1"
+
+  header="Name|Owner"
+
+  sshUrls=$(cat <(echo "$header") "$GITHUB_INFO_CACHE_FILE" \
+    | column -s'|' -t \
+    | fzf --layout=reverse --header-lines 1 --with-nth=2.. ${search:+"-q $search"} \
+    | awk '{print $1}'
+  )
+
+  for url in $(echo $sshUrls); do
+    echo git clone "$url"
+  done
+}
+
