@@ -48,8 +48,8 @@ _chmod () {
 TMP_SSH_KEY_DIR="${XDG_RUNTIME_DIR:-/tmp}/.ssh"
 add_key () {
   echo Installing Key: $2
-  lpass show "$1" --field "Private Key" > "${TMP_SSH_KEY_DIR}/$2"
-  lpass show "$1" --field "Public Key" > "${TMP_SSH_KEY_DIR}/$2.pub"
+  bw get item "$1" | jq -r '.notes' > "${TMP_SSH_KEY_DIR}/$2"
+  bw get item "$1" | jq -r '.fields[] | select(.name=="public") | .value' > "${TMP_SSH_KEY_DIR}/$2.pub"
   _purgeIfEmpty "${TMP_SSH_KEY_DIR}/$2"
   _purgeIfEmpty "${TMP_SSH_KEY_DIR}/$2.pub"
   _chmod 400 "${TMP_SSH_KEY_DIR}/$2"
@@ -59,8 +59,8 @@ add_key () {
 keyme () {
   [ -z "${KEYME_KEYS_TO_LOAD}" ] && _keysToLoadHelp && return
   [ -z "${LASTPASS_USER}" ] && _lastPassUserHelp && return
-  echo Lastpass login...
-  2>&1 lpass ls > /dev/null || lpass login "${LASTPASS_USER}"
+  echo "Bitwarden Login..."
+  _bwUnlock
   echo Purging "${TMP_SSH_KEY_DIR}"
   [ -d "${TMP_SSH_KEY_DIR}" ] && rm -rf "${TMP_SSH_KEY_DIR}"
   echo Making tmp dir "${TMP_SSH_KEY_DIR}"...
