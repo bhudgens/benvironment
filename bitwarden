@@ -1,11 +1,13 @@
 export BW_SESSION_FILE="${XDG_RUNTIME_DIR:-/tmp}/.bwSession"
 export BW_USERNAME="benjamin@benjamindavid.com"
+export BW_APIKEYFILE="$HOME/.bwapikey"
 
 function _isBwLoggedIn() {
   ! bw status | jq -r '.userEmail' | grep 'null' > /dev/null
 }
 
 function _bwLogin() {
+  [ -f "$BW_APIKEYFILE" ] && source "$BW_APIKEYFILE"
   ! _isBwLoggedIn && bw login "${BW_USERNAME}" --raw > "${BW_SESSION_FILE}"
   [ -f "${BW_SESSION_FILE}" ] && export BW_SESSION=$(cat ${BW_SESSION_FILE})
 }
@@ -17,6 +19,7 @@ function _isBwUnlocked() {
 function _bwUnlock() {
   _bwLogin
 
+  [ -f "$BW_APIKEYFILE" ] && source "$BW_APIKEYFILE"
   ! _isBwUnlocked && bw unlock --raw > "${BW_SESSION_FILE}"
   [ -f "${BW_SESSION_FILE}" ] && export BW_SESSION=$(cat ${BW_SESSION_FILE})
 }
