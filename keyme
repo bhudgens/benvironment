@@ -49,7 +49,7 @@ TMP_SSH_KEY_DIR="${XDG_RUNTIME_DIR:-/tmp}/.ssh"
 add_key () {
   echo Installing Key: $2
   bw get item "$1" | jq -r '.notes' > "${TMP_SSH_KEY_DIR}/$2"
-  bw get item "$1" | jq -r '.fields[] | select(.name=="public") | .value' > "${TMP_SSH_KEY_DIR}/$2.pub"
+  bw get item "$1" | jq -r '.fields[] | select(.name=="public") | .value' > "${TMP_SSH_KEY_DIR}/$2.pub" 2> /dev/null
   _purgeIfEmpty "${TMP_SSH_KEY_DIR}/$2"
   _purgeIfEmpty "${TMP_SSH_KEY_DIR}/$2.pub"
   _chmod 400 "${TMP_SSH_KEY_DIR}/$2"
