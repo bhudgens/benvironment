@@ -731,7 +731,8 @@ purge_docker_everything () {
 }
 
 function get_wiki_repo() {
-  local wikiRepo=$(git remote -v \
+  local wikiRepo
+  wikiRepo=$(git remote -v \
                      | egrep 'origin.*push' \
                      | awk '{print $2}' \
                      | perl -pe 's|\.git$|\.wiki\.git|')
@@ -739,15 +740,15 @@ function get_wiki_repo() {
   git clone "$wikiRepo" ../$(basename $PWD).wiki
 }
 
+# Run on Change
+function roc() {
+  local file
+  local command
+  file="$1"
+  command="$2"
 
-##########################################################
-## XXX: Some sync help
-##########################################################
+  # If no command specified, run the file declared
+  [ -n "$command" ] || command="$file"
 
-function check_deploy() {
-  local app="$1"
-  for machine in $(curl -s 'http://eephleet-internal.glgresearch.com/forkulator/primary-phleet-instances-virginia' | grep PrivateIpAddress | cut -f 4 -d '"'); do
-    CONTAINER=$(2>&1 curl -v -X HEAD "http://$machine/$app/" | grep "X-Starphleet-Container" | awk '{print $3}')
-    echo "Machine: $machine | Container: $CONTAINER"
-  done
+  nodemon -w "$file" -x "$command"
 }
