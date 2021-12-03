@@ -1,4 +1,4 @@
-#! /usr/bin/env
+#! /usr/bin/env bash
 
 export AWS_REGION=${AWS_REGION:-"us-east-1"}
 export AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION:-$AWS_REGION}
@@ -35,7 +35,7 @@ function _aws() {
     --env AWS_REGION \
     --env AWS_DEFAULT_REGION \
     --env AWS_PAGER="" \
-    bhudgens/aws-cli "$@" 
+    bhudgens/aws-cli "$@"
 }
 
 # If there's an error just return empty
@@ -169,7 +169,7 @@ function _login() {
     [ -z "$ONLY_ONCE" ] && echo -e -n "${yellow}Waiting for authentication.." && ONLY_ONCE="done"
     echo -e -n "${blue}$((++COUNT))"
     sleep "$POLL_INTERVAL"
-  done 
+  done
 
   echo ""
   echo ""
@@ -181,7 +181,7 @@ function _login() {
 #
 # The process to update the roles per account takes a bit of time
 # and we do not do it very often so I'm exporting this as a unique
-# command. It will automatically be run if `keys` is called the 
+# command. It will automatically be run if `keys` is called the
 # first time. We ask AWS for an account list and then
 # a list of roles for each account.
 ######################################################################################
