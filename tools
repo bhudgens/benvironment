@@ -7,6 +7,8 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   apt_get_install nodejs node
   apt_get_install locales update-locale
   apt_get_install npm
+  apt_get_install bsdmainutils column
+  apt_get_install unzip
   apt_get_install git
   apt_get_install curl
   apt_get_install xsel
