@@ -756,5 +756,7 @@ function roc() {
 # Get Expense Date
 # For getting the date stamp for an expense
 function ged() {
-  date +'%Y%m%d%H%M'
+  THE_DATE_TIME=$(date +'%Y%m%d%H%M')
+  echo "The Date/Time is Copied to Clipboard: $THE_DATE_TIME"
+  echo "$THE_DATE_TIME" | pbcopy
 }
