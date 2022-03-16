@@ -758,5 +758,5 @@ function roc() {
 function ged() {
   THE_DATE_TIME=$(date +'%Y%m%d%H%M')
   echo "The Date/Time is Copied to Clipboard: $THE_DATE_TIME"
-  echo "$THE_DATE_TIME" | clip.exe
+  echo -n "$THE_DATE_TIME" | clip.exe
 }
