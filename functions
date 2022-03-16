@@ -752,3 +752,9 @@ function roc() {
 
   nodemon -w "$file" -x "$command"
 }
+
+# Get Expense Date
+# For getting the date stamp for an expense
+function ged() {
+  date +'%Y%m%d%H%M'
+}
