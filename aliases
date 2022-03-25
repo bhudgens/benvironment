@@ -11,9 +11,6 @@
 #############################################################################
 # Rapid Reverts
 #############################################################################
-# -New- rv.. purges previous dir
-alias nrv='rm -rf "${DIR_REVERTS}"; mkdir -p "${DIR_REVERTS}"; cd "${DIR_REVERTS}"'
-alias rv='mkdir -p "${DIR_REVERTS}"; cd "${DIR_REVERTS}"'
 # Revert the last normal commit
 alias gr='git revert HEAD~1..HEAD'
 # Revert the last commit if it's a merge
@@ -30,9 +27,6 @@ alias sql='code /Users/benjamin/Dropbox/code/sql'
 #############################################################################
 alias priv='cat ${HOME}/.ssh/id_rsa | pbcopy'
 alias pub='cat ${HOME}/.ssh/id_rsa.pub | pbcopy'
-alias cdg='cd "${DIR_GLG}"'
-alias sd='cd ${DIR_STARPHLEET_DEV}'
-alias term='"${DIR_GLG}"/starphleet-enhance/terminate-instance'
 alias ssh='ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null'
 # ls shortcuts
 alias ls='ls -G'
@@ -40,11 +34,8 @@ alias ll='ls -lh'
 alias lsa='ls -lah'
 alias la='ls -lAh'
 alias l='ls -lah'
-
-#############################################################################
-# Screen Saver
-#############################################################################
-alias ss='open -a /System/Library/CoreServices/ScreenSaverEngine.app'
+alias rv='mkdir -p "${DIR_REVERTS}"; cd "${DIR_REVERTS}"'
+alias cs='cd "/mnt/g/My Drive/CodeShare"'
 
 #############################################################################
 # Shell Shortcuts
