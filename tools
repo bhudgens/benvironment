@@ -61,7 +61,7 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
     popd > /dev/null
   fi
 
-  if [ ! -f "$HOME/.local/kitty.app/bin/kitty" ]; then
+  if false && [ ! -f "$HOME/.local/kitty.app/bin/kitty" ]; then
     pushd /tmp > /dev/null
     apt_get_install libjs-underscore
     apt_get_install libjs-sphinxdoc
@@ -69,7 +69,7 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
     popd
   fi
 
-  if [ ! -L "${HOME}/.config/kitty/kitty.conf" ] \
+  if false && [ ! -L "${HOME}/.config/kitty/kitty.conf" ] \
   && [ -f "${HOME}/.dotfiles/kitty.conf" ]; then
     mkdir -p $(dirname "${HOME}/.config/kitty/kitty.conf")
     [ -f "${HOME}/.config/kitty/kitty.conf" ] && mv "${HOME}/.config/kitty/kitty.conf" "${HOME}/.config/kitty/kitty.conf.bak"
