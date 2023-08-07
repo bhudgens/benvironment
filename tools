@@ -90,7 +90,7 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   npm_install "bhudgens/tidy-markdown" "tidy-markdown"
 fi
 
-if ! _which lpass; then
+if false && ! _which lpass; then
   apt_get_install bash-completion
   apt_get_install build-essential
   apt_get_install cmake
