@@ -540,25 +540,11 @@ c () {
 # build one that connects to all the machines specified.
 # As a convenience, we also accept a list of IP addresses
 #
-# Usage:    connect_to_all_machines [$clusterName]
-#           connect_to_all_machines $ip1 $ip2
-# Example:  connect_to_all_machines [virginia|moserca]
-#           connect_to_all_machines 10.0.0.1 10.0.0.2
+# Usage:    connect_to_all_machines $ip1 $ip2
 ##########################################################
-# Set to admiral or captain
-USER_TYPE="admiral"
 function connect_to_all_machines() {
-  if [ "$#" -gt 1 ]; then
-    MACHINES=$@
-  else
-    CLUSTER_NAME="${1:-virginia}"
-    [ "${CLUSTER_NAME}" = "virginia" ] && MACHINE_URL="http://eephleet-internal.glgresearch.com/forkulator/primary-phleet-instances-virginia"
-    [ "${CLUSTER_NAME}" = "moserca" ] && MACHINE_URL="http://eephleet-internal.glgresearch.com/forkulator/moserca-phleet-instances"
-    [ "${CLUSTER_NAME}" = "marklar" ] && MACHINE_URL="http://eephleet-internal.glgresearch.com/forkulator/marklar-phleet-instances"
-    MACHINES=$(curl -s "${MACHINE_URL}" | grep PrivateIpAddress | cut -f 4 -d '"')
-  fi
+  MACHINES=$@
 
-  CLUSTER_NAME=${CLUSTER_NAME:-virginia}
   if [ -z "${TMUX}" ]; then
     tmux new-session -d
     PANE_ID=0
@@ -574,7 +560,7 @@ function connect_to_all_machines() {
     [ $PANE_ID -gt 0 ] && tmux split-window
     [ $PANE_ID -gt 0 ] && tmux select-layout even-vertical
     pane=${window}.$((PANE_ID++))
-    tmux send-keys -t "$pane" "ssh ${USER_TYPE}@${machine}" Enter
+    tmux send-keys -t "$pane" "ssh ${machine}" Enter
     tmux send-keys -t "$pane" "clear" Enter
   done
   tmux setw sync
