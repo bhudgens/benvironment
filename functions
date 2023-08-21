@@ -42,6 +42,41 @@ rl() {
   zsh
 }
 
+######################################
+# Bash Function: Configure No Sudo Password
+######################################
+# This Bash function adds the current user to the "sudo" group, allowing
+# them to execute commands with superuser privileges without the need
+# to enter a password each time. The function uses the `usermod` command
+# to append the user to the "sudo" group.
+#
+# Usage:
+#   no_sudo_password
+#
+# Notes:
+# - The function assumes that the system user invoking this function has
+#   sufficient privileges to use the `sudo` command.
+# - The `-aG` option of the `usermod` command appends the user to the
+#   specified group without removing them from other groups.
+# - Granting a user the ability to use sudo without a password reduces the
+#   security of the system, as it provides elevated privileges without
+#   requiring password authentication.
+#
+# Example:
+#   no_sudo_password
+#
+# Important:
+# - This function should be used with caution, and only when absolutely
+#   necessary. It's recommended to understand the implications of this action
+#   before enabling passwordless sudo access.
+######################################
+no_sudo_password() {
+  # Add the current user to the "sudo" group using the usermod command
+  # This grants the user the ability to execute commands with superuser
+  # privileges without requiring a password each time.
+  sudo usermod -aG sudo ${USER}
+}
+
 # app
 #
 #  Open a URL in APP Mode in Chrome
