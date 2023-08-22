@@ -1,0 +1,14 @@
+function kubernetes_setup_login() {
+  _bwUnlock
+  host="$(bw list items --search kubernetes-admin | jq -r '.[] | .name' | fzf)"
+  configFile="$HOME/.kube/config"
+  mkdir -p "$(dirname "$configFile")"
+  bw list items --search "$host" \
+    | jq -r '.[] | .id' \
+    | xargs -I {} bw get item {} \
+    | jq -r '.notes' \
+    > "$configFile"
+  chown $(id -u):$(id -g) "$configFile"  
+  chmod 400 "$configFile"
+  echo "kubectl setup for host: $host"
+}
