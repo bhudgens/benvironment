@@ -75,7 +75,7 @@ no_sudo_password() {
   # This grants the user the ability to execute commands with superuser
   # privileges without requiring a password each time.
   sudo usermod -aG sudo ${USER}
-  sudo sed -i 's/%sudo   ALL=(ALL:ALL) ALL/%sudo   ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers
+  sudo sed -i 's/%sudo.*ALL=(ALL:ALL).*ALL/%sudo   ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers
 }
 
 # app
