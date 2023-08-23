@@ -16,6 +16,12 @@ github_purge_password() {
     --all
 }
 
+# new debian machine-id
+function new_debian_machine_id() {
+  sudo rm -f /etc/machine-id
+  sudo dbus-uuidgen --ensure=/etc/machine-id
+}
+
 # Find a certain mask in all epi queries
 function epis_with_mask() {
   export MASK_LOOKING_FOR=${1}
