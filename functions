@@ -580,6 +580,7 @@ c () {
 ##########################################################
 function connect_to_all_machines() {
   MACHINES=$@
+  SSH_USER=${SSH_USER:-$USER}
 
   if [ -z "${TMUX}" ]; then
     tmux new-session -d
@@ -596,7 +597,7 @@ function connect_to_all_machines() {
     [ $PANE_ID -gt 0 ] && tmux split-window
     [ $PANE_ID -gt 0 ] && tmux select-layout even-vertical
     pane=${window}.$((PANE_ID++))
-    tmux send-keys -t "$pane" "ssh ${machine}" Enter
+    tmux send-keys -t "$pane" "ssh ${SSH_USER}@${machine}" Enter
     tmux send-keys -t "$pane" "clear" Enter
   done
   tmux setw sync
