@@ -40,7 +40,7 @@ main() {
   fi
 
   echo Installing benvironment into ${env_file}
-  echo "source ${BENVIRONMENT_LOAD_FILE}" >> "${HOME}/${env_file}"
+  echo "source ${BENVIRONMENT_LOAD_FILE}" >> "${HOME}/.zshrc"
   echo All Done! Open a new window!
 }
 
