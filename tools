@@ -14,7 +14,7 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
     apt_get_install gnupg
     sudo mkdir -p /etc/apt/keyrings
     curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-    apt_get_install nodejs node
+    apt_get_install nodejs
   fi
 
   apt_get_install apt-utils apt-extracttemplates
