@@ -1,0 +1,14 @@
+#! /usr/bin/env bash
+
+function blink_raspberry_pi_led() {
+  while true; do
+    for onOffToggle in $(seq 0 1); do
+
+      for ledId in $(seq 0 1); do
+        echo ${onOffToggle} | sudo tee /sys/class/leds/led${ledId}/brightness
+      done
+
+      sleep 1
+    done
+  done
+}
