@@ -137,6 +137,16 @@ csd() {
   cd ${CURRENT_DIR}
 }
 
+
+# Description: Uninstall the cloud-init package and remove its configuration files.
+# This function purges the cloud-init package from the system using 'apt-get purge',
+# and then removes the '/etc/cloud/' and '/var/lib/cloud/' directories to clean up
+# any remaining configuration files and data.
+uninstall_cloud_init() {
+  sudo apt-get purge cloud-init
+  sudo rm -rf /etc/cloud/ && sudo rm -rf /var/lib/cloud/
+}
+
 # ccd
 #
 #  loop through each directory in the current dir and check
