@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-glglogin() {
+sp() {
   if ! bw status | jq -r '.userEmail' | grep -q 'glgroup.com'; then
     API_KEY="$(bw get item d9156b54-fcf2-4d2a-bee8-b0f200e61b86)"
     export BW_CLIENTID="$(echo "$API_KEY" | jq -r '.login.username')"
