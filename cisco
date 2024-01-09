@@ -16,3 +16,7 @@ sp() {
     echo "Already logged in to other profile"
   fi
 }
+
+mp() {
+  echo "$BW_MP" | pbcopy
+}
