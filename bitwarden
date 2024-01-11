@@ -6,6 +6,10 @@ function _isBwLoggedIn() {
   ! bw status | jq -r '.userEmail' | grep 'null' > /dev/null
 }
 
+function _bwLogout() {
+  bw logout
+}
+
 function _bwLogin() {
   [ -f "$BW_APIKEYFILE" ] && source "$BW_APIKEYFILE"
   ! _isBwLoggedIn && bw login "${BW_USERNAME}" --raw > "${BW_SESSION_FILE}"
