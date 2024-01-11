@@ -11,12 +11,82 @@ sp() {
 
     bw logout
     bw login --apikey
-    export BW_SESSION="$(bw unlock --passwordenv BW_MP --raw)"
   else
     echo "Already logged in to other profile"
   fi
+  [ -n "$BW_MP" ] && bw unlock --passwordenv BW_MP --raw > "${BW_SESSION_FILE}"
+  [ -f "${BW_SESSION_FILE}" ] && export BW_SESSION=$(cat ${BW_SESSION_FILE})
 }
 
 mp() {
   echo "$BW_MP" | pbcopy
+}
+
+cisco_login() {
+  local cisco_username="$1"
+  local cisco_password="$2"
+  local cisco_enable="$3"
+  local connection_command="$4"
+  CISCO_LOGIN_USERNAME="$cisco_username"
+  local command_with_username="$(eval echo "$connection_command")"
+  if echo "$connection_command" | grep -q "telnet"; then
+    local after_login_command="
+        expect \"Username:\"
+        send \"$cisco_username\r\"
+        expect \"Password:\"
+        send \"$cisco_password\r\"
+    "
+  else
+    local after_login_command="
+        expect {
+           \"*yes/no*\" { send \"yes\r\"; exp_continue }
+           \"*Password:*\" { send \"$cisco_password\r\" }
+        }
+    "
+  fi
+  if [ -n "$cisco_enable" ]; then
+    local enable_commands="
+        expect \">\"
+        send \"enable\r\"
+        expect \"Password:\"
+        send \"$cisco_enable\r\"
+        expect \"#\"
+    "
+  fi
+  expect -c "
+    spawn $command_with_username
+    $after_login_command
+    $enable_commands
+    interact
+  "
+}
+
+cc() {
+  local _connections="$(bw list items --collectionid f6afb5ed-511d-45dd-a5e6-b0f20123b8ce)"
+  LIST="$(echo "$_connections" | jq -r '.[].name')"
+  # set -x
+  SELECTION="$(echo "$LIST" | fzf)"
+  [ -z "$SELECTION" ] && return
+  IP_ADDRESS="$(echo "$SELECTION" | grep -oP '(\d{1,3}\.){3}\d{1,3}')"
+  ONLY_SELECTION="$(echo "$_connections" | jq -r "[.[] | select(.name | contains(\"$IP_ADDRESS\"))]")"
+  LOGIN_CREDS="$(echo "$ONLY_SELECTION" | jq -r ".[] | select(.name | contains(\"| Login\"))")"
+  if [ -z "$LOGIN_CREDS" ]; then
+    LOGIN_CREDS="$(bw list items --search "Cisco Tacacs Credentials" | jq -r ".[]")"
+  fi
+  if [ -z "$LOGIN_CREDS" ]; then
+    # Login with your own creds or provided creds
+    echo -n "TACACS Username: "
+    read cisco_username
+    echo -n "TACACS Password: "
+    read -s cisco_password
+    echo ""
+  else
+    cisco_username="$(echo "$LOGIN_CREDS" | jq -r ".login.username")"
+    cisco_password="$(echo "$LOGIN_CREDS" | jq -r ".login.password")"
+  fi
+  ENABLE_CREDS="$(echo "$ONLY_SELECTION" | jq -r ".[] | select(.name | contains(\"| Enable\")) | .login.password")"
+  CONNECTION_COMMAND="$(echo "$ONLY_SELECTION" | jq -r ".[] | select(.name | contains(\"| Enable\")) | .notes")"
+  cisco_login "$cisco_username" "$cisco_password" "$ENABLE_CREDS" "$CONNECTION_COMMAND"
+  # set +x
+  # Now pass enable password
 }
