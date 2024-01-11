@@ -38,10 +38,10 @@ cisco_login() {
     "
   else
     local after_login_command="
-        expect {
-           \"*yes/no*\" { send \"yes\r\"; exp_continue }
-           \"*Password:*\" { send \"$cisco_password\r\" }
-        }
+      expect {
+         \"*yes/no*\" { send \"yes\r\"; exp_continue }
+         -re {([Pp]assword:)} { send \"$cisco_password\r\" }
+      }
     "
   fi
   if [ -n "$cisco_enable" ]; then
