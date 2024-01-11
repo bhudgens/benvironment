@@ -58,7 +58,7 @@ add_key () {
 
 keyme () {
   [ -z "${KEYME_KEYS_TO_LOAD}" ] && _keysToLoadHelp && return
-  [ -z "${LASTPASS_USER}" ] && _lastPassUserHelp && return
+  _bwLogout
   echo "Bitwarden Login..."
   _bwUnlock
   echo Purging "${TMP_SSH_KEY_DIR}"
