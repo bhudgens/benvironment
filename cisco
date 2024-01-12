@@ -64,7 +64,6 @@ cisco_login() {
 cc() {
   local _connections="$(bw list items --collectionid f6afb5ed-511d-45dd-a5e6-b0f20123b8ce)"
   LIST="$(echo "$_connections" | jq -r '.[].name')"
-  # set -x
   SELECTION="$(echo "$LIST" | fzf)"
   [ -z "$SELECTION" ] && return
   IP_ADDRESS="$(echo "$SELECTION" | grep -oP '(\d{1,3}\.){3}\d{1,3}')"
@@ -85,8 +84,6 @@ cc() {
     cisco_password="$(echo "$LOGIN_CREDS" | jq -r ".login.password")"
   fi
   ENABLE_CREDS="$(echo "$ONLY_SELECTION" | jq -r ".[] | select(.name | contains(\"| Enable\")) | .login.password")"
-  CONNECTION_COMMAND="$(echo "$ONLY_SELECTION" | jq -r ".[] | select(.name | contains(\"| Enable\")) | .notes")"
+  CONNECTION_COMMAND="$(echo "$ONLY_SELECTION" | jq -r ".[] | select(.notes != null and .notes != \"\") | .notes | limit(1; .)")"
   cisco_login "$cisco_username" "$cisco_password" "$ENABLE_CREDS" "$CONNECTION_COMMAND"
-  # set +x
-  # Now pass enable password
 }
