@@ -100,6 +100,14 @@ wl() {
   local WINDOWS_USERNAME=$(jq -r '.login.username' <<< $LOGIN_CREDS)
   local WINDOWS_PASSWORD=$(jq -r '.login.password' <<< $LOGIN_CREDS)
 
+  # Using the notes in the vault,
+  # this will eval those commands
+  # and log you in automatically.
+  # The caveat being that the usernames
+  # may have a single backslash ("\")
+  # and we need to escape it to play
+  # nice in shells
+
   eval command_with_username=\"$CONNECTION_COMMAND\"
   local command_with_backslashes_fixed=$(echo "$command_with_username" | sed 's/\\/\\\\/g')
   eval $command_with_backslashes_fixed
