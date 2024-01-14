@@ -61,7 +61,7 @@ cisco_login() {
   "
 }
 
-cc() {
+cl() {
   local _connections="$(bw list items --collectionid f6afb5ed-511d-45dd-a5e6-b0f20123b8ce)"
   LIST="$(echo "$_connections" | jq -r '.[].name')"
   SELECTION="$(echo "$LIST" | fzf)"
@@ -86,4 +86,21 @@ cc() {
   ENABLE_CREDS="$(echo "$ONLY_SELECTION" | jq -r ".[] | select(.name | contains(\"| Enable\")) | .login.password")"
   CONNECTION_COMMAND="$(echo "$ONLY_SELECTION" | jq -r 'limit(1; .[] | select(.notes != null and .notes != "")) | .notes')"
   cisco_login "$cisco_username" "$cisco_password" "$ENABLE_CREDS" "$CONNECTION_COMMAND"
+}
+
+wl() {
+  _connections="$(bw list items --collectionid 8f60a0cf-dfbd-488a-8583-b0f20123c81a --search 'PRTG NUC')"
+  LIST=$(jq -r '.[].name' <<< $_connections)
+  SELECTION=$(fzf <<< $LIST)
+  [ -z "$SELECTION" ] && return
+  IP_ADDRESS="$(echo "$SELECTION" | grep -oP '(\d{1,3}\.){3}\d{1,3}')"
+  ONLY_SELECTION=$(jq -r "[.[] | select(.name | contains(\"$IP_ADDRESS\"))]" <<< $_connections)
+  LOGIN_CREDS=$(jq -r ".[] | select(.name | contains(\"| Login\"))" <<< $ONLY_SELECTION)
+  CONNECTION_COMMAND=$(jq -r 'limit(1; .[] | select(.notes != null and .notes != "")) | .notes' <<< $ONLY_SELECTION)
+  local WINDOWS_USERNAME=$(jq -r '.login.username' <<< $LOGIN_CREDS)
+  local WINDOWS_PASSWORD=$(jq -r '.login.password' <<< $LOGIN_CREDS)
+
+  eval command_with_username=\"$CONNECTION_COMMAND\"
+  local command_with_backslashes_fixed=$(echo "$command_with_username" | sed 's/\\/\\\\/g')
+  eval $command_with_backslashes_fixed
 }
