@@ -84,6 +84,6 @@ cc() {
     cisco_password="$(echo "$LOGIN_CREDS" | jq -r ".login.password")"
   fi
   ENABLE_CREDS="$(echo "$ONLY_SELECTION" | jq -r ".[] | select(.name | contains(\"| Enable\")) | .login.password")"
-  CONNECTION_COMMAND="$(echo "$ONLY_SELECTION" | jq -r ".[] | select(.notes != null and .notes != \"\") | .notes | limit(1; .)")"
+  CONNECTION_COMMAND="$(echo "$ONLY_SELECTION" | jq -r 'limit(1; .[] | select(.notes != null and .notes != "")) | .notes')"
   cisco_login "$cisco_username" "$cisco_password" "$ENABLE_CREDS" "$CONNECTION_COMMAND"
 }
