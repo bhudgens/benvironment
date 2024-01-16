@@ -577,16 +577,6 @@ hack_root() {
   ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null "admiral@${HOST}" "cat /home/admiral/.ssh/authorized_keys | sudo tee -a /root/.ssh/authorized_keys"
 }
 
-ds () {
-  rsync -ravP /Users/benjamin/reverts/starphleet/ root@benjaminhudgens.glgresearch.com:/starphleet/
-  ssh root@benjaminhudgens.glgresearch.com "cd /starphleet/provision; ./patch"
-}
-
-# Move my copy function from .zshrc
-c () {
-  cat $1 | pbcopy
-}
-
 ##########################################################
 # Assume the person has zero tmux session open and
 # build one that connects to all the machines specified.
@@ -632,43 +622,6 @@ function connect_to_all_machines() {
 devdb () {
   curl -s "${DEVDB_INFO_URL}${1}" | jq
 }
-
-##########################################################
-# Starphleet Connect
-#
-# Example:
-#  ➜  ~ sc
-#  Connect to which server:
-#   1) virginia.glgresearch.com
-#   2) singapore.glgresearch.com
-#   3) jobs.glgresearch.com
-#   4) email.glgresearch.com
-#   5) benjaminhudgens.glgresearch.com
-#   6) bulkmail.glgresearch.com
-#   7) notsplunk.glgresearch.com
-#   8) syslog.glgresearch.com
-#   9) accounting.glgresearch.com
-#  10) vpcvirginia.glgresearch.com
-#  11) vpcsingapore.glgresearch.com
-#  12) china.glgresearch.com
-#  13) moserca.glgresearch.com
-#  14) marklar.glgresearch.com
-#  15) services-buildserver.glgresearch.com
-#?
-##########################################################
-sc () {
-  STARPHLEET_ENHANCE_CACHE="/tmp/se.cache"
-  if [ ! -f "${STARPHLEET_ENHANCE_CACHE}/connect.sh" ]; then
-    rm -rf "${STARPHLEET_ENHANCE_CACHE}"
-  fi
-  if [ ! -d "${STARPHLEET_ENHANCE_CACHE}" ]; then
-    git clone git@github.com:glg/starphleet-enhance.git "${STARPHLEET_ENHANCE_CACHE}"
-  fi
-  pushd "${STARPHLEET_ENHANCE_CACHE}" > /dev/null
-  "${STARPHLEET_ENHANCE_CACHE}/connect.sh"
-  popd > /dev/null
-}
-
 
 ##########################################################
 ## Patch and Push

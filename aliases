@@ -17,12 +17,6 @@ alias gr='git revert HEAD~1..HEAD'
 alias gmr='git revert -m 1 HEAD~1..HEAD'
 
 #############################################################################
-# Quick Edits
-#############################################################################
-alias t='atom /Users/benjamin/Dropbox/code/templates'
-alias sql='code /Users/benjamin/Dropbox/code/sql'
-
-#############################################################################
 # Navigation
 #############################################################################
 alias priv='cat ${HOME}/.ssh/id_rsa | pbcopy'
