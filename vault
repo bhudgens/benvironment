@@ -66,12 +66,9 @@ cl() {
   LIST="$(echo "$_connections" | jq -r '.[].name')"
   SELECTION="$(echo "$LIST" | fzf)"
   [ -z "$SELECTION" ] && return
-  set -x
   IP_ADDRESS="$(echo "$SELECTION" | grep -oP '(\d{1,3}\.){3}\d{1,3}')"
   ONLY_SELECTION="$(echo "$_connections" | jq -r "[.[] | select(.name | contains(\"$IP_ADDRESS \"))]")"
   LOGIN_CREDS=$(jq -r ".[] | select(.name | contains(\"| Login\"))" <<< $ONLY_SELECTION)
-  set +x
-  exit 0
   if [ -z "$LOGIN_CREDS" ]; then
     LOGIN_CREDS="$(bw list items --search "Cisco Tacacs Credentials" | jq -r ".[]")"
   fi
