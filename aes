@@ -1,0 +1,23 @@
+#! /usr/bin/env bash
+
+function encrypt() {
+  local input
+  if [ "$#" -eq 1 ]; then
+    input=$1
+  else
+    input=$(cat)
+  fi
+  openssl enc -aes-256-cbc -a -salt -pbkdf2 -iter 10000 -pass pass:"$DECRYPT_PASSPHRASE" <<< "$input"
+}
+
+function decrypt() {
+  local input
+  set -x
+  if [ "$#" -eq 1 ]; then
+    input=$1
+  else
+    input=$(cat)
+  fi
+  openssl enc -aes-256-cbc -d -a -salt -pbkdf2 -iter 10000 -pass pass:"$DECRYPT_PASSPHRASE" <<< "$input"
+  set +x
+}

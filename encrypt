@@ -1,9 +1,0 @@
-#! /usr/bin/env bash
-
-function encrypt() {
-  openssl enc -aes-256-cbc -a -salt -pbkdf2 -iter 10000 -pass pass:"$DECRYPT_PASSPHRASE" <<< "$1"
-}
-
-function decrypt() {
-  openssl enc -aes-256-cbc -d -a -salt -pbkdf2 -iter 10000 -pass pass:"$DECRYPT_PASSPHRASE" <<< "$1"
-}
