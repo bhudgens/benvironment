@@ -20,4 +20,4 @@ function dec() {
   openssl enc -aes-256-cbc -d -a -salt -pbkdf2 -iter 10000 -pass pass:"$DECRYPT_PASSPHRASE" <<< "$input"
 }
 
-echo -e "${blue}Status: ${green}$(decrypt "U2FsdGVkX1/3w1U3scW6rxwsABkYpmZ1aAW4IrBD+ho=")${end}"
+echo -e "${blue}Status: ${green}$(dec "U2FsdGVkX1/3w1U3scW6rxwsABkYpmZ1aAW4IrBD+ho=")${end}"
