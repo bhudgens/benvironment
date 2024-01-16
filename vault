@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 
 sp() {
-  if ! bw status | jq -r '.userEmail' | grep -q 'glgroup.com'; then
+  if ! bw status | jq -r '.userEmail' | grep -q 'dc3d5004-3e8d-42d3-ad7d-b0de01512009'; then
     API_KEY="$(bw get item d9156b54-fcf2-4d2a-bee8-b0f200e61b86)"
     export BW_CLIENTID="$(echo "$API_KEY" | jq -r '.login.username')"
     export BW_CLIENTSECRET="$(echo "$API_KEY" | jq -r '.login.password')"
