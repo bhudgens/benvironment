@@ -89,7 +89,7 @@ cl() {
 }
 
 wl() {
-  _connections="$(bw list items --collectionid 8f60a0cf-dfbd-488a-8583-b0f20123c81a --search 'PRTG NUC')"
+  _connections="$(bw list items --collectionid 902ae5fe-8965-495f-9f12-b0f900e966e2)"
   LIST=$(jq -r '.[].name' <<< $_connections)
   SELECTION=$(fzf <<< $LIST)
   [ -z "$SELECTION" ] && return
