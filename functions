@@ -562,14 +562,6 @@ cat << EOF > ./.eslintrc.json
 EOF
 }
 
-admin() {
-  ssh -i "${HOME}/.ssh/glguser" "ubuntu@${1}"
-}
-
-db() {
-  ssh -i "${HOME}/.ssh/devdb" "ubuntu@${1}"
-}
-
 hack_root() {
   HOST="${1}"
   ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null "admiral@${HOST}" "sudo bash -c '[ ! -f /root/.ssh/.authorized_keys.org ] && cp /root/.ssh/authorized_keys /root/.ssh/.authorized_keys.org || true'"
@@ -643,16 +635,6 @@ function drun() {
 ##########################################################
 function dex() {
   docker exec -it "$@"
-}
-
-##########################################################
-## Who owns a GLG app
-##########################################################
-function whoowns() {
-  for github_username in $(curl -s "https://services-internal.glgresearch.com/forkulator/who-owns?service=$1" | jq -r '.[].username'); do
-    USER=$(curl -s "https://services-internal.glgresearch.com/forkulator/github-username-to-glg-email?user=${github_username}" | jq -r '.email');
-    echo $USER
-  done
 }
 
 ##########################################################

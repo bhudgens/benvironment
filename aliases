@@ -37,9 +37,7 @@ alias cs='cd "/mnt/g/My Drive/CodeShare"'
 alias flushdns='sudo killall -HUP mDNSResponder'
 alias md='mkdir -p'
 alias history='fc -l 1'
-alias ndm='bash -c "$(STARPHLEET_HEADQUARTERS=git@github.com:glg/template-hq-dev.git#master curl -s https://raw.githubusercontent.com/glg/starphleet-dev-webinstalls/master/template)"'
 alias ol='app https://outlook.office.com/owa/'
-alias new="cp -r ${HOME}/Dropbox/code/glg/node_boilerplate "
 alias ttl="sudo sysctl -w net.inet.ip.ttl=65"
 alias bus="sudo sysctl -w net.inet.ip.ttl=66"
 alias remap="xmodmap ${HOME}/.keymaps"
@@ -123,13 +121,11 @@ alias gss='git status -s'
 alias me='sudo pactl load-module module-loopback latency_msec=1'
 alias nme='sudo pactl unload-module module-loopback'
 alias myip='curl "https://api.ipify.org?format=json"'
-alias boatvpn='sudo glgroup openvpn connect && sudo route add -host 172.27.4.14 gw 172.27.128.1'
 alias denv='source <(bwGetNote "Development Environment")'
 alias aws='docker run --rm -it -v ~/.aws:/root/.aws -v $(pwd):/aws --env AWS_SESSION_TOKEN --env AWS_ACCESS_KEY_ID --env AWS_SECRET_ACCESS_KEY --env AWS_PAGER="" bhudgens/aws-cli'
 
 alias record='asciinema rec'
 
-alias zoom='open https://glgroup.zoom.us/my/bhudgens && echo https://glgroup.zoom.us/my/bhudgens | pbcopy'
 alias xcodeaccept="sudo xcodebuild -license accept"
 alias dev="cd $HOME/reverts/ec2.starphleet.dev.headquarters"
 

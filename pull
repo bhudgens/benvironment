@@ -17,13 +17,6 @@ add_remote() {
   # Get the current remote assigned to this clone
   CURRENT_REMOTE=$(git remote -v | grep push | awk '{print $2}')
 
-  # Set what our 'new' remote should be (the opposing glg remote)
-  if [ "${CURRENT_ORG}" = "glg-core" ]; then
-    NEW_ORG="glg"
-  else
-    NEW_ORG="glg-core"
-  fi
-
   # Take the old remote and swap in our new org
   NEW_REMOTE=$(echo "${CURRENT_REMOTE}" | sed -e "s/${CURRENT_ORG}/${NEW_ORG}/")
 
