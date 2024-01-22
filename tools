@@ -161,7 +161,10 @@ then
 fi
 
 if [ ! -f "$HOME/.gitconfig" ]; then
-  git config --global user.email "benjamin@benjamindavid.com"
-  git config --global user.name "Benjamin Hudgens"
+  userEmail=$(dec "U2FsdGVkX180D0GMZl202OnyHw28AzoAnqGMhsayiMDRSLWut5k+CO4LYMAT5a/K")
+  if [ $? -eq 0 ]; then
+    git config --global user.email "$userEmail"
+    git config --global user.name "Benjamin Hudgens"
+  fi
 fi
 
