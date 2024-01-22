@@ -89,12 +89,16 @@ cl() {
 }
 
 wl() {
-  _connections="$(bw list items --collectionid 902ae5fe-8965-495f-9f12-b0f900e966e2)"
-  LIST=$(jq -r '.[].name' <<< $_connections)
+  _prtgNucs="$(bw list items --collectionid 902ae5fe-8965-495f-9f12-b0f900e966e2)"
+  _generalEntries="$(bw list items --collectionid 8f60a0cf-dfbd-488a-8583-b0f20123c81a --search "RDP")"
+
+  allEntries=$(jq -s 'add' <(cat <<< $_prtgNucs) <(cat <<< $_generalEntries))
+
+  LIST=$(jq -r '.[].name' <<< $allEntries)
   SELECTION=$(fzf <<< $LIST)
   [ -z "$SELECTION" ] && return
   IP_ADDRESS="$(echo "$SELECTION" | grep -oP '(\d{1,3}\.){3}\d{1,3}')"
-  ONLY_SELECTION=$(jq -r "[.[] | select(.name | contains(\"$IP_ADDRESS\"))]" <<< $_connections)
+  ONLY_SELECTION=$(jq -r "[.[] | select(.name | contains(\"$IP_ADDRESS\"))]" <<< $allEntries)
   LOGIN_CREDS=$(jq -r ".[] | select(.name | contains(\"| Login\"))" <<< $ONLY_SELECTION)
   CONNECTION_COMMAND=$(jq -r 'limit(1; .[] | select(.notes != null and .notes != "")) | .notes' <<< $ONLY_SELECTION)
   local WINDOWS_USERNAME=$(jq -r '.login.username' <<< $LOGIN_CREDS)
