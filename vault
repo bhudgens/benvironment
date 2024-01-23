@@ -62,8 +62,23 @@ cisco_login() {
   "
 }
 
+TMP_BW_CACHE_FILE="${XDG_RUNTIME_DIR:-/tmp/}.clItemCache"
+
+# Clear the cache
+# (n)ew(c)isco(l)ogin
+ncl() {
+  rm "$TMP_BW_CACHE_FILE"
+}
+
+# Login to cisco devices
+# (c)isco(l)ogin
 cl() {
-  local _connections="$(bw list items --collectionid f6afb5ed-511d-45dd-a5e6-b0f20123b8ce)"
+
+  [ ! -f "$TMP_BW_CACHE_FILE" ] \
+    && bw list items --collectionid f6afb5ed-511d-45dd-a5e6-b0f20123b8ce \
+    > "$TMP_BW_CACHE_FILE"
+
+  local _connections=$(cat "$TMP_BW_CACHE_FILE")
   LIST="$(echo "$_connections" | jq -r '.[].name')"
   SELECTION="$(echo "$LIST" | fzf)"
   [ -z "$SELECTION" ] && return
@@ -89,11 +104,27 @@ cl() {
   cisco_login "$cisco_username" "$cisco_password" "$ENABLE_CREDS" "$CONNECTION_COMMAND"
 }
 
-wl() {
-  _prtgNucs="$(bw list items --collectionid 902ae5fe-8965-495f-9f12-b0f900e966e2)"
-  _generalEntries="$(bw list items --collectionid 8f60a0cf-dfbd-488a-8583-b0f20123c81a --search "RDP")"
+TMP_WL_CACHE_FILE="${XDG_RUNTIME_DIR:-/tmp/}.wlItemCache"
 
-  allEntries=$(jq -s 'add' <(cat <<< $_prtgNucs) <(cat <<< $_generalEntries))
+# Clear the cache
+# (n)ew(w)indows(l)ogin
+nwl() {
+  rm "$TMP_WL_CACHE_FILE"
+}
+
+# Login to RDP devices
+# (w)indows(l)ogin
+wl() {
+
+  if [ ! -f "$TMP_WL_CACHE_FILE" ]; then
+
+    _prtgNucs="$(bw list items --collectionid 902ae5fe-8965-495f-9f12-b0f900e966e2)"
+    _generalEntries="$(bw list items --collectionid 8f60a0cf-dfbd-488a-8583-b0f20123c81a --search "RDP")"
+
+    jq -s 'add' <(cat <<< $_prtgNucs) <(cat <<< $_generalEntries) > "$TMP_WL_CACHE_FILE"
+    allEntries=$(cat "$TMP_WL_CACHE_FILE")
+
+  fi
 
   LIST=$(jq -r '.[].name' <<< $allEntries)
   SELECTION=$(fzf <<< $LIST)
