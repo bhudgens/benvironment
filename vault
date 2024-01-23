@@ -68,6 +68,7 @@ TMP_BW_CACHE_FILE="${XDG_RUNTIME_DIR:-/tmp/}.clItemCache"
 # (n)ew(c)isco(l)ogin
 ncl() {
   rm "$TMP_BW_CACHE_FILE"
+  cl
 }
 
 # Login to cisco devices
@@ -110,6 +111,7 @@ TMP_WL_CACHE_FILE="${XDG_RUNTIME_DIR:-/tmp/}.wlItemCache"
 # (n)ew(w)indows(l)ogin
 nwl() {
   rm "$TMP_WL_CACHE_FILE"
+  wl
 }
 
 # Login to RDP devices
