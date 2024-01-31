@@ -147,6 +147,7 @@ wl() {
   # nice in shells
 
   eval command_with_username=\"$CONNECTION_COMMAND\"
-  local command_with_backslashes_fixed=$(echo "$command_with_username" | sed 's/\\/\\\\/g')
+  local command_with_password_quoted=$(echo "$command_with_username" | sed "s|/pass:\(.*\);|/pass:'\1';|")
+  local command_with_backslashes_fixed=$(echo "$command_with_password_quoted" | sed 's/\\/\\\\/g')
   eval $command_with_backslashes_fixed
 }
