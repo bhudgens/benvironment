@@ -119,15 +119,13 @@ nwl() {
 wl() {
 
   if [ ! -f "$TMP_WL_CACHE_FILE" ]; then
-
     _prtgNucs="$(bw list items --collectionid 902ae5fe-8965-495f-9f12-b0f900e966e2)"
     _generalEntries="$(bw list items --collectionid 8f60a0cf-dfbd-488a-8583-b0f20123c81a --search "RDP")"
 
     jq -s 'add' <(cat <<< $_prtgNucs) <(cat <<< $_generalEntries) > "$TMP_WL_CACHE_FILE"
-    allEntries=$(cat "$TMP_WL_CACHE_FILE")
-
   fi
 
+  allEntries=$(cat "$TMP_WL_CACHE_FILE")
   LIST=$(jq -r '.[].name' <<< $allEntries)
   SELECTION=$(fzf <<< $LIST)
   [ -z "$SELECTION" ] && return
