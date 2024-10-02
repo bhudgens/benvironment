@@ -1,5 +1,5 @@
 export BW_SESSION_FILE="${XDG_RUNTIME_DIR:-/tmp}/.bwSession"
-export BW_USERNAME=$(dec "U2FsdGVkX19mdzwIXmM7CT3SaCG2z5/gSP4nzHi6hgpKKkCLcfyIYYOAf3cL7Zw+Bj+aKl9NLMRpNC6oc4pRnw==")
+export BW_USERNAME=$(dec "U2FsdGVkX18H/ngbZbImHfPsDwpE7/9/11qJ/Nt4bpOM5HlnwNlS45obrq+/f6WC")
 export BW_APIKEYFILE="$HOME/.bwapikey"
 
 function _isBwLoggedIn() {
