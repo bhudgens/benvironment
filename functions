@@ -705,17 +705,22 @@ function ged() {
 
 # Generate commit message on staged changes
 cm() {
-  OPENAI_API_KEY=${OPENAI_API_KEY:?"OPENAI_API_KEY not set"}
-  git diff --cached --quiet && { echo "No staged changes to commit."; return; }
+  OPENAI_API_KEY=${OPENAI_API_KEY:?'OPENAI_API_KEY not set'}
+  git diff --cached --quiet && { echo 'No staged changes to commit.'; return; }
 
   staged_changes=$(git diff --cached | base64)
-  prompt="Generate a concise commit message that follows these guidelines: The first line should be a summary of 50 characters or less. Then include a newline, followed by a list of all the changes and the supposed reasons why in bullet point form. Do not repeat the diff. Only provide the commit message."
+  msg_guidelines='Generate a concise commit message that follows these guidelines: The first line should be a summary of 50 characters or less. Then include a newline, followed by a list of all the changes and the supposed reasons why in bullet point form. Do not repeat the diff. Only provide the commit message.'
 
-  json_payload=$(jq -n --arg model "gpt-4-turbo" --arg prompt "$prompt" --arg changes "$staged_changes" '{model: $model, messages: [{role: "user", content: ($prompt + " " + $changes)}], max_tokens: 150, temperature: 0.7}')
+  json_payload=$(jq -n --arg model 'gpt-4-turbo' --arg msg_guidelines "$msg_guidelines" --arg changes "$staged_changes" '{model: $model, messages: [{role: "user", content: ($msg_guidelines + " " + $changes)}], max_tokens: 150, temperature: 0.7}')
 
-  commit_message=$(curl -s https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" -H "Authorization: Bearer $OPENAI_API_KEY" -d "$json_payload" | jq -r '.choices[0].message.content' | sed 's/^\s*//;s/\s*$//')
+  commit_message=$(curl -s https://api.openai.com/v1/chat/completions -H 'Content-Type: application/json' -H "Authorization: Bearer $OPENAI_API_KEY" -d "$json_payload" | jq -r '.choices[0].message.content' | sed 's/^\s*//;s/\s*$//')
 
   echo "$commit_message"
-  read -p "Use this commit message? (y/n): " confirm
-  [[ "$confirm" =~ ^[Yy]$ ]] && git commit -m "$commit_message" || echo "Commit aborted."
+  printf 'Use this commit message? (y/n): '
+  read -r confirm
+  if [[ "$confirm" =~ ^[Yy]$ ]]; then
+    git commit -m "$commit_message"
+  else
+    echo 'Commit aborted.'
+  fi
 }
