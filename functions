@@ -705,13 +705,15 @@ function ged() {
 
 # Generate commit message on staged changes
 cm() {
+  [ -n "$ENABLE_DEBUG" ] && set -x
   OPENAI_API_KEY=${OPENAI_API_KEY:?'OPENAI_API_KEY not set'}
   git diff --cached --quiet && { echo 'No staged changes to commit.'; return; }
 
-  staged_changes=$(git diff --cached | base64)
-  msg_guidelines='Generate a concise commit message that follows these guidelines: The first line should be a summary of 50 characters or less. Then include a newline, followed by a list of all the changes and the supposed reasons why in bullet point form. Do not repeat the diff. Only provide the commit message. Please do not wrap responses in ```'
+  pre_encoded=$(git diff --cached)
+  staged_changes=$(echo "$pre_encoded" | base64)
+  msg_guidelines='After my instructions, there will be a base64 encoded string that you will first decode. Analyze only the results after decoding the string, which contains a set of git diffs. Generate a concise commit message based solely on the diff after it has been decoded, ignoring any surrounding context or unrelated content and focusing only on the changes in the diff. In your response, the first line should be a summary of 50 characters or less, followed by a newline and then a list of all the changes and the supposed reasons why in bullet point form. Do not repeat the diff, and only provide the commit message. Please do not wrap responses in markdown.'
 
-  json_payload=$(jq -n --arg model 'gpt-4-turbo' --arg msg_guidelines "$msg_guidelines" --arg changes "$staged_changes" '{model: $model, messages: [{role: "user", content: ($msg_guidelines + " " + $changes)}], max_tokens: 150, temperature: 0.7}')
+  json_payload=$(jq -n --arg model 'gpt-4o' --arg msg_guidelines "$msg_guidelines" --arg changes "$staged_changes" '{model: $model, messages: [{role: "user", content: ($msg_guidelines + " " + $changes)}], max_tokens: 150, temperature: 0.7}')
 
   commit_message=$(curl -s https://api.openai.com/v1/chat/completions -H 'Content-Type: application/json' -H "Authorization: Bearer $OPENAI_API_KEY" -d "$json_payload" | jq -r '.choices[0].message.content' | sed 's/^\s*//;s/\s*$//')
 
@@ -723,4 +725,5 @@ cm() {
   else
     echo 'Commit aborted.'
   fi
+  [ -n "$ENABLE_DEBUG" ] && set +x
 }
