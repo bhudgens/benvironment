@@ -709,7 +709,7 @@ cm() {
   git diff --cached --quiet && { echo 'No staged changes to commit.'; return; }
 
   staged_changes=$(git diff --cached | base64)
-  msg_guidelines='Generate a concise commit message that follows these guidelines: The first line should be a summary of 50 characters or less. Then include a newline, followed by a list of all the changes and the supposed reasons why in bullet point form. Do not repeat the diff. Only provide the commit message.'
+  msg_guidelines='Generate a concise commit message that follows these guidelines: The first line should be a summary of 50 characters or less. Then include a newline, followed by a list of all the changes and the supposed reasons why in bullet point form. Do not repeat the diff. Only provide the commit message. Please do not wrap responses in ```'
 
   json_payload=$(jq -n --arg model 'gpt-4-turbo' --arg msg_guidelines "$msg_guidelines" --arg changes "$staged_changes" '{model: $model, messages: [{role: "user", content: ($msg_guidelines + " " + $changes)}], max_tokens: 150, temperature: 0.7}')
 
