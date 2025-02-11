@@ -1,0 +1,46 @@
+# This supports getting credentials from bitwarden
+# and copying them to clipboard. It caches records
+# if they don't exist and then uses that cache in
+# the future
+gpw() {
+    # Define cache file
+    CACHE_FILE="/tmp/.bw_items_cache"
+
+    # Check if cache file exists and is not empty
+    if [ ! -s "$CACHE_FILE" ]; then
+        # Ensure user is logged in to Bitwarden
+        _bwUnlock
+        # Get a list of items and save to cache file
+        bw list items > "$CACHE_FILE"
+        # Set cache file permissions to read/write by owner only
+        chmod 600 "$CACHE_FILE"
+    fi
+
+    # Process items with jq to remove control characters and display with fzf
+    item=$(cat "$CACHE_FILE" | jq -r 'walk(if type == "string" then gsub("[\\x00-\\x1F]"; "") else . end) | .[] | "\(.name) | \(.login.username // "N/A") | \(.login.uris[0].uri // "N/A") | \(.id)"' | fzf --layout=reverse --height=40% --min-height=10)
+
+    # Extract item_id from the selected item
+    item_id=$(echo "$item" | awk -F' | ' '{print $NF}')
+
+    # Trap CTRL-C and exit the loop
+    trap "echo 'Exiting...'; exit 0" SIGINT
+
+    # Loop for selecting username, password, or totp
+    while true; do
+        attribute=$(echo -e "username\npassword\ntotp" | fzf --layout=reverse --height=40% --min-height=10)
+        if [ -z "$attribute" ]; then
+            echo "No attribute selected."
+            return 1
+        fi
+
+        # Extract the value from the cached data
+        value=$(cat "$CACHE_FILE" | jq -r --arg id "$item_id" --arg attr "$attribute" '.[] | select(.id == $id) | .login[$attr] // empty')
+        if [ -z "$value" ]; then
+            echo "No value found for $attribute."
+            return 1
+        fi
+
+        echo "$value" | pbcopy
+        echo "$attribute copied to clipboard."
+    done
+}
