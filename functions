@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
 
 #############################################################################
 # Functions
@@ -226,7 +226,7 @@ cat << EOF > ./.gitignore
 *.zip
 
 # Logs and databases #
-######################
+#####################
 *.log
 *.sql
 *.sqlite
@@ -704,18 +704,75 @@ function ged() {
 }
 
 # Generate commit message on staged changes
-cm() {
+function cm() {
   [ -n "$ENABLE_DEBUG" ] && set -x
-  OPENAI_API_KEY=${OPENAI_API_KEY:?'OPENAI_API_KEY not set'}
-  git diff --cached --quiet && { echo 'No staged changes to commit.'; return; }
+  
+  # Check if there are staged changes
+  if git diff --cached --quiet; then
+    echo 'No staged changes to commit.'
+    return
+  fi
 
-  pre_encoded=$(git diff --cached)
-  staged_changes=$(echo "$pre_encoded" | base64)
-  msg_guidelines='After my instructions, there will be a base64 encoded string that you will first decode. Analyze only the results after decoding the string, which contains a set of git diffs. Generate a concise commit message based solely on the diff after it has been decoded, ignoring any surrounding context or unrelated content and focusing only on the changes in the diff. In your response, the first line should be a summary of 50 characters or less, followed by a newline and then a list of all the changes and the supposed reasons why in bullet point form. Do not repeat the diff, and only provide the commit message. Please do not wrap responses in markdown.'
+  # Collect staged changes and safely encode them as a single JSON string
+  staged_changes=$(git diff --cached --no-color | jq -Rs .)
+  
+  msg_guidelines='After my instructions there will data from a git diff. Generate a concise commit message based solely on the diff after it has been decoded, ignoring any surrounding context or unrelated content and focusing only on the changes in the diff. In your response, the first line should be a summary of 50 characters or less, followed by a newline, and then another new line, and then a list of all the changes and the supposed reasons why in bullet point form. Do not repeat the diff, and only provide the commit message. Please do not wrap responses in markdown. Make sure to put a new line between the top summary line and the bullet points. There should be a summary, then a blank line, and then bullet points. Bullet points should use dashes'
 
-  json_payload=$(jq -n --arg model 'gpt-4o' --arg msg_guidelines "$msg_guidelines" --arg changes "$staged_changes" '{model: $model, messages: [{role: "user", content: ($msg_guidelines + " " + $changes)}], max_tokens: 150, temperature: 0.7}')
 
-  commit_message=$(curl -s https://api.openai.com/v1/chat/completions -H 'Content-Type: application/json' -H "Authorization: Bearer $OPENAI_API_KEY" -d "$json_payload" | jq -r '.choices[0].message.content' | sed 's/^\s*//;s/\s*$//')
+  local apiUrl
+  local authHeader
+  local modelParam
+  local jsonPayload
+  local modelName="llama-3.2-3b-instruct"
+
+  if [ -n "$OPENAI_API_KEY" ]; then
+    apiUrl="https://api.openai.com/v1/chat/completions"
+    authHeader="-H \"Authorization: Bearer $OPENAI_API_KEY\""
+    modelParam="--arg model 'gpt-4o'"
+    # Insert the escaped diff string directly into the user prompt
+    jsonPayload=$(jq -n \
+      $modelParam \
+      --arg msg_guidelines "$msg_guidelines" \
+      --arg changes "$staged_changes" \
+      '{ 
+         model: $model, 
+         messages: [
+           {
+             role: "user", 
+             content: ($msg_guidelines + "\n\n" + $changes)
+           }
+         ],
+         stream: false,
+         max_tokens: 150,
+         temperature: 0.7
+       }'
+    )
+    commit_message=$(curl -s $apiUrl \
+      -H 'Content-Type: application/json' \
+      $authHeader \
+      -d "$jsonPayload" | jq -r '.choices[0].message.content' | sed 's/^\s*//;s/\s*$//')
+  else
+    apiUrl="http://192.168.1.98:1234/v1/chat/completions"
+    jsonPayload=$(jq -n \
+      --arg model "$modelName" \
+      --arg msg_guidelines "$msg_guidelines" \
+      --arg changes "$staged_changes" \
+      '{ 
+         model: $model, 
+         messages: [
+           {
+             role: "user", 
+             content: ($msg_guidelines + "\n\n" + $changes)
+           }
+         ],
+         stream: false,
+         temperature: 0.7
+       }'
+    )
+    commit_message=$(curl -s "$apiUrl" \
+      -H 'Content-Type: application/json' \
+      -d "$jsonPayload" | jq -r '.choices[0].message.content')
+  fi
 
   echo "$commit_message"
   printf 'Use this commit message? (y/n): '
