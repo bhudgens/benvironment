@@ -12,6 +12,10 @@ function enc() {
 
 function dec() {
   local input
+  if [ -z "$DECRYPT_PASSPHRASE" ]; then
+    return 0
+  fi
+
   if [ "$#" -eq 1 ]; then
     input=$1
   else
