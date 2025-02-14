@@ -721,17 +721,13 @@ function cm() {
 
   local apiUrl
   local authHeader
-  local modelParam
-  local jsonPayload
-  local modelName="llama-3.2-3b-instruct"
 
   if [ -n "$OPENAI_API_KEY" ]; then
     apiUrl="https://api.openai.com/v1/chat/completions"
-    authHeader="-H \"Authorization: Bearer $OPENAI_API_KEY\""
-    modelParam="--arg model 'gpt-4o'"
+    authHeader="Authorization: Bearer $OPENAI_API_KEY"
     # Insert the escaped diff string directly into the user prompt
     jsonPayload=$(jq -n \
-      $modelParam \
+      --arg model "gpt-4o" \
       --arg msg_guidelines "$msg_guidelines" \
       --arg changes "$staged_changes" \
       '{ 
@@ -748,13 +744,13 @@ function cm() {
        }'
     )
     commit_message=$(curl -s $apiUrl \
-      -H 'Content-Type: application/json' \
-      $authHeader \
+      -H "Content-Type: application/json" \
+      -H "$authHeader" \
       -d "$jsonPayload" | jq -r '.choices[0].message.content' | sed 's/^\s*//;s/\s*$//')
   else
     apiUrl="http://192.168.1.98:1234/v1/chat/completions"
     jsonPayload=$(jq -n \
-      --arg model "$modelName" \
+      --arg model "llama-3.2-3b-instruct" \
       --arg msg_guidelines "$msg_guidelines" \
       --arg changes "$staged_changes" \
       '{ 
