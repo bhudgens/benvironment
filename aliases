@@ -12,6 +12,7 @@
 # Rapid Reverts
 #############################################################################
 # Revert the last normal commit
+alias a='aichat -e'
 alias gr='git revert HEAD~1..HEAD'
 # Revert the last commit if it's a merge
 alias gmr='git revert -m 1 HEAD~1..HEAD'
