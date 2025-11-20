@@ -61,8 +61,7 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   mkdir -p ./tools
 
   # List of tools to download if missing
-  tools_list="fzf bw docker docker-compose tidy-markdown prettyping kitty lpass"
-  for tool in $tools_list; do
+  for tool in $BENVIRONMENT_TOOLS_LIST; do
     if [ ! -f "./tools/${tool}" ]; then
       curl -s "${URL_PATH_TO_ENV_FILES}/tools/${tool}" -o "./tools/${tool}"
       chmod +x "./tools/${tool}"
