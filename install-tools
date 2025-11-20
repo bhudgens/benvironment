@@ -57,6 +57,18 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
     export FZF_DEFAULT_OPTS='-m --height 50% --border'
   fi
 
+  # Ensure tools directory exists
+  mkdir -p ./tools
+
+  # List of tools to download if missing
+  tools_list="fzf bw docker docker-compose tidy-markdown prettyping kitty lpass"
+  for tool in $tools_list; do
+    if [ ! -f "./tools/${tool}" ]; then
+      curl -s "${URL_PATH_TO_ENV_FILES}/tools/${tool}" -o "./tools/${tool}"
+      chmod +x "./tools/${tool}"
+    fi
+  done
+
   # Source custom tool installation scripts
   for tool_script in ./tools/*; do
     if [ -f "$tool_script" ]; then
