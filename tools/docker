@@ -1,0 +1,4 @@
+if ! _which docker; then
+  bash -c "$(curl -sLo- 'https://get.docker.com')"
+  eval "$SUDO usermod -aG docker '$USER'"
+fi

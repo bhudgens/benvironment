@@ -1,0 +1,23 @@
+if false && ! _which lpass; then
+  apt_get_install bash-completion
+  apt_get_install build-essential
+  apt_get_install cmake
+  apt_get_install git
+  apt_get_install libcurl4
+  apt_get_install libcurl4-openssl-dev
+  apt_get_install libssl-dev
+  apt_get_install libxml2
+  apt_get_install libxml2-dev
+  apt_get_install libssl1.1
+  apt_get_install pkg-config
+  apt_get_install ca-certificates
+  apt_get_install xclip
+
+  TMP_LPASS_INSTALL_DIR="/tmp/lastpass-cli"
+  mkdir -p "${TMP_LPASS_INSTALL_DIR}"
+  git clone "https://github.com/lastpass/lastpass-cli.git" "${TMP_LPASS_INSTALL_DIR}"
+  pushd "${TMP_LPASS_INSTALL_DIR}" > /dev/null
+    make
+    eval "$SUDO make install"
+  popd > /dev/null
+fi

@@ -1,0 +1,8 @@
+if ! _which prettyping; then
+  pushd /tmp > /dev/null
+  curl -s -O https://raw.githubusercontent.com/denilsonsa/prettyping/master/prettyping
+  eval "$SUDO cp prettyping /usr/local/bin"
+  echo Installing prettyping
+  eval "$SUDO chmod +x /usr/local/bin/prettyping"
+  popd > /dev/null
+fi

@@ -15,7 +15,7 @@ export BENVIRONMENT_HELP_FILE="/tmp/.benvironment.help.md"
 
 [ -f "${BENVIRONMENT_HELP_FILE}" ] && rm "${BENVIRONMENT_HELP_FILE}"
 
-BENVIRONMENT_FILES_TO_LOAD="${BENVIRONMENT_FILES_TO_LOAD:-colors aes shared configs tmux vim tools functions aliases pull statuses keyme azure livetail bitwarden mfa camera connect localuser links awskeys fonts clone kubernetes raspberrypi vault gpw}"
+BENVIRONMENT_FILES_TO_LOAD="${BENVIRONMENT_FILES_TO_LOAD:-colors aes shared configs tmux vim install-tools functions aliases pull statuses keyme azure livetail bitwarden mfa camera connect localuser links awskeys fonts clone kubernetes raspberrypi vault gpw}"
 
 mkdir -p "${HOME}/run"
 for file in $(echo $BENVIRONMENT_FILES_TO_LOAD); do

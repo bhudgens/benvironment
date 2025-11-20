@@ -1,0 +1,14 @@
+if false && [ ! -f "$HOME/.local/kitty.app/bin/kitty" ]; then
+  pushd /tmp > /dev/null
+  apt_get_install libjs-underscore
+  apt_get_install libjs-sphinxdoc
+  curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
+  popd
+fi
+
+if false && [ ! -L "${HOME}/.config/kitty/kitty.conf" ] \
+&& [ -f "${HOME}/.dotfiles/kitty.conf" ]; then
+  mkdir -p $(dirname "${HOME}/.config/kitty/kitty.conf")
+  [ -f "${HOME}/.config/kitty/kitty.conf" ] && mv "${HOME}/.config/kitty/kitty.conf" "${HOME}/.config/kitty/kitty.conf.bak"
+  ln -s "${HOME}/.dotfiles/kitty.conf" "${HOME}/.config/kitty/kitty.conf"
+fi

@@ -57,74 +57,12 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
     export FZF_DEFAULT_OPTS='-m --height 50% --border'
   fi
 
-  if ! _which fzf \
-  && [ ! -d "$HOME/.fzf" ]; then
-    git clone --depth 1 "https://github.com/junegunn/fzf.git" "$HOME/.fzf"
-    pushd "$HOME/.fzf" > /dev/null
-    "$HOME/.fzf/install" --key-bindings --completion --update-rc
-    popd > /dev/null
-  fi
-
-  if ! _which bw; then
-    pushd /tmp > /dev/null
-    curl -sLo- 'https://vault.bitwarden.com/download/?app=cli&platform=linux' > /tmp/bw.zip
-    unzip /tmp/bw.zip
-    mv /tmp/bw /usr/bin/bw
-    chmod +x /usr/bin/bw
-    popd > /dev/null
-  fi
-
-  if false && [ ! -f "$HOME/.local/kitty.app/bin/kitty" ]; then
-    pushd /tmp > /dev/null
-    apt_get_install libjs-underscore
-    apt_get_install libjs-sphinxdoc
-    curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
-    popd
-  fi
-
-  if false && [ ! -L "${HOME}/.config/kitty/kitty.conf" ] \
-  && [ -f "${HOME}/.dotfiles/kitty.conf" ]; then
-    mkdir -p $(dirname "${HOME}/.config/kitty/kitty.conf")
-    [ -f "${HOME}/.config/kitty/kitty.conf" ] && mv "${HOME}/.config/kitty/kitty.conf" "${HOME}/.config/kitty/kitty.conf.bak"
-    ln -s "${HOME}/.dotfiles/kitty.conf" "${HOME}/.config/kitty/kitty.conf"
-  fi
-
-  if ! _which docker; then
-    bash -c "$(curl -sLo- 'https://get.docker.com')"
-    eval "$SUDO usermod -aG docker '$USER'"
-  fi
-
-  if ! _which docker-compose; then
-    eval "$SUDO curl -L 'https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)' -o '/usr/local/bin/docker-compose'"
-    eval "$SUDO chmod +x '/usr/local/bin/docker-compose'"
-  fi
-
-  # Let's me clean up markdown
-  npm_install "bhudgens/tidy-markdown" "tidy-markdown"
-fi
-
-if false && ! _which lpass; then
-  apt_get_install bash-completion
-  apt_get_install build-essential
-  apt_get_install cmake
-  apt_get_install git
-  apt_get_install libcurl4
-  apt_get_install libcurl4-openssl-dev
-  apt_get_install libssl-dev
-  apt_get_install libxml2
-  apt_get_install libxml2-dev
-  apt_get_install libssl1.1
-  apt_get_install pkg-config
-  apt_get_install ca-certificates
-  apt_get_install xclip
-
-  TMP_LPASS_INSTALL_DIR="/tmp/lastpass-cli"
-  mkdir -p "${TMP_LPASS_INSTALL_DIR}"
-  git clone "https://github.com/lastpass/lastpass-cli.git" "${TMP_LPASS_INSTALL_DIR}"
-  pushd "${TMP_LPASS_INSTALL_DIR}" > /dev/null
-    make
-    eval "$SUDO make install"
-  popd > /dev/null
+  # Source custom tool installation scripts
+  for tool_script in ./tools/*; do
+    if [ -f "$tool_script" ]; then
+      source "$tool_script"
+    fi
+  done
 fi
 
 # When installing modules with npm always pin version
@@ -137,16 +75,6 @@ npm config set save-prefix ''
 # swap cat with bat
 if _which batcat; then
   alias cat='batcat'
-fi
-
-# Install prettyping
-if ! _which prettyping; then
-  pushd /tmp > /dev/null
-  curl -s -O https://raw.githubusercontent.com/denilsonsa/prettyping/master/prettyping
-  eval "$SUDO cp prettyping /usr/local/bin"
-  echo Installing prettyping
-  eval "$SUDO chmod +x /usr/local/bin/prettyping"
-  popd > /dev/null
 fi
 
 if [ -f /usr/local/bin/prettyping ]; then
