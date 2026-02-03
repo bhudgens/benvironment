@@ -1,8 +1,8 @@
 if ! _which bw; then
   pushd /tmp > /dev/null
   curl -sLo- 'https://bitwarden.com/download/?app=cli&platform=linux' > /tmp/bw.zip
-  unzip /tmp/bw.zip
+  unzip -o /tmp/bw.zip
   chmod +x bw
-  mv bw /usr/bin/bw
+  eval "$SUDO mv bw /usr/bin/bw"
   popd > /dev/null
 fi
