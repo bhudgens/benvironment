@@ -15,7 +15,7 @@ main() {
     && _commandExists apt-get; then
 
   for _command in curl zsh git; do
-    if ! _commandExists _command; then
+    if ! _commandExists "$_command"; then
       APPS_TO_INSTALL="$APPS_TO_INSTALL $_command"
     fi
   done
