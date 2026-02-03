@@ -20,6 +20,7 @@ usage() {
     echo "  start    - Start/attach to test container (default)"
     echo "  rebuild  - Remove container and rebuild image from scratch"
     echo "  remove   - Remove the test container (keeps image)"
+    echo "  refresh  - Clear cached files so next source picks up latest"
     echo "  clean    - Remove both container and image"
     echo "  status   - Show container status"
     echo "  logs     - Show container logs"
@@ -114,6 +115,19 @@ rebuild() {
     start
 }
 
+refresh() {
+    if ! docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
+        echo -e "${RED}Container does not exist. Run 'start' first.${NC}"
+        return 1
+    fi
+
+    echo -e "${YELLOW}Clearing cached files in container...${NC}"
+    docker start "$CONTAINER_NAME" > /dev/null 2>&1 || true
+    docker exec "$CONTAINER_NAME" bash -c 'rm -rf ~/run ~/.*zshrc ~/.oh-my-zsh ~/.benvironment'
+    echo -e "${GREEN}Cache cleared. Starting container...${NC}"
+    start
+}
+
 logs() {
     if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
         docker logs "$CONTAINER_NAME"
@@ -137,6 +151,9 @@ case "${1:-start}" in
         remove_container
         remove_image
         echo -e "${GREEN}Cleaned up.${NC}"
+        ;;
+    refresh)
+        refresh
         ;;
     status)
         status
