@@ -61,7 +61,7 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   mkdir -p "$HOME/run/tools"
 
   # List of tools to download if missing
-  for tool in $BENVIRONMENT_TOOLS_LIST; do
+  for tool in "${BENVIRONMENT_TOOLS_LIST[@]}"; do
     if [ ! -f "$HOME/run/tools/${tool}" ]; then
       curl -s "${URL_PATH_TO_ENV_FILES}/tools/${tool}" -o "$HOME/run/tools/${tool}"
       chmod +x "$HOME/run/tools/${tool}"
@@ -69,9 +69,9 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   done
 
   # Source custom tool installation scripts
-  for tool_script in $HOME/run/tools/*; do
-    if [ -f "$tool_script" ]; then
-      source "$tool_script"
+  for tool in "${BENVIRONMENT_TOOLS_LIST[@]}"; do
+    if [ -f "$HOME/run/tools/${tool}" ]; then
+      source "$HOME/run/tools/${tool}"
     fi
   done
 fi
