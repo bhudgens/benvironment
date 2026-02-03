@@ -52,7 +52,7 @@ npm_install () {
     eval "$SUDO chmod 775 /usr/bin"
     eval "$SUDO chown root:adm /usr/local/bin"
     eval "$SUDO chmod 775 /usr/local/bin"
-    npm install -g "$1"
+    eval "$SUDO npm install -g $1"
   fi
 }
 
