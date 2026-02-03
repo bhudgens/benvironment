@@ -34,7 +34,6 @@ live.env
 # OS generated files #
 ######################
 runme
-test
 .DS_Store
 .DS_Store?
 ._*
