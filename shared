@@ -45,9 +45,9 @@ npm_install () {
   if ! _which "${APP}" \
   && _which npm; then
     eval "$SUDO mkdir -p /usr/lib/node_modules"
-    eval "$SUDO mkdir -p /usr/local/lib"
+    eval "$SUDO mkdir -p /usr/local/lib/node_modules"
     eval "$SUDO chown -R ${USER}:${USER} /usr/lib/node_modules"
-    eval "$SUDO chown -R ${USER}:${USER} /usr/local/lib"
+    eval "$SUDO chown -R ${USER}:${USER} /usr/local/lib/node_modules"
     eval "$SUDO chown root:adm /usr/bin"
     eval "$SUDO chmod 775 /usr/bin"
     eval "$SUDO chown root:adm /usr/local/bin"
