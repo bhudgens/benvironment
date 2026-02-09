@@ -123,7 +123,7 @@ alias me='sudo pactl load-module module-loopback latency_msec=1'
 alias nme='sudo pactl unload-module module-loopback'
 alias myip='curl "https://api.ipify.org?format=json"'
 alias denv='source <(bwGetNote "Development Environment")'
-alias aws='docker run --rm -it -v ~/.aws:/root/.aws -v $(pwd):/aws --env AWS_SESSION_TOKEN --env AWS_ACCESS_KEY_ID --env AWS_SECRET_ACCESS_KEY --env AWS_PAGER="" bhudgens/aws-cli'
+# alias aws='docker run --rm -it -v ~/.aws:/root/.aws -v $(pwd):/aws --env AWS_SESSION_TOKEN --env AWS_ACCESS_KEY_ID --env AWS_SECRET_ACCESS_KEY --env AWS_PAGER="" bhudgens/aws-cli'
 
 alias record='asciinema rec'
 
