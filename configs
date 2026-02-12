@@ -21,3 +21,14 @@ popd > /dev/null
 for dotfile in .zshrc .tmux.conf; do
   install_dot_file "$dotfile"
 done
+
+#############################################################################
+# Oh-My-Zsh Custom Plugins
+#############################################################################
+ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
+  2>&1 git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions" > /dev/null
+fi
+if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
+  2>&1 git clone https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" > /dev/null
+fi
