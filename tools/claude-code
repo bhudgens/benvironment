@@ -1,3 +1,5 @@
 # Install Claude Code CLI (Anthropic's official CLI for Claude)
 # https://docs.anthropic.com/en/docs/claude-code
-npm_install "@anthropic-ai/claude-code" claude
+if ! _which claude; then
+  curl -fsSL https://claude.ai/install.sh | bash
+fi
