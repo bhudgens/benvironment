@@ -83,6 +83,18 @@ keyme () {
     chmod 600 "${TMP_SSH_KEY_DIR}/authorized_keys"
     echo "authorized_keys built from loaded public keys"
   fi
+
+  # Copy keys to Windows .ssh/ if running in WSL2 (VS Code uses Windows SSH)
+  if [[ -d "/mnt/c" ]]; then
+    local win_home
+    win_home=$(wslpath "$(cmd.exe /C 'echo %USERPROFILE%' 2>/dev/null | tr -d '\r')" 2>/dev/null) || true
+    if [[ -n "$win_home" && -d "$win_home" ]]; then
+      local win_ssh="$win_home/.ssh"
+      mkdir -p "$win_ssh" 2>/dev/null
+      cp "${TMP_SSH_KEY_DIR}"/* "$win_ssh/" 2>/dev/null || true
+      echo "SSH keys copied to Windows: $win_ssh"
+    fi
+  fi
 }
 
 agentme () {
