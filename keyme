@@ -149,34 +149,6 @@ _keyme_find_ephemeral_dir () {
   echo "$candidate"
 }
 
-# Install authorized_keys to a system-level sshd-safe location.
-# keyme's ~/.ssh is a symlink to tmpfs which sshd StrictModes rejects.
-# /etc/ssh/authorized_keys/%u is immune to this because sshd owns the path.
-_keyme_install_system_authorized_keys () {
-  local src="${TMP_SSH_KEY_DIR}/authorized_keys"
-  [[ -f "$src" ]] || return 0
-
-  # Only on Linux with sshd
-  [[ "$(uname)" == "Darwin" ]] && return 0
-  command -v sshd &>/dev/null || return 0
-
-  local ak_dir="/etc/ssh/authorized_keys"
-  local ak_file="$ak_dir/$(whoami)"
-
-  echo "Installing authorized_keys to $ak_file..."
-  sudo mkdir -p "$ak_dir"
-  sudo cp "$src" "$ak_file"
-  sudo chmod 644 "$ak_file"
-
-  # Configure sshd to check this location (idempotent, one-time)
-  if ! grep -q '/etc/ssh/authorized_keys/%u' /etc/ssh/sshd_config 2>/dev/null; then
-    echo "Configuring sshd AuthorizedKeysFile..."
-    sudo sed -i 's|^#\?AuthorizedKeysFile.*|AuthorizedKeysFile .ssh/authorized_keys /etc/ssh/authorized_keys/%u|' /etc/ssh/sshd_config
-    sudo systemctl restart sshd
-    echo "sshd configured and restarted"
-  fi
-}
-
 TMP_SSH_KEY_DIR=""
 add_key () {
   echo Installing Key: $2
@@ -221,9 +193,6 @@ keyme () {
     chmod 600 "${TMP_SSH_KEY_DIR}/authorized_keys"
     echo "authorized_keys built from loaded public keys"
   fi
-
-  # Install to sshd-safe system location (Linux servers only)
-  _keyme_install_system_authorized_keys
 
   # Copy keys to Windows .ssh/ if running in WSL2 (VS Code uses Windows SSH)
   if [[ -d "/mnt/c" ]]; then
