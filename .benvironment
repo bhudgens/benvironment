@@ -1,8 +1,10 @@
 #! /usr/bin/env bash
 
-read -rs 'DECRYPT_PASSPHRASE?Decrypt:'
-echo ""
-export DECRYPT_PASSPHRASE
+if [ ! -f "${HOME}/.ssh/id_rsa" ]; then
+  read -rs 'DECRYPT_PASSPHRASE?Decrypt:'
+  echo ""
+  export DECRYPT_PASSPHRASE
+fi
 export DIR_REVERTS="${HOME}/reverts"
 export DIR_GLG="${HOME}/Dropbox/code/glg"
 export DIR_STARPHLEET="${DIR_REVERTS}/starphleet"
