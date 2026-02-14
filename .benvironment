@@ -12,7 +12,7 @@ export DIR_CODE="${HOME}/Dropbox/code"
 export DIR_PERSONAL="${HOME}/Dropbox/code/personal"
 export URL_PATH_TO_ENV_FILES="https://raw.githubusercontent.com/bhudgens/benvironment/master"
 export BENVIRONMENT_HELP_FILE="/tmp/.benvironment.help.md"
-BENVIRONMENT_TOOLS_LIST=(nodejs fzf bw docker docker-compose tidy-markdown prettyping kitty lpass claude-code granted)
+BENVIRONMENT_TOOLS_LIST=(nodejs fzf bw docker docker-compose tidy-markdown prettyping kitty lpass claude-code granted aichat)
 
 [ -f "${BENVIRONMENT_HELP_FILE}" ] && rm "${BENVIRONMENT_HELP_FILE}"
 

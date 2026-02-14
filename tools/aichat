@@ -1,0 +1,9 @@
+# Install aichat - AI-powered chat CLI
+# https://github.com/sigoden/aichat
+AICHAT_VERSION="0.30.0"
+
+if ! _which aichat; then
+  curl -fsSL "https://github.com/sigoden/aichat/releases/download/v${AICHAT_VERSION}/aichat-v${AICHAT_VERSION}-x86_64-unknown-linux-musl.tar.gz" -o "/tmp/aichat.tar.gz"
+  eval "$SUDO tar -xzf /tmp/aichat.tar.gz -C /usr/local/bin/ aichat"
+  rm -f /tmp/aichat.tar.gz
+fi
