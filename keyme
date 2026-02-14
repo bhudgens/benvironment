@@ -134,7 +134,7 @@ _keyme_find_ephemeral_dir () {
 
       # Create the runtime dir if it doesn't exist (requires sudo)
       if [[ ! -d "$candidate" ]]; then
-        echo "Creating $candidate (XDG_RUNTIME_DIR not set)..."
+        echo "Creating $candidate (XDG_RUNTIME_DIR not set)..." >&2
         sudo mkdir -p "$candidate" || { echo "Error: failed to create $candidate" >&2; return 1; }
         sudo chown "$(id -un):$(id -gn)" "$candidate" || { echo "Error: failed to chown $candidate" >&2; return 1; }
         sudo chmod 700 "$candidate" || { echo "Error: failed to chmod $candidate" >&2; return 1; }
