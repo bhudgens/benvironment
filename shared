@@ -53,6 +53,7 @@ npm_install () {
     eval "$SUDO chown root:adm /usr/local/bin"
     eval "$SUDO chmod 775 /usr/local/bin"
     eval "$SUDO npm install -g $1"
+    [ -d "${HOME}/.npm" ] && eval "$SUDO chown -R ${USER}:${USER} ${HOME}/.npm"
   fi
 }
 
