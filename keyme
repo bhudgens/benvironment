@@ -45,7 +45,139 @@ _chmod () {
   [ -f "$2" ] && chmod $1 "$2"
 }
 
-TMP_SSH_KEY_DIR="${XDG_RUNTIME_DIR:-/tmp/}.ssh"
+# Validate that a directory is on an ephemeral filesystem and has safe permissions.
+# Returns 0 if safe, 1 if not. Prints error to stderr on failure.
+_keyme_validate_dir () {
+  local dir="$1"
+
+  if [[ "$(uname)" == "Darwin" ]]; then
+    # macOS: TMPDIR must be under /var/folders/ (OS-managed, cleaned on reboot)
+    if [[ "$dir" != /var/folders/* && "$dir" != /private/var/folders/* ]]; then
+      echo "Error: directory '$dir' is not under macOS-managed /var/folders/." >&2
+      echo "  Keys would persist on disk across reboots." >&2
+      return 1
+    fi
+  else
+    # Linux: must be on tmpfs
+    local fstype
+    fstype=$(findmnt -n -o FSTYPE --target "$dir" 2>/dev/null) || fstype=""
+    if [[ "$fstype" != "tmpfs" ]]; then
+      echo "Error: '$dir' is not on tmpfs (found: '${fstype:-unknown}')." >&2
+      echo "  Keys would persist on disk across reboots." >&2
+      return 1
+    fi
+  fi
+
+  # Verify ownership: must be owned by current user
+  local dir_owner
+  if [[ "$(uname)" == "Darwin" ]]; then
+    dir_owner=$(stat -f %Su "$dir" 2>/dev/null)
+  else
+    dir_owner=$(stat -c %U "$dir" 2>/dev/null)
+  fi
+  if [[ "$dir_owner" != "$(id -un)" ]]; then
+    echo "Error: '$dir' is owned by '$dir_owner', expected '$(id -un)'." >&2
+    return 1
+  fi
+
+  # Verify not world-writable
+  local perms
+  if [[ "$(uname)" == "Darwin" ]]; then
+    perms=$(stat -f %Lp "$dir" 2>/dev/null)
+  else
+    perms=$(stat -c %a "$dir" 2>/dev/null)
+  fi
+  local other_bits="${perms: -1}"
+  if [[ "$other_bits" =~ [2367] ]]; then
+    echo "Error: '$dir' is world-writable (mode: $perms). sshd StrictModes will reject this." >&2
+    return 1
+  fi
+
+  return 0
+}
+
+# Find a safe, ephemeral directory for SSH key storage.
+# Validates filesystem type and permissions BEFORE returning.
+# Prints the directory path on success, error on failure.
+_keyme_find_ephemeral_dir () {
+  local candidate=""
+
+  if [[ "$(uname)" == "Darwin" ]]; then
+    candidate="${TMPDIR:-}"
+    if [[ -z "$candidate" ]]; then
+      echo "Error: TMPDIR is not set on macOS." >&2
+      return 1
+    fi
+    # Validate before using
+    _keyme_validate_dir "$candidate" || return 1
+
+  else
+    # Linux: prefer XDG_RUNTIME_DIR, fall back to /run/user/<uid>
+    candidate="${XDG_RUNTIME_DIR:-}"
+
+    if [[ -n "$candidate" ]]; then
+      # XDG_RUNTIME_DIR is set — validate it
+      _keyme_validate_dir "$candidate" || return 1
+    else
+      # XDG_RUNTIME_DIR not set — try /run/user/<uid>
+      # First verify /run is tmpfs BEFORE creating anything
+      local fstype
+      fstype=$(findmnt -n -o FSTYPE --target /run 2>/dev/null) || fstype=""
+      if [[ "$fstype" != "tmpfs" ]]; then
+        echo "Error: /run is not tmpfs (found: '${fstype:-unknown}'). No safe ephemeral storage available." >&2
+        return 1
+      fi
+
+      local uid
+      uid=$(id -u)
+      candidate="/run/user/$uid"
+
+      # Create the runtime dir if it doesn't exist (requires sudo)
+      if [[ ! -d "$candidate" ]]; then
+        echo "Creating $candidate (XDG_RUNTIME_DIR not set)..."
+        sudo mkdir -p "$candidate" || { echo "Error: failed to create $candidate" >&2; return 1; }
+        sudo chown "$(id -un):$(id -gn)" "$candidate" || { echo "Error: failed to chown $candidate" >&2; return 1; }
+        sudo chmod 700 "$candidate" || { echo "Error: failed to chmod $candidate" >&2; return 1; }
+      fi
+
+      # Validate the created/existing dir
+      _keyme_validate_dir "$candidate" || return 1
+      export XDG_RUNTIME_DIR="$candidate"
+    fi
+  fi
+
+  echo "$candidate"
+}
+
+# Install authorized_keys to a system-level sshd-safe location.
+# keyme's ~/.ssh is a symlink to tmpfs which sshd StrictModes rejects.
+# /etc/ssh/authorized_keys/%u is immune to this because sshd owns the path.
+_keyme_install_system_authorized_keys () {
+  local src="${TMP_SSH_KEY_DIR}/authorized_keys"
+  [[ -f "$src" ]] || return 0
+
+  # Only on Linux with sshd
+  [[ "$(uname)" == "Darwin" ]] && return 0
+  command -v sshd &>/dev/null || return 0
+
+  local ak_dir="/etc/ssh/authorized_keys"
+  local ak_file="$ak_dir/$(whoami)"
+
+  echo "Installing authorized_keys to $ak_file..."
+  sudo mkdir -p "$ak_dir"
+  sudo cp "$src" "$ak_file"
+  sudo chmod 644 "$ak_file"
+
+  # Configure sshd to check this location (idempotent, one-time)
+  if ! grep -q '/etc/ssh/authorized_keys/%u' /etc/ssh/sshd_config 2>/dev/null; then
+    echo "Configuring sshd AuthorizedKeysFile..."
+    sudo sed -i 's|^#\?AuthorizedKeysFile.*|AuthorizedKeysFile .ssh/authorized_keys /etc/ssh/authorized_keys/%u|' /etc/ssh/sshd_config
+    sudo systemctl restart sshd
+    echo "sshd configured and restarted"
+  fi
+}
+
+TMP_SSH_KEY_DIR=""
 add_key () {
   echo Installing Key: $2
   bw get item "$1" | jq -r '.notes' > "${TMP_SSH_KEY_DIR}/$2"
@@ -58,6 +190,12 @@ add_key () {
 
 keyme () {
   [ -z "${KEYME_KEYS_TO_LOAD}" ] && _keysToLoadHelp && return
+
+  # Find and validate ephemeral storage BEFORE doing anything
+  local ephemeral_base
+  ephemeral_base=$(_keyme_find_ephemeral_dir) || return 1
+  TMP_SSH_KEY_DIR="${ephemeral_base}/.ssh"
+
   _bwLogout
   echo "Bitwarden Login..."
   _bwUnlock
@@ -77,12 +215,15 @@ keyme () {
     add_key "${id}" "${name}"
   done
 
-  # Build authorized_keys from loaded public keys (enables VS Code Remote-SSH)
+  # Build authorized_keys from loaded public keys
   if ls "${TMP_SSH_KEY_DIR}"/*.pub 1>/dev/null 2>&1; then
     cat "${TMP_SSH_KEY_DIR}"/*.pub > "${TMP_SSH_KEY_DIR}/authorized_keys" 2>/dev/null
     chmod 600 "${TMP_SSH_KEY_DIR}/authorized_keys"
     echo "authorized_keys built from loaded public keys"
   fi
+
+  # Install to sshd-safe system location (Linux servers only)
+  _keyme_install_system_authorized_keys
 
   # Copy keys to Windows .ssh/ if running in WSL2 (VS Code uses Windows SSH)
   if [[ -d "/mnt/c" ]]; then
