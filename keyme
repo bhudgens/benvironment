@@ -76,6 +76,13 @@ keyme () {
     local name=$(echo $key_and_name | awk '{print $2}')
     add_key "${id}" "${name}"
   done
+
+  # Build authorized_keys from loaded public keys (enables VS Code Remote-SSH)
+  if ls "${TMP_SSH_KEY_DIR}"/*.pub 1>/dev/null 2>&1; then
+    cat "${TMP_SSH_KEY_DIR}"/*.pub > "${TMP_SSH_KEY_DIR}/authorized_keys" 2>/dev/null
+    chmod 600 "${TMP_SSH_KEY_DIR}/authorized_keys"
+    echo "authorized_keys built from loaded public keys"
+  fi
 }
 
 agentme () {
