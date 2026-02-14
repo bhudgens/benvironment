@@ -36,6 +36,14 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
     eval "$SUDO apt-get install -o Dpkg::Options::='--force-overwrite' -y bat ripgrep"
   fi
 
+  # AWS CLI v2
+  if ! _which aws; then
+    curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+    unzip -qo /tmp/awscliv2.zip -d /tmp
+    eval "$SUDO /tmp/aws/install"
+    rm -rf /tmp/awscliv2.zip /tmp/aws
+  fi
+
   if type rg &> /dev/null; then
     export FZF_DEFAULT_COMMAND='rg --files'
     export FZF_DEFAULT_OPTS='-m --height 50% --border'
