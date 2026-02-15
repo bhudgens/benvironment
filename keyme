@@ -146,7 +146,7 @@ _keyme_find_ephemeral_dir () {
     fi
   fi
 
-  echo "$candidate"
+  echo "${candidate%/}"
 }
 
 TMP_SSH_KEY_DIR=""
