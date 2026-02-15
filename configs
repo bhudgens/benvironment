@@ -6,6 +6,11 @@ function _which () {
   which $1 > /dev/null
 }
 
+# Skip configs setup if SSH key doesn't exist yet
+if [ ! -f "${HOME}/.ssh/id_rsa" ]; then
+  return 0
+fi
+
 #############################################################################
 # Checkout our dotfiles
 #############################################################################

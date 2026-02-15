@@ -1,4 +1,7 @@
-export BW_SESSION_FILE="${XDG_RUNTIME_DIR:-/tmp}/.bwSession"
+# Use ephemeral storage for Bitwarden session and cache
+_BW_EPHEMERAL_DIR="${XDG_RUNTIME_DIR:-/tmp}"
+export BW_SESSION_FILE="${_BW_EPHEMERAL_DIR}/.bwSession"
+export BW_CACHE_FILE="${_BW_EPHEMERAL_DIR}/.bw_items_cache"
 export BW_USERNAME=$(dec "U2FsdGVkX18H/ngbZbImHfPsDwpE7/9/11qJ/Nt4bpOM5HlnwNlS45obrq+/f6WC")
 export BW_APIKEYFILE="$HOME/.bwapikey"
 
@@ -26,6 +29,37 @@ function _bwUnlock() {
   [ -f "$BW_APIKEYFILE" ] && source "$BW_APIKEYFILE"
   ! _isBwUnlocked && bw unlock --raw > "${BW_SESSION_FILE}"
   [ -f "${BW_SESSION_FILE}" ] && export BW_SESSION=$(cat ${BW_SESSION_FILE})
+}
+
+# Ensure Bitwarden items cache exists and is current
+# Returns the path to the cache file
+function _bwEnsureCache() {
+  # Check if cache file exists and is not empty
+  if [ ! -s "$BW_CACHE_FILE" ]; then
+    # Ensure user is logged in and unlocked
+    _bwUnlock
+    # Get a list of items, clean control characters, and save to cache file
+    bw list items | jq -c 'walk(if type == "string" then gsub("[\\x00-\\x1F]"; "") else . end)' > "$BW_CACHE_FILE"
+    # Set cache file permissions to read/write by owner only
+    chmod 600 "$BW_CACHE_FILE"
+  fi
+  echo "$BW_CACHE_FILE"
+}
+
+# Get a specific item from the cache by ID
+# Usage: _bwGetItemFromCache <item_id>
+function _bwGetItemFromCache() {
+  local item_id="$1"
+  _bwEnsureCache > /dev/null
+  jq -r --arg id "$item_id" '.[] | select(.id == $id)' "$BW_CACHE_FILE"
+}
+
+# Clean up Bitwarden cache unless persistence is enabled
+# Cache is kept only if $HOME/.keepbwcache exists
+function _bwCleanupCache() {
+  if [ ! -f "$HOME/.keepbwcache" ] && [ -f "$BW_CACHE_FILE" ]; then
+    rm -f "$BW_CACHE_FILE"
+  fi
 }
 
 function bwGetNote() {

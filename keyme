@@ -152,8 +152,9 @@ _keyme_find_ephemeral_dir () {
 TMP_SSH_KEY_DIR=""
 add_key () {
   echo Installing Key: $2
-  bw get item "$1" | jq -r '.notes' > "${TMP_SSH_KEY_DIR}/$2"
-  bw get item "$1" | jq -r '.fields[] | select(.name=="public") | .value' > "${TMP_SSH_KEY_DIR}/$2.pub" 2> /dev/null
+  local item=$(_bwGetItemFromCache "$1")
+  echo "$item" | jq -r '.notes' > "${TMP_SSH_KEY_DIR}/$2"
+  echo "$item" | jq -r '.fields[] | select(.name=="public") | .value' > "${TMP_SSH_KEY_DIR}/$2.pub" 2> /dev/null
   _purgeIfEmpty "${TMP_SSH_KEY_DIR}/$2"
   _purgeIfEmpty "${TMP_SSH_KEY_DIR}/$2.pub"
   _chmod 400 "${TMP_SSH_KEY_DIR}/$2"
@@ -170,7 +171,8 @@ keyme () {
 
   _bwLogout
   echo "Bitwarden Login..."
-  _bwUnlock
+  echo "Populating Bitwarden cache..."
+  _bwEnsureCache > /dev/null
   echo Purging "${TMP_SSH_KEY_DIR}"
   [ -d "${TMP_SSH_KEY_DIR}" ] && rm -rf "${TMP_SSH_KEY_DIR}"
   echo Making tmp dir "${TMP_SSH_KEY_DIR}"...
@@ -205,6 +207,9 @@ keyme () {
       echo "SSH keys copied to Windows: $win_ssh"
     fi
   fi
+
+  # Clean up cache unless persistence is enabled
+  _bwCleanupCache
 }
 
 agentme () {
