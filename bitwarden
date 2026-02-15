@@ -38,21 +38,12 @@ function _bwEnsureCache() {
   if [ ! -s "$BW_CACHE_FILE" ]; then
     # Ensure user is logged in and unlocked
     _bwUnlock
-    # Get a list of items, clean control characters (except newlines/tabs), and save to cache file
-    # Preserve \x09 (tab) and \x0A (newline) which are needed for SSH keys and formatting
-    bw list items | jq -c 'walk(if type == "string" then gsub("[\\x00-\\x08\\x0B-\\x1F]"; "") else . end)' > "$BW_CACHE_FILE"
+    # Get a list of items and save to cache file
+    bw list items > "$BW_CACHE_FILE"
     # Set cache file permissions to read/write by owner only
     chmod 600 "$BW_CACHE_FILE"
   fi
   echo "$BW_CACHE_FILE"
-}
-
-# Get a specific item from the cache by ID
-# Usage: _bwGetItemFromCache <item_id>
-function _bwGetItemFromCache() {
-  local item_id="$1"
-  _bwEnsureCache > /dev/null
-  jq -r --arg id "$item_id" '.[] | select(.id == $id)' "$BW_CACHE_FILE"
 }
 
 # Clean up Bitwarden cache unless persistence is enabled

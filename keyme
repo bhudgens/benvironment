@@ -152,9 +152,9 @@ _keyme_find_ephemeral_dir () {
 TMP_SSH_KEY_DIR=""
 add_key () {
   echo Installing Key: $2
-  local item=$(_bwGetItemFromCache "$1")
-  echo "$item" | jq -r '.notes' > "${TMP_SSH_KEY_DIR}/$2"
-  echo "$item" | jq -r '.fields[] | select(.name=="public") | .value' > "${TMP_SSH_KEY_DIR}/$2.pub" 2> /dev/null
+  local cache_file=$(_bwEnsureCache)
+  cat "$cache_file" | jq -r --arg id "$1" '.[] | select(.id == $id) | .notes' > "${TMP_SSH_KEY_DIR}/$2"
+  cat "$cache_file" | jq -r --arg id "$1" '.[] | select(.id == $id) | .fields[] | select(.name=="public") | .value' > "${TMP_SSH_KEY_DIR}/$2.pub" 2> /dev/null
   _purgeIfEmpty "${TMP_SSH_KEY_DIR}/$2"
   _purgeIfEmpty "${TMP_SSH_KEY_DIR}/$2.pub"
   _chmod 400 "${TMP_SSH_KEY_DIR}/$2"
