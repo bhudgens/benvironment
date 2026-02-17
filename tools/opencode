@@ -1,5 +1,5 @@
 # Install OpenCode - AI coding agent for the terminal
-# https://github.com/opencode-ai/opencode
+# https://github.com/anomalyco/opencode
 if ! _which opencode; then
-  curl -fsSL https://raw.githubusercontent.com/opencode-ai/opencode/refs/heads/main/install | bash
+  curl -fsSL https://opencode.ai/install | bash
 fi
