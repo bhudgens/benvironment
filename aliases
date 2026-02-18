@@ -145,4 +145,7 @@ alias prompt="export PROMPT='%{%f%b%k%}\$(build_prompt) '"
 
 alias cisco="ssh -oKexAlgorithms=+diffie-hellman-group1-sha1,diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1 -oHostKeyAlgorithms=+ssh-rsa "
 
+alias oc='opencode'
+alias cx='codex'
+
 # All finished
