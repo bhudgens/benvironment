@@ -40,6 +40,11 @@ rl() {
     fi
   done
 
+  for tool in "${BENVIRONMENT_TOOLS_LIST[@]}"; do
+    TOOL_CACHE="${HOME}/run/tools/${tool}"
+    [ -f "${TOOL_CACHE}" ] && rm "${TOOL_CACHE}" && echo "Purged ${TOOL_CACHE}"
+  done
+
   if [ -f "./.benvironment" ]; then
     cp "./.benvironment" "${HOME}/.benvironment"
   else
