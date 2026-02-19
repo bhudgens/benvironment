@@ -1,5 +1,10 @@
 # Install OpenCode - AI coding agent for the terminal
 # https://github.com/anomalyco/opencode
-if ! _which opencode; then
+if ! _which opencode && [ ! -f "$HOME/.opencode/bin/opencode" ]; then
   curl -fsSL https://opencode.ai/install | bash
+fi
+
+# Ensure opencode is in PATH
+if [ -d "$HOME/.opencode/bin" ]; then
+  export PATH="$HOME/.opencode/bin:$PATH"
 fi
