@@ -52,10 +52,14 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   # Ensure tools directory exists
   mkdir -p "$HOME/run/tools"
 
-  # List of tools to download if missing
+  # List of tools to load if missing from cache
   for tool in "${BENVIRONMENT_TOOLS_LIST[@]}"; do
     if [ ! -f "$HOME/run/tools/${tool}" ]; then
-      curl -s "${URL_PATH_TO_ENV_FILES}/tools/${tool}" -o "$HOME/run/tools/${tool}"
+      if [ -f "./tools/${tool}" ]; then
+        cp "./tools/${tool}" "$HOME/run/tools/${tool}"
+      else
+        curl -s "${URL_PATH_TO_ENV_FILES}/tools/${tool}" -o "$HOME/run/tools/${tool}"
+      fi
       chmod +x "$HOME/run/tools/${tool}"
     fi
   done

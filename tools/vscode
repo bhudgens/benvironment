@@ -1,0 +1,10 @@
+# VS Code wrapper for WSL2 - calls Windows VS Code directly
+# without adding Windows paths to PATH (avoids WSL PATH latency)
+if [ -d "/mnt/c" ] && ! _which code; then
+  VSCODE_PATH="/mnt/c/Users/benja/AppData/Local/Programs/Microsoft VS Code/bin/code"
+  if [ -f "$VSCODE_PATH" ]; then
+    code() {
+      "$VSCODE_PATH" "$@"
+    }
+  fi
+fi
