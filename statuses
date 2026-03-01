@@ -85,14 +85,3 @@ statusAnything() {
   $*
   anybar_bad "${PORT_ANYBAR_STATUS_ANYTHING}"
 }
-
-cat << EOF >> "${BENVIRONMENT_HELP_FILE}"
-${blue}
-${white}## Status Anything
-${blue}
--   ${white}statusAnything \$cmd \$args ${blue}
-    Runs any command and leaves a status bar indicator
-    on your menu bar while the command is running.  Green
-    while the command runs and red when it stops
-
-EOF
