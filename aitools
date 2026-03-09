@@ -13,6 +13,7 @@
 #
 # Managed files:
 #   ~/.claude/CLAUDE.md         <- ~/.dotfiles/ai/claude/CLAUDE.md
+#   ~/.claude/settings.json     <- ~/.dotfiles/ai/claude/settings.json
 #   ~/.claude/commands/         <- ~/.dotfiles/ai/claude/commands/
 #   ~/.claude/skills/           <- ~/.dotfiles/ai/claude/skills/
 #   ~/.codex/AGENTS.md          <- ~/.dotfiles/ai/codex/AGENTS.md
@@ -42,9 +43,10 @@ _ai_install_dir() {
 }
 
 # Claude Code
-_ai_install_file "claude/CLAUDE.md"   "${HOME}/.claude/CLAUDE.md"
-_ai_install_dir  "claude/commands"    "${HOME}/.claude/commands"
-_ai_install_dir  "claude/skills"      "${HOME}/.claude/skills"
+_ai_install_file "claude/CLAUDE.md"      "${HOME}/.claude/CLAUDE.md"
+_ai_install_file "claude/settings.json"  "${HOME}/.claude/settings.json"
+_ai_install_dir  "claude/commands"       "${HOME}/.claude/commands"
+_ai_install_dir  "claude/skills"         "${HOME}/.claude/skills"
 
 # Codex
 _ai_install_file "codex/AGENTS.md"    "${HOME}/.codex/AGENTS.md"
