@@ -13,26 +13,15 @@ fi
 
 #############################################################################
 # Checkout our dotfiles
-# Primary machine: ~/reverts/dotfiles is the working copy — symlink ~/.dotfiles to it
-# Other hosts:     clone from GitHub into ~/.dotfiles and pull latest
 #############################################################################
 DOT_FILES_REPO=${DOT_FILES_REPO:-"https://github.com/bhudgens/dotfiles.git"}
-
-if [ -d "${HOME}/reverts/dotfiles/.git" ]; then
-  # Primary machine: symlink ~/.dotfiles -> ~/reverts/dotfiles
-  if [ ! -L "${HOME}/.dotfiles" ]; then
-    [ -d "${HOME}/.dotfiles" ] && mv "${HOME}/.dotfiles" "${HOME}/.dotfiles.bak"
-    ln -s "${HOME}/reverts/dotfiles" "${HOME}/.dotfiles"
-  fi
-else
-  # Other hosts: clone and pull
-  if [ ! -d "${HOME}/.dotfiles" ]; then
-    2>&1 git clone "${DOT_FILES_REPO}" "${HOME}/.dotfiles" > /dev/null
-  fi
-  pushd "${HOME}/.dotfiles" > /dev/null
-    2>&1 git pull > /dev/null
-  popd > /dev/null
+if [ ! -d "$HOME/.dotfiles" ]; then
+  2>&1 git clone "${DOT_FILES_REPO}" "$HOME/.dotfiles" > /dev/null
 fi
+
+pushd "$HOME/.dotfiles" > /dev/null
+  2>&1 git pull > /dev/null
+popd > /dev/null
 
 for dotfile in .zshrc .tmux.conf; do
   install_dot_file "$dotfile"

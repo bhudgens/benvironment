@@ -2,23 +2,24 @@
 #############################################################################
 # AI Tool Config Management
 #
-# Manages portable global configs for: claude-code, codex, opencode
+# Copies portable global configs for: claude-code, codex, opencode
+# from ~/.dotfiles/ai/ to their expected locations on every shell load.
 #
-# Source of truth: ~/reverts/dotfiles/ai/  (primary machine)
-#                  ~/.dotfiles/ai/          (all machines via git clone)
+# This is pull-only: files are overwritten from dotfiles on each load.
+# To persist a change across all machines:
+#   1. Edit ~/reverts/dotfiles/ai/<tool>/<file>
+#   2. Commit and push from ~/reverts/dotfiles
+#   On next shell load, all machines will pull and receive the update.
 #
-# To persist changes to any managed file:
-#   Commit and push from ~/reverts/dotfiles
-#
-# Managed symlinks:
-#   ~/.claude/CLAUDE.md       -> ~/.dotfiles/ai/claude/CLAUDE.md
-#   ~/.claude/commands/       -> ~/.dotfiles/ai/claude/commands/
-#   ~/.claude/skills/         -> ~/.dotfiles/ai/claude/skills/
-#   ~/.codex/AGENTS.md        -> ~/.dotfiles/ai/codex/AGENTS.md
-#   ~/.opencode/AGENTS.md     -> ~/.dotfiles/ai/opencode/AGENTS.md
+# Managed files:
+#   ~/.claude/CLAUDE.md         <- ~/.dotfiles/ai/claude/CLAUDE.md
+#   ~/.claude/commands/         <- ~/.dotfiles/ai/claude/commands/
+#   ~/.claude/skills/           <- ~/.dotfiles/ai/claude/skills/
+#   ~/.codex/AGENTS.md          <- ~/.dotfiles/ai/codex/AGENTS.md
+#   ~/.opencode/AGENTS.md       <- ~/.dotfiles/ai/opencode/AGENTS.md
 #############################################################################
 
-_ai_link_file() {
+_ai_install_file() {
   local src="${HOME}/.dotfiles/ai/${1}"
   local dest="${2}"
   local dest_dir
@@ -27,42 +28,26 @@ _ai_link_file() {
   [ ! -f "${src}" ] && return 0
 
   mkdir -p "${dest_dir}"
-
-  if [ -f "${dest}" ] && [ ! -L "${dest}" ]; then
-    mv "${dest}" "${dest}.bak"
-  fi
-
-  if [ ! -L "${dest}" ]; then
-    ln -s "${src}" "${dest}"
-  fi
+  cp -f "${src}" "${dest}"
 }
 
-_ai_link_dir() {
+_ai_install_dir() {
   local src="${HOME}/.dotfiles/ai/${1}"
   local dest="${2}"
-  local dest_parent
-  dest_parent="$(dirname "${dest}")"
 
   [ ! -d "${src}" ] && return 0
 
-  mkdir -p "${dest_parent}"
-
-  if [ -d "${dest}" ] && [ ! -L "${dest}" ]; then
-    mv "${dest}" "${dest}.bak"
-  fi
-
-  if [ ! -L "${dest}" ]; then
-    ln -s "${src}" "${dest}"
-  fi
+  mkdir -p "${dest}"
+  cp -rf "${src}/." "${dest}/"
 }
 
 # Claude Code
-_ai_link_file  "claude/CLAUDE.md"   "${HOME}/.claude/CLAUDE.md"
-_ai_link_dir   "claude/commands"    "${HOME}/.claude/commands"
-_ai_link_dir   "claude/skills"      "${HOME}/.claude/skills"
+_ai_install_file "claude/CLAUDE.md"   "${HOME}/.claude/CLAUDE.md"
+_ai_install_dir  "claude/commands"    "${HOME}/.claude/commands"
+_ai_install_dir  "claude/skills"      "${HOME}/.claude/skills"
 
 # Codex
-_ai_link_file  "codex/AGENTS.md"    "${HOME}/.codex/AGENTS.md"
+_ai_install_file "codex/AGENTS.md"    "${HOME}/.codex/AGENTS.md"
 
 # OpenCode
-_ai_link_file  "opencode/AGENTS.md" "${HOME}/.opencode/AGENTS.md"
+_ai_install_file "opencode/AGENTS.md" "${HOME}/.opencode/AGENTS.md"
