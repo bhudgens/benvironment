@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+#############################################################################
+# AI Tool Config Management
+#
+# Manages portable global configs for: claude-code, codex, opencode
+#
+# Source of truth: ~/reverts/dotfiles/ai/  (primary machine)
+#                  ~/.dotfiles/ai/          (all machines via git clone)
+#
+# To persist changes to any managed file:
+#   Commit and push from ~/reverts/dotfiles
+#
+# Managed symlinks:
+#   ~/.claude/CLAUDE.md       -> ~/.dotfiles/ai/claude/CLAUDE.md
+#   ~/.claude/commands/       -> ~/.dotfiles/ai/claude/commands/
+#   ~/.claude/skills/         -> ~/.dotfiles/ai/claude/skills/
+#   ~/.codex/AGENTS.md        -> ~/.dotfiles/ai/codex/AGENTS.md
+#   ~/.opencode/AGENTS.md     -> ~/.dotfiles/ai/opencode/AGENTS.md
+#############################################################################
+
+_ai_link_file() {
+  local src="${HOME}/.dotfiles/ai/${1}"
+  local dest="${2}"
+  local dest_dir
+  dest_dir="$(dirname "${dest}")"
+
+  [ ! -f "${src}" ] && return 0
+
+  mkdir -p "${dest_dir}"
+
+  if [ -f "${dest}" ] && [ ! -L "${dest}" ]; then
+    mv "${dest}" "${dest}.bak"
+  fi
+
+  if [ ! -L "${dest}" ]; then
+    ln -s "${src}" "${dest}"
+  fi
+}
+
+_ai_link_dir() {
+  local src="${HOME}/.dotfiles/ai/${1}"
+  local dest="${2}"
+  local dest_parent
+  dest_parent="$(dirname "${dest}")"
+
+  [ ! -d "${src}" ] && return 0
+
+  mkdir -p "${dest_parent}"
+
+  if [ -d "${dest}" ] && [ ! -L "${dest}" ]; then
+    mv "${dest}" "${dest}.bak"
+  fi
+
+  if [ ! -L "${dest}" ]; then
+    ln -s "${src}" "${dest}"
+  fi
+}
+
+# Claude Code
+_ai_link_file  "claude/CLAUDE.md"   "${HOME}/.claude/CLAUDE.md"
+_ai_link_dir   "claude/commands"    "${HOME}/.claude/commands"
+_ai_link_dir   "claude/skills"      "${HOME}/.claude/skills"
+
+# Codex
+_ai_link_file  "codex/AGENTS.md"    "${HOME}/.codex/AGENTS.md"
+
+# OpenCode
+_ai_link_file  "opencode/AGENTS.md" "${HOME}/.opencode/AGENTS.md"
