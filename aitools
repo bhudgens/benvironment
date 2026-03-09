@@ -2,54 +2,32 @@
 #############################################################################
 # AI Tool Config Management
 #
-# Copies portable global configs for: claude-code, codex, opencode
-# from ~/.dotfiles/ai/ to their expected locations on every shell load.
+# Installs portable global configs for: claude-code, codex, opencode
+# from ~/.dotfiles into their expected locations, using the same
+# install_dot_file / install_dot_dir pattern as the rest of benvironment.
 #
-# This is pull-only: files are overwritten from dotfiles on each load.
 # To persist a change across all machines:
-#   1. Edit ~/reverts/dotfiles/ai/<tool>/<file>
+#   1. Edit the file under ~/reverts/dotfiles/
 #   2. Commit and push from ~/reverts/dotfiles
-#   On next shell load, all machines will pull and receive the update.
+#   On next shell load, all machines pull and pick up the update.
 #
-# Managed files:
-#   ~/.claude/CLAUDE.md         <- ~/.dotfiles/ai/claude/CLAUDE.md
-#   ~/.claude/settings.json     <- ~/.dotfiles/ai/claude/settings.json
-#   ~/.claude/commands/         <- ~/.dotfiles/ai/claude/commands/
-#   ~/.claude/skills/           <- ~/.dotfiles/ai/claude/skills/
-#   ~/.codex/AGENTS.md          <- ~/.dotfiles/ai/codex/AGENTS.md
-#   ~/.opencode/AGENTS.md       <- ~/.dotfiles/ai/opencode/AGENTS.md
+# Managed:
+#   ~/.claude/CLAUDE.md         <- ~/.dotfiles/.claude/CLAUDE.md
+#   ~/.claude/settings.json     <- ~/.dotfiles/.claude/settings.json
+#   ~/.claude/commands/         <- ~/.dotfiles/.claude/commands/
+#   ~/.claude/skills/           <- ~/.dotfiles/.claude/skills/
+#   ~/.codex/AGENTS.md          <- ~/.dotfiles/.codex/AGENTS.md
+#   ~/.opencode/AGENTS.md       <- ~/.dotfiles/.opencode/AGENTS.md
 #############################################################################
 
-_ai_install_file() {
-  local src="${HOME}/.dotfiles/ai/${1}"
-  local dest="${2}"
-  local dest_dir
-  dest_dir="$(dirname "${dest}")"
-
-  [ ! -f "${src}" ] && return 0
-
-  mkdir -p "${dest_dir}"
-  cp -f "${src}" "${dest}"
-}
-
-_ai_install_dir() {
-  local src="${HOME}/.dotfiles/ai/${1}"
-  local dest="${2}"
-
-  [ ! -d "${src}" ] && return 0
-
-  mkdir -p "${dest}"
-  cp -rf "${src}/." "${dest}/"
-}
-
 # Claude Code
-_ai_install_file "claude/CLAUDE.md"      "${HOME}/.claude/CLAUDE.md"
-_ai_install_file "claude/settings.json"  "${HOME}/.claude/settings.json"
-_ai_install_dir  "claude/commands"       "${HOME}/.claude/commands"
-_ai_install_dir  "claude/skills"         "${HOME}/.claude/skills"
+install_dot_file ".claude/CLAUDE.md"
+install_dot_file ".claude/settings.json"
+install_dot_dir  ".claude/commands"
+install_dot_dir  ".claude/skills"
 
 # Codex
-_ai_install_file "codex/AGENTS.md"    "${HOME}/.codex/AGENTS.md"
+install_dot_file ".codex/AGENTS.md"
 
 # OpenCode
-_ai_install_file "opencode/AGENTS.md" "${HOME}/.opencode/AGENTS.md"
+install_dot_file ".opencode/AGENTS.md"

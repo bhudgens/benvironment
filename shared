@@ -58,13 +58,24 @@ npm_install () {
 }
 
 #############################################################################
-# Install Root Level dotfiles
+# Install dotfiles (files and directories) from ~/.dotfiles into $HOME
 #############################################################################
 function install_dot_file () {
   local dotfile="$1"
   if [ ! -L "${HOME}/${dotfile}" ] \
   && [ -f "${HOME}/.dotfiles/${dotfile}" ]; then
-   [ -f "${HOME}/${dotfile}" ] && mv "${HOME}/${dotfile}" "${HOME}/${dotfile}.bak"
-   ln -s "${HOME}/.dotfiles/${dotfile}" "${HOME}/${dotfile}"
+    mkdir -p "$(dirname "${HOME}/${dotfile}")"
+    [ -f "${HOME}/${dotfile}" ] && mv "${HOME}/${dotfile}" "${HOME}/${dotfile}.bak"
+    ln -s "${HOME}/.dotfiles/${dotfile}" "${HOME}/${dotfile}"
+  fi
+}
+
+function install_dot_dir () {
+  local dotdir="$1"
+  if [ ! -L "${HOME}/${dotdir}" ] \
+  && [ -d "${HOME}/.dotfiles/${dotdir}" ]; then
+    mkdir -p "$(dirname "${HOME}/${dotdir}")"
+    [ -d "${HOME}/${dotdir}" ] && mv "${HOME}/${dotdir}" "${HOME}/${dotdir}.bak"
+    ln -s "${HOME}/.dotfiles/${dotdir}" "${HOME}/${dotdir}"
   fi
 }
