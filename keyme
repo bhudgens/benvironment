@@ -199,7 +199,7 @@ keyme () {
   # Copy keys to Windows .ssh/ if running in WSL2 (VS Code uses Windows SSH)
   if [[ -d "/mnt/c" ]]; then
     local win_home
-    win_home=$(wslpath "$(cmd.exe /C 'echo %USERPROFILE%' 2>/dev/null | tr -d '\r')" 2>/dev/null) || true
+    win_home=$(wslpath "$(/mnt/c/Windows/System32/cmd.exe /C 'echo %USERPROFILE%' 2>/dev/null | tr -d '\r')" 2>/dev/null) || true
     if [[ -n "$win_home" && -d "$win_home" ]]; then
       local win_ssh="$win_home/.ssh"
       mkdir -p "$win_ssh" 2>/dev/null

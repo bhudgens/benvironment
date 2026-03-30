@@ -3,7 +3,7 @@
 # We're in windows
 if [ -d "/mnt/c" ]; then
   # ...and, then maybe a program
-  powershell.exe /c start $*
+  /mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe /c start $*
 
   exit 0
 fi
