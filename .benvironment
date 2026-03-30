@@ -16,6 +16,8 @@ export URL_PATH_TO_ENV_FILES="https://raw.githubusercontent.com/bhudgens/benviro
 export EDITOR=vim
 BENVIRONMENT_TOOLS_LIST=(nodejs fzf bw docker docker-compose tidy-markdown prettyping kitty lpass claude-code granted aichat opencode gh vscode)
 
+[ -d "${HOME}/.local/bin" ] && export PATH="${HOME}/.local/bin:${PATH}"
+
 if [ ${#BENVIRONMENT_FILES_TO_LOAD[@]} -eq 0 ]; then
   BENVIRONMENT_FILES_TO_LOAD=(colors aes shared configs tmux vim install-tools functions aliases pull statuses keyme azure livetail bitwarden mfa camera connect localuser links awskeys fonts clone kubernetes raspberrypi vault gpw aitools)
 fi
