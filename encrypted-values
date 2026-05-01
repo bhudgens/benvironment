@@ -9,7 +9,7 @@ encrypted_value GIT_EMAIL "U2FsdGVkX199wJd5KiTlGTrUivO5JiZfVMDoMlBMiBQWb+zw7NtZK
 _benvironment_after_decrypt () {
   local git_email
 
-  git_email="$(dec_value GIT_EMAIL)"
+  git_email="$(dec_cached_value GIT_EMAIL)"
   if [ -n "$git_email" ]; then
     git config --global user.email "$git_email"
     git config --global user.name "Benjamin Hudgens"

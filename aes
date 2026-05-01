@@ -187,3 +187,17 @@ dec_value() {
 
   printf '%s' "$decrypted"
 }
+
+dec_cached_value() {
+  local name="$1"
+  local encrypted
+  local decrypted
+
+  encrypted=$(_encrypted_value_for "$name")
+  decrypted=$(_decrypted_cache_get "$name" "$encrypted")
+  if [ $? -ne 0 ]; then
+    return 1
+  fi
+
+  printf '%s' "$decrypted"
+}
