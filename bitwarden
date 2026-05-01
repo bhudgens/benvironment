@@ -2,8 +2,16 @@
 _BW_EPHEMERAL_DIR="${XDG_RUNTIME_DIR:-/tmp}"
 export BW_SESSION_FILE="${_BW_EPHEMERAL_DIR}/.bwSession"
 export BW_CACHE_FILE="${_BW_EPHEMERAL_DIR}/.bw_items_cache"
-export BW_USERNAME=$(dec "U2FsdGVkX18H/ngbZbImHfPsDwpE7/9/11qJ/Nt4bpOM5HlnwNlS45obrq+/f6WC")
+BW_USERNAME=""
 export BW_APIKEYFILE="$HOME/.bwapikey"
+
+_bwUsername() {
+  if [ -z "$BW_USERNAME" ]; then
+    BW_USERNAME="$(dec_value BW_USERNAME)"
+    export BW_USERNAME
+  fi
+  printf '%s' "$BW_USERNAME"
+}
 
 function _isBwLoggedIn() {
   ! bw status | jq -r '.userEmail' | grep 'null' > /dev/null
@@ -15,7 +23,7 @@ function _bwLogout() {
 
 function _bwLogin() {
   [ -f "$BW_APIKEYFILE" ] && source "$BW_APIKEYFILE"
-  ! _isBwLoggedIn && bw login "${BW_USERNAME}" --raw > "${BW_SESSION_FILE}"
+  ! _isBwLoggedIn && bw login "$(_bwUsername)" --raw > "${BW_SESSION_FILE}"
   [ -f "${BW_SESSION_FILE}" ] && export BW_SESSION=$(cat ${BW_SESSION_FILE})
 }
 
@@ -61,4 +69,3 @@ function bwGetNote() {
 
   bw get item "$note" | jq -r ".notes"
 }
-

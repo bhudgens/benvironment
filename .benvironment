@@ -1,10 +1,5 @@
 #! /usr/bin/env bash
 
-if [ ! -f "${HOME}/.ssh/id_rsa" ]; then
-  read -rs 'DECRYPT_PASSPHRASE?Decrypt:'
-  echo ""
-  export DECRYPT_PASSPHRASE
-fi
 export DIR_REVERTS="${HOME}/reverts"
 export DIR_GLG="${HOME}/Dropbox/code/glg"
 export DIR_STARPHLEET="${DIR_REVERTS}/starphleet"
@@ -19,7 +14,7 @@ BENVIRONMENT_TOOLS_LIST=(nodejs fzf bw docker docker-compose tidy-markdown prett
 [ -d "${HOME}/.local/bin" ] && export PATH="${HOME}/.local/bin:${PATH}"
 
 if [ ${#BENVIRONMENT_FILES_TO_LOAD[@]} -eq 0 ]; then
-  BENVIRONMENT_FILES_TO_LOAD=(colors aes shared configs tmux vim install-tools functions aliases pull statuses keyme azure livetail bitwarden mfa camera connect localuser links awskeys fonts clone kubernetes raspberrypi vault gpw aitools)
+  BENVIRONMENT_FILES_TO_LOAD=(colors aes encrypted-values shared configs tmux vim install-tools functions aliases pull statuses keyme azure livetail bitwarden mfa camera connect localuser links awskeys fonts clone kubernetes raspberrypi vault gpw aitools)
 fi
 
 mkdir -p "${HOME}/run"

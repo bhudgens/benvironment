@@ -1,0 +1,17 @@
+#! /usr/bin/env bash
+
+encrypted_value BW_USERNAME "U2FsdGVkX19qJigfUBp4Fwl5EihYT2JuYaTKSPFXokrs5q9LSW7B0kKUsSIE/dmB"
+encrypted_value GIT_EMAIL "U2FsdGVkX199wJd5KiTlGTrUivO5JiZfVMDoMlBMiBQWb+zw7NtZK1hSOu0phnaH"
+
+# Temporary enforcement: several environments were bootstrapped with the wrong
+# Git email. Key loading already decrypts these values, so enforce Git identity
+# here after decrypt instead of prompting during shell startup.
+_benvironment_after_decrypt () {
+  local git_email
+
+  git_email="$(dec_value GIT_EMAIL)"
+  if [ -n "$git_email" ]; then
+    git config --global user.email "$git_email"
+    git config --global user.name "Benjamin Hudgens"
+  fi
+}

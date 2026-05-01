@@ -1,6 +1,135 @@
 #! /usr/bin/env bash
 
-function enc() {
+DECRYPT_CACHE_FILE="${XDG_RUNTIME_DIR:-/tmp}/.benvironment_decrypted_values"
+ENCRYPTED_VALUE_NAMES="${ENCRYPTED_VALUE_NAMES:-}"
+DECRYPT_VALUES_LOADED=0
+DECRYPT_AFTER_LOAD_RAN=0
+
+_decrypt_prompt_passphrase () {
+  read -rs 'DECRYPT_PASSPHRASE?Decode passphrase: '
+  echo >&2
+  export DECRYPT_PASSPHRASE
+}
+
+_decrypt_cache_dir () {
+  dirname "$DECRYPT_CACHE_FILE"
+}
+
+_decrypt_prepare_cache () {
+  mkdir -p "$(_decrypt_cache_dir)"
+  chmod 700 "$(_decrypt_cache_dir)"
+  touch "$DECRYPT_CACHE_FILE"
+  chmod 600 "$DECRYPT_CACHE_FILE"
+}
+
+_encrypted_var_name () {
+  printf 'ENCRYPTED_VALUE_%s' "$1"
+}
+
+_encrypted_value_for () {
+  local var_name
+  var_name=$(_encrypted_var_name "$1")
+  eval "printf '%s' \"\${${var_name}:-}\""
+}
+
+_decrypted_cache_get () {
+  [ -f "$DECRYPT_CACHE_FILE" ] || return 1
+  awk -F '\t' -v name="$1" -v encrypted="$2" '$1 == name && $2 == encrypted { print substr($0, length($1) + length($2) + 3); found=1; exit } END { exit found ? 0 : 1 }' "$DECRYPT_CACHE_FILE"
+}
+
+_decrypted_cache_set () {
+  _decrypt_prepare_cache
+  awk -F '\t' -v name="$1" '$1 != name' "$DECRYPT_CACHE_FILE" > "${DECRYPT_CACHE_FILE}.tmp"
+  printf '%s\t%s\t%s\n' "$1" "$2" "$3" >> "${DECRYPT_CACHE_FILE}.tmp"
+  mv "${DECRYPT_CACHE_FILE}.tmp" "$DECRYPT_CACHE_FILE"
+  chmod 600 "$DECRYPT_CACHE_FILE"
+}
+
+encrypted_value () {
+  local name="$1"
+  local encrypted="$2"
+  local var_name
+
+  if [[ ! "$name" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; then
+    echo "Invalid encrypted value name: $name" >&2
+    return 1
+  fi
+
+  var_name=$(_encrypted_var_name "$name")
+  eval "${var_name}=\$encrypted"
+
+  case " $ENCRYPTED_VALUE_NAMES " in
+    *" $name "*) ;;
+    *) ENCRYPTED_VALUE_NAMES="${ENCRYPTED_VALUE_NAMES}${ENCRYPTED_VALUE_NAMES:+ }$name" ;;
+  esac
+}
+
+_decrypt_all_values () {
+  local name
+  local encrypted
+  local decoded
+  local failed
+
+  if [ "$DECRYPT_VALUES_LOADED" -eq 1 ]; then
+    return 0
+  fi
+
+  if [ -z "$ENCRYPTED_VALUE_NAMES" ]; then
+    DECRYPT_VALUES_LOADED=1
+    return 0
+  fi
+
+  while true; do
+    if [ -z "$DECRYPT_PASSPHRASE" ]; then
+      _decrypt_prompt_passphrase
+    fi
+
+    failed=0
+    for name in $ENCRYPTED_VALUE_NAMES; do
+      encrypted=$(_encrypted_value_for "$name")
+      if _decrypted_cache_get "$name" "$encrypted" >/dev/null; then
+        continue
+      fi
+
+      decoded=$(openssl enc -aes-256-cbc -d -a -salt -pbkdf2 -iter 10000 -pass pass:"$DECRYPT_PASSPHRASE" <<< "$encrypted" 2>/dev/null)
+      if [ $? -eq 0 ] && [ -n "$decoded" ]; then
+        _decrypted_cache_set "$name" "$encrypted" "$decoded"
+      else
+        failed=1
+        break
+      fi
+    done
+
+    if [ "$failed" -eq 0 ]; then
+      DECRYPT_VALUES_LOADED=1
+      DECRYPT_PASSPHRASE=""
+      export DECRYPT_PASSPHRASE
+      # Temporary migration hook: lets the environment repair dependent config
+      # immediately after encrypted values are available, without prompting on
+      # shell startup. See docs/adr/0001-temporary-after-decrypt-git-config.md.
+      _decrypt_after_load
+      return 0
+    fi
+
+    DECRYPT_PASSPHRASE=""
+    export DECRYPT_PASSPHRASE
+    echo "Decode failed, trying again." >&2
+  done
+}
+
+_decrypt_after_load () {
+  if [ "$DECRYPT_AFTER_LOAD_RAN" -eq 1 ]; then
+    return 0
+  fi
+
+  DECRYPT_AFTER_LOAD_RAN=1
+
+  if type _benvironment_after_decrypt >/dev/null 2>&1; then
+    _benvironment_after_decrypt
+  fi
+}
+
+enc() {
   local input
   if [ "$#" -eq 1 ]; then
     input=$1
@@ -10,18 +139,44 @@ function enc() {
   openssl enc -aes-256-cbc -a -salt -pbkdf2 -iter 10000 -pass pass:"$DECRYPT_PASSPHRASE" <<< "$input"
 }
 
-function dec() {
+dec() {
   local input
-  if [ -z "$DECRYPT_PASSPHRASE" ]; then
-    return 0
-  fi
-
   if [ "$#" -eq 1 ]; then
     input=$1
   else
     input=$(cat)
   fi
-  openssl enc -aes-256-cbc -d -a -salt -pbkdf2 -iter 10000 -pass pass:"$DECRYPT_PASSPHRASE" <<< "$input"
+
+  while true; do
+    if [ -z "$DECRYPT_PASSPHRASE" ]; then
+      _decrypt_prompt_passphrase
+    fi
+
+    openssl enc -aes-256-cbc -d -a -salt -pbkdf2 -iter 10000 -pass pass:"$DECRYPT_PASSPHRASE" <<< "$input" 2>/dev/null
+    if [ $? -eq 0 ]; then
+      DECRYPT_PASSPHRASE=""
+      export DECRYPT_PASSPHRASE
+      return 0
+    fi
+
+    DECRYPT_PASSPHRASE=""
+    export DECRYPT_PASSPHRASE
+    echo "Decode failed, trying again." >&2
+  done
 }
 
-echo -e "${blue}Status: ${green}$(dec "U2FsdGVkX19RuIDuiZ/bXnxpHQA3nApHdUzjisMIu4A=")${end}"
+dec_value() {
+  local name="$1"
+  local encrypted
+  local decrypted
+
+  _decrypt_all_values || return 1
+  encrypted=$(_encrypted_value_for "$name")
+  decrypted=$(_decrypted_cache_get "$name" "$encrypted")
+  if [ $? -ne 0 ]; then
+    echo "Unknown encrypted value: $name" >&2
+    return 1
+  fi
+
+  printf '%s' "$decrypted"
+}
