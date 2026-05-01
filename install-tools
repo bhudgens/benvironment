@@ -2,6 +2,34 @@
 
 if echo $OSTYPE | grep -i linux > /dev/null; then
 
+  ensure_xterm_ghostty_terminfo () {
+    if infocmp -x xterm-ghostty > /dev/null 2>&1; then
+      return 0
+    fi
+
+    apt_get_install ncurses-bin tic
+
+    if infocmp -x xterm-ghostty > /dev/null 2>&1; then
+      return 0
+    fi
+
+    if _which curl && _which tic; then
+      local terminfo_url="https://raw.githubusercontent.com/ghostty-org/ghostty/main/terminfo/xterm-ghostty"
+      local terminfo_file="/tmp/xterm-ghostty.terminfo"
+
+      if curl -fsSL "${terminfo_url}" -o "${terminfo_file}"; then
+        mkdir -p "${HOME}/.terminfo"
+        tic -x -o "${HOME}/.terminfo" "${terminfo_file}" > /dev/null 2>&1 || true
+        rm -f "${terminfo_file}"
+      fi
+    fi
+
+    if ! infocmp -x xterm-ghostty > /dev/null 2>&1 \
+    && [ "${TERM:-}" = "xterm-ghostty" ]; then
+      export TERM=xterm-256color
+    fi
+  }
+
   apt_get_install apt-utils apt-extracttemplates
   apt_get_install locales update-locale
   apt_get_install bsdmainutils column
@@ -17,6 +45,8 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
   apt_get_install nmap
   apt_get_install strace
   apt_get_install jq
+  ensure_xterm_ghostty_terminfo
+  unset -f ensure_xterm_ghostty_terminfo
   apt_get_install silversearcher-ag ag
   # Needed for coc-lua lsp server vim plugin
   # Link: https://stackoverflow.com/questions/20079572/srlua-makefile-error-lua-h-no-such-file-or-directory/20080097
