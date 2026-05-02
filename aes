@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-DECRYPT_CACHE_FILE="${XDG_RUNTIME_DIR:-/tmp}/.benvironment_decrypted_values"
+DECRYPT_CACHE_FILE="${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/.benvironment_decrypted_values"
 ENCRYPTED_VALUE_NAMES="${ENCRYPTED_VALUE_NAMES:-}"
 DECRYPT_VALUES_LOADED=0
 DECRYPT_AFTER_LOAD_RAN=0
@@ -17,8 +17,7 @@ _decrypt_cache_dir () {
 }
 
 _decrypt_prepare_cache () {
-  mkdir -p "$(_decrypt_cache_dir)"
-  chmod 700 "$(_decrypt_cache_dir)"
+  mkdir -p -m 700 "$(_decrypt_cache_dir)"
   touch "$DECRYPT_CACHE_FILE"
   chmod 600 "$DECRYPT_CACHE_FILE"
 }
@@ -44,6 +43,24 @@ _decrypted_cache_set () {
   printf '%s\t%s\t%s\n' "$1" "$2" "$3" >> "${DECRYPT_CACHE_FILE}.tmp"
   mv "${DECRYPT_CACHE_FILE}.tmp" "$DECRYPT_CACHE_FILE"
   chmod 600 "$DECRYPT_CACHE_FILE"
+}
+
+_decrypt_cache_complete () {
+  local name
+  local encrypted
+
+  while IFS= read -r name; do
+    [ -z "$name" ] && continue
+
+    encrypted=$(_encrypted_value_for "$name")
+    if ! _decrypted_cache_get "$name" "$encrypted" >/dev/null; then
+      return 1
+    fi
+  done <<EOF
+$ENCRYPTED_VALUE_NAMES
+EOF
+
+  return 0
 }
 
 encrypted_value () {
@@ -79,6 +96,12 @@ _decrypt_all_values () {
 
   if [ -z "$ENCRYPTED_VALUE_NAMES" ]; then
     DECRYPT_VALUES_LOADED=1
+    return 0
+  fi
+
+  if _decrypt_cache_complete; then
+    DECRYPT_VALUES_LOADED=1
+    _decrypt_after_load
     return 0
   fi
 
