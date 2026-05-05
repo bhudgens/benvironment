@@ -7,4 +7,12 @@ if [ -d "/mnt/c" ] && ! _which code; then
       "$VSCODE_PATH" "$@"
     }
   fi
+elif echo "$OSTYPE" | grep -i darwin > /dev/null && ! _which code; then
+  if [ -d "/Applications/Visual Studio Code.app" ]; then
+    code() {
+      open -a "Visual Studio Code" "$@"
+    }
+  elif _which brew; then
+    brew_cask_install visual-studio-code
+  fi
 fi

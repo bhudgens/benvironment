@@ -1,4 +1,13 @@
 if ! _which docker; then
-  bash -c "$(curl -sLo- 'https://get.docker.com')"
-  eval "$SUDO usermod -aG docker '$USER'"
+  if echo "$OSTYPE" | grep -i darwin > /dev/null; then
+    if _which brew; then
+      brew_cask_install docker
+      brew_install docker
+    else
+      echo "Docker Desktop is required on macOS. Install Homebrew or Docker Desktop, then re-run install-tools."
+    fi
+  else
+    bash -c "$(curl -sLo- 'https://get.docker.com')"
+    eval "$SUDO usermod -aG docker '$USER'"
+  fi
 fi

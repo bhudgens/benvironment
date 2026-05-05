@@ -1,8 +1,17 @@
 if ! _which prettyping; then
   pushd /tmp > /dev/null
   curl -s -O https://raw.githubusercontent.com/denilsonsa/prettyping/master/prettyping
-  eval "$SUDO cp prettyping /usr/local/bin"
+  if echo "$OSTYPE" | grep -i darwin > /dev/null; then
+    mkdir -p "${HOME}/.local/bin"
+    cp prettyping "${HOME}/.local/bin/prettyping"
+  else
+    eval "$SUDO cp prettyping /usr/local/bin"
+  fi
   echo Installing prettyping
-  eval "$SUDO chmod +x /usr/local/bin/prettyping"
+  if echo "$OSTYPE" | grep -i darwin > /dev/null; then
+    chmod +x "${HOME}/.local/bin/prettyping"
+  else
+    eval "$SUDO chmod +x /usr/local/bin/prettyping"
+  fi
   popd > /dev/null
 fi

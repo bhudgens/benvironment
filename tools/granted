@@ -2,8 +2,18 @@
 # https://granted.dev
 GRANTED_VERSION="0.36.2"
 
-if ! _which granted; then
-  curl -OL "https://releases.commonfate.io/granted/v${GRANTED_VERSION}/granted_${GRANTED_VERSION}_linux_x86_64.tar.gz"
-  eval "$SUDO tar -xzf granted_${GRANTED_VERSION}_linux_x86_64.tar.gz -C /usr/local/bin/ granted assume assumego"
-  rm -f "granted_${GRANTED_VERSION}_linux_x86_64.tar.gz"
+if ! _which granted \
+&& ! _which assume; then
+  if echo "$OSTYPE" | grep -i darwin > /dev/null; then
+    mkdir -p "${HOME}/.local/bin"
+    GRANTED_ARCH="x86_64"
+    [ "$(uname -m)" = "arm64" ] && GRANTED_ARCH="arm64"
+    curl -fsSL "https://releases.commonfate.io/granted/v${GRANTED_VERSION}/granted_${GRANTED_VERSION}_darwin_${GRANTED_ARCH}.tar.gz" -o "/tmp/granted.tar.gz"
+    tar -xzf /tmp/granted.tar.gz -C "${HOME}/.local/bin" granted assume assumego
+    rm -f /tmp/granted.tar.gz
+  else
+    curl -OL "https://releases.commonfate.io/granted/v${GRANTED_VERSION}/granted_${GRANTED_VERSION}_linux_x86_64.tar.gz"
+    eval "$SUDO tar -xzf granted_${GRANTED_VERSION}_linux_x86_64.tar.gz -C /usr/local/bin/ granted assume assumego"
+    rm -f "granted_${GRANTED_VERSION}_linux_x86_64.tar.gz"
+  fi
 fi

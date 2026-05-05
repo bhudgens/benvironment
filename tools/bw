@@ -1,8 +1,17 @@
 if ! _which bw; then
   pushd /tmp > /dev/null
-  curl -sLo- 'https://bitwarden.com/download/?app=cli&platform=linux' > /tmp/bw.zip
+  if echo "$OSTYPE" | grep -i darwin > /dev/null; then
+    curl -sLo- 'https://bitwarden.com/download/?app=cli&platform=macos' > /tmp/bw.zip
+  else
+    curl -sLo- 'https://bitwarden.com/download/?app=cli&platform=linux' > /tmp/bw.zip
+  fi
   unzip -o /tmp/bw.zip
   chmod +x bw
-  eval "$SUDO mv bw /usr/bin/bw"
+  if echo "$OSTYPE" | grep -i darwin > /dev/null; then
+    mkdir -p "${HOME}/.local/bin"
+    mv bw "${HOME}/.local/bin/bw"
+  else
+    eval "$SUDO mv bw /usr/bin/bw"
+  fi
   popd > /dev/null
 fi
