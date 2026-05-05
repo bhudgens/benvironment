@@ -29,7 +29,7 @@ main() {
   fi
 
   if [ ! -d "$HOME/.oh-my-zsh" ]; then
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    KEEP_ZSHRC=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
   fi
 
   URL_PATH_TO_ENV_FILES="https://raw.githubusercontent.com/bhudgens/benvironment/master"
@@ -39,8 +39,10 @@ main() {
     curl -s "${URL_PATH_TO_ENV_FILES}/${BENVIRONMENT_LOAD_FILE}" -o "${HOME}/${BENVIRONMENT_LOAD_FILE}"
   fi
 
-  echo Installing benvironment into ${env_file}
-  echo "source ${BENVIRONMENT_LOAD_FILE}" >> "${HOME}/.zshrc"
+  echo "Installing benvironment into ${HOME}/${BENVIRONMENT_LOAD_FILE}"
+  if ! grep -q "${HOME}/${BENVIRONMENT_LOAD_FILE}" "${HOME}/.zshrc" 2>/dev/null; then
+    echo "source ${HOME}/${BENVIRONMENT_LOAD_FILE}" >> "${HOME}/.zshrc"
+  fi
   echo All Done! Open a new window!
 }
 

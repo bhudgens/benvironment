@@ -12,6 +12,8 @@ export EDITOR=vim
 BENVIRONMENT_TOOLS_LIST=(nodejs fzf bw docker docker-compose tidy-markdown prettyping kitty lpass claude-code granted aichat opencode gh vscode)
 
 [ -d "${HOME}/.local/bin" ] && export PATH="${HOME}/.local/bin:${PATH}"
+[ -d "${HOME}/.local/node/bin" ] && export PATH="${HOME}/.local/node/bin:${PATH}"
+[ -d "${HOME}/.npm-global/bin" ] && export PATH="${HOME}/.npm-global/bin:${PATH}"
 
 if [ ${#BENVIRONMENT_FILES_TO_LOAD[@]} -eq 0 ]; then
   BENVIRONMENT_FILES_TO_LOAD=(colors aes encrypted-values shared configs tmux vim install-tools functions aliases pull statuses keyme azure livetail bitwarden mfa camera connect localuser links awskeys fonts clone kubernetes raspberrypi vault gpw aitools)
@@ -20,9 +22,11 @@ fi
 mkdir -p "${HOME}/run"
 for file in "${BENVIRONMENT_FILES_TO_LOAD[@]}"; do
   FILE_CACHE_ALIASES="${HOME}/run/.${file}"
-  if [ ! -f "${FILE_CACHE_ALIASES}" ]; then
+  if [ -f "${HOME}/reverts/benvironment/${file}" ]; then
+    cp "${HOME}/reverts/benvironment/${file}" "${FILE_CACHE_ALIASES}"
+  elif [ ! -f "${FILE_CACHE_ALIASES}" ]; then
     if [ -f "./${file}" ]; then
-      cp "${file}" "${FILE_CACHE_ALIASES}"
+      cp "./${file}" "${FILE_CACHE_ALIASES}"
     else
       curl -s "${URL_PATH_TO_ENV_FILES}/${file}" -o "${FILE_CACHE_ALIASES}"
     fi

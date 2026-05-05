@@ -5,7 +5,7 @@
 #############################################################################
 # shhhhh
 function _which () {
-  which $1 > /dev/null
+  which "$1" > /dev/null 2>&1
 }
 
 [ "$EUID" -ne 0 ] && _which sudo && SUDO="sudo -E "
@@ -14,17 +14,26 @@ function _which () {
 # Software Install - Mac Poo
 #############################################################################
 brew_install () {
-  BREW_CMD="$(which brew)"
-  if [ ! -f "${BREW_CMD}" ]; then
+  BREW_FORMULA="$1"
+  BREW_CHECK="${2:-$1}"
+  if ! _which brew; then
     echo Brew not found
     return
   fi
 
-  BREW_CMD="$1"
-  which "${BREW_CMD}" > /dev/null
-  if [ $? -gt 0 ]; then
-    brew install "${BREW_CMD}"
+  if ! _which "${BREW_CHECK}"; then
+    brew install "${BREW_FORMULA}"
   fi
+}
+
+brew_cask_install () {
+  BREW_CASK="$1"
+  if ! _which brew; then
+    echo Brew not found
+    return
+  fi
+
+  brew list --cask "${BREW_CASK}" > /dev/null 2>&1 || brew install --cask "${BREW_CASK}"
 }
 
 #############################################################################
@@ -44,16 +53,23 @@ npm_install () {
   [ -z "$2" ] || APP="$2"
   if ! _which "${APP}" \
   && _which npm; then
-    eval "$SUDO mkdir -p /usr/lib/node_modules"
-    eval "$SUDO mkdir -p /usr/local/lib/node_modules"
-    eval "$SUDO chown -R ${USER}:${USER} /usr/lib/node_modules"
-    eval "$SUDO chown -R ${USER}:${USER} /usr/local/lib/node_modules"
-    eval "$SUDO chown root:adm /usr/bin"
-    eval "$SUDO chmod 775 /usr/bin"
-    eval "$SUDO chown root:adm /usr/local/bin"
-    eval "$SUDO chmod 775 /usr/local/bin"
-    eval "$SUDO npm install -g $1"
-    [ -d "${HOME}/.npm" ] && eval "$SUDO chown -R ${USER}:${USER} ${HOME}/.npm"
+    if echo "$OSTYPE" | grep -i darwin > /dev/null; then
+      mkdir -p "${HOME}/.npm-global"
+      npm config set prefix "${HOME}/.npm-global"
+      export PATH="${HOME}/.npm-global/bin:${PATH}"
+      npm install -g "$1"
+    else
+      eval "$SUDO mkdir -p /usr/lib/node_modules"
+      eval "$SUDO mkdir -p /usr/local/lib/node_modules"
+      eval "$SUDO chown -R ${USER}:${USER} /usr/lib/node_modules"
+      eval "$SUDO chown -R ${USER}:${USER} /usr/local/lib/node_modules"
+      eval "$SUDO chown root:adm /usr/bin"
+      eval "$SUDO chmod 775 /usr/bin"
+      eval "$SUDO chown root:adm /usr/local/bin"
+      eval "$SUDO chmod 775 /usr/local/bin"
+      eval "$SUDO npm install -g $1"
+      [ -d "${HOME}/.npm" ] && eval "$SUDO chown -R ${USER}:${USER} ${HOME}/.npm"
+    fi
   fi
 }
 

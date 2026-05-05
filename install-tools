@@ -73,33 +73,80 @@ if echo $OSTYPE | grep -i linux > /dev/null; then
     eval "$SUDO /tmp/aws/install"
     rm -rf /tmp/awscliv2.zip /tmp/aws
   fi
+elif echo "$OSTYPE" | grep -i darwin > /dev/null; then
+  if _which brew; then
+    brew_install git
+    brew_install curl
+    brew_install wget
+    brew_install tmux
+    brew_install openvpn
+    brew_install nmap
+    brew_install jq
+    brew_install the_silver_searcher ag
+    brew_install lua
+    brew_install unzip
+    brew_install ripgrep rg
+    brew_install bat
+    brew_install awscli aws
+  else
+    echo "Homebrew not found. Skipping macOS package installs from install-tools."
+    mkdir -p "${HOME}/.local/bin"
 
-  if type rg &> /dev/null; then
-    export FZF_DEFAULT_COMMAND='rg --files'
-    export FZF_DEFAULT_OPTS='-m --height 50% --border'
+    if ! _which rg; then
+      RG_ARCH="$(uname -m)"
+      [ "$RG_ARCH" = "arm64" ] && RG_ARCH="aarch64"
+      RG_TAG="$(curl -fsSL https://api.github.com/repos/BurntSushi/ripgrep/releases/latest | sed -nE 's/.*"tag_name": *"([^"]+)".*/\1/p' | head -1)"
+      RG_VERSION="${RG_TAG#v}"
+      if [ -n "$RG_VERSION" ]; then
+        RG_PACKAGE="ripgrep-${RG_VERSION}-${RG_ARCH}-apple-darwin"
+        curl -fsSL "https://github.com/BurntSushi/ripgrep/releases/download/${RG_TAG}/${RG_PACKAGE}.tar.gz" -o "/tmp/${RG_PACKAGE}.tar.gz"
+        tar -xzf "/tmp/${RG_PACKAGE}.tar.gz" -C /tmp
+        cp "/tmp/${RG_PACKAGE}/rg" "${HOME}/.local/bin/rg"
+        rm -rf "/tmp/${RG_PACKAGE}" "/tmp/${RG_PACKAGE}.tar.gz"
+      fi
+    fi
+
+    if ! _which bat; then
+      BAT_ARCH="$(uname -m)"
+      [ "$BAT_ARCH" = "arm64" ] && BAT_ARCH="aarch64"
+      BAT_TAG="$(curl -fsSL https://api.github.com/repos/sharkdp/bat/releases/latest | sed -nE 's/.*"tag_name": *"([^"]+)".*/\1/p' | head -1)"
+      BAT_VERSION="${BAT_TAG#v}"
+      if [ -n "$BAT_VERSION" ]; then
+        BAT_PACKAGE="bat-v${BAT_VERSION}-${BAT_ARCH}-apple-darwin"
+        curl -fsSL "https://github.com/sharkdp/bat/releases/download/${BAT_TAG}/${BAT_PACKAGE}.tar.gz" -o "/tmp/${BAT_PACKAGE}.tar.gz"
+        tar -xzf "/tmp/${BAT_PACKAGE}.tar.gz" -C /tmp
+        cp "/tmp/${BAT_PACKAGE}/bat" "${HOME}/.local/bin/bat"
+        rm -rf "/tmp/${BAT_PACKAGE}" "/tmp/${BAT_PACKAGE}.tar.gz"
+      fi
+    fi
+  fi
+fi
+
+# Ensure tools directory exists
+mkdir -p "$HOME/run/tools"
+
+# List of tools to load if missing from cache
+for tool in "${BENVIRONMENT_TOOLS_LIST[@]}"; do
+  TOOL_CACHE="${HOME}/run/tools/${tool}"
+  TOOL_SOURCE="${HOME}/reverts/benvironment/tools/${tool}"
+  if [ -f "${TOOL_SOURCE}" ]; then
+    cp "${TOOL_SOURCE}" "${TOOL_CACHE}"
+    chmod +x "${TOOL_CACHE}"
+  elif [ ! -f "${TOOL_CACHE}" ]; then
+    if curl -s "${URL_PATH_TO_ENV_FILES}/tools/${tool}" -o "${TOOL_CACHE}" && [ -s "${TOOL_CACHE}" ]; then
+      chmod +x "${TOOL_CACHE}"
+    else
+      echo "WARN: unable to load tool definition for ${tool}"
+      continue
+    fi
   fi
 
-  # Ensure tools directory exists
-  mkdir -p "$HOME/run/tools"
+  [ -f "${TOOL_CACHE}" ] && source "${TOOL_CACHE}"
+done
 
-  # List of tools to load if missing from cache
-  for tool in "${BENVIRONMENT_TOOLS_LIST[@]}"; do
-    if [ ! -f "$HOME/run/tools/${tool}" ]; then
-      if [ -f "./tools/${tool}" ]; then
-        cp "./tools/${tool}" "$HOME/run/tools/${tool}"
-      else
-        curl -s "${URL_PATH_TO_ENV_FILES}/tools/${tool}" -o "$HOME/run/tools/${tool}"
-      fi
-      chmod +x "$HOME/run/tools/${tool}"
-    fi
-  done
-
-  # Source custom tool installation scripts
-  for tool in "${BENVIRONMENT_TOOLS_LIST[@]}"; do
-    if [ -f "$HOME/run/tools/${tool}" ]; then
-      source "$HOME/run/tools/${tool}"
-    fi
-  done
+if type rg &> /dev/null; then
+  export FZF_DEFAULT_COMMAND='rg --files'
+  export FZF_DEFAULT_OPTS='-m --height 50% --border'
 fi
 
 #############################################################################
@@ -109,9 +156,11 @@ fi
 # swap cat with bat
 if _which batcat; then
   alias cat='batcat'
+elif _which bat; then
+  alias cat='bat'
 fi
 
-if [ -f /usr/local/bin/prettyping ]; then
+if _which prettyping; then
   alias ping='prettyping --nolegend'
 fi
 

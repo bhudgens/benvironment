@@ -131,7 +131,9 @@ alias record='asciinema rec'
 alias xcodeaccept="sudo xcodebuild -license accept"
 alias dev="cd $HOME/reverts/ec2.starphleet.dev.headquarters"
 
-if [ ! -d "/mnt/c" ]; then
+if ! echo "$OSTYPE" | grep -i darwin > /dev/null \
+&& [ ! -d "/mnt/c" ] \
+&& _which xsel; then
   alias pbcopy='xsel --clipboard --input'
   alias pbpaste='xsel --clipboard --output'
 fi

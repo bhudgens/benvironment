@@ -662,8 +662,13 @@ getpass () {
   # Cuts the id out of something like:
   #  blah blah blah [id: 234234234234234322]
   local LPASS_ID=$(echo "${lpass_entry}" | perl -pe 's|.*?\s+(\d+)\]$|$1|')
-  lpass show --password "${LPASS_ID}" | tr -d '\n' | xsel --clipboard --input \
-    || lpass show --field=password "${LPASS_ID}" | tr -d '\n' | xsel --clipboard --input
+  if _which pbcopy; then
+    lpass show --password "${LPASS_ID}" | tr -d '\n' | pbcopy \
+      || lpass show --field=password "${LPASS_ID}" | tr -d '\n' | pbcopy
+  elif _which xsel; then
+    lpass show --password "${LPASS_ID}" | tr -d '\n' | xsel --clipboard --input \
+      || lpass show --field=password "${LPASS_ID}" | tr -d '\n' | xsel --clipboard --input
+  fi
 }
 
 ##########################################################
