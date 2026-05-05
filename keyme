@@ -174,11 +174,11 @@ keyme () {
   echo "Populating Bitwarden cache..."
   _bwEnsureCache > /dev/null
 
-  # Temporary migration repair: keyme is the command most often run on machines
-  # that later use Git. If encrypted values are already decoded/cached, repair
-  # the global Git identity here without prompting for the decode passphrase.
-  # Remove after all environments have the corrected Git email config.
-  if type _benvironment_after_decrypt >/dev/null 2>&1; then
+  # Ensure any available encrypted values are decoded once, then repair
+  # Git identity from the decrypted cache for this session's runtime.
+  if type _decrypt_all_values >/dev/null 2>&1; then
+    _decrypt_all_values
+  elif type _benvironment_after_decrypt >/dev/null 2>&1; then
     _benvironment_after_decrypt
   fi
 

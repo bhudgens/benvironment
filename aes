@@ -210,7 +210,6 @@ dec_value() {
 
   printf '%s' "$decrypted"
 }
-
 dec_cached_value() {
   local name="$1"
   local encrypted

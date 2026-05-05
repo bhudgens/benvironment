@@ -70,12 +70,17 @@ EOF
 # Software Install
 #############################################################################
 
-apt_get_install vim
+if _which apt-get; then
+  apt_get_install vim
+fi
 
 # Ensure vim >= 9.0.0438 (one-time upgrade)
-if _which vim && [ ! -f "$HOME/.vim_version_ok" ]; then
-  _vim_ver=$(vim --version | head -1 | grep -oP '\d+\.\d+')
-  _vim_patch=$(vim --version | grep -oP 'Included patches: \d+-\K\d+' || echo 0)
+if _which vim \
+&& _which apt-get \
+&& [ ! -f "$HOME/.vim_version_ok" ]; then
+  _vim_ver=$(vim --version | head -1 | sed -E 's/.*Vi IMproved ([0-9]+\.[0-9]+).*/\1/')
+  _vim_patch=$(vim --version | sed -nE 's/Included patches: [0-9]+-([0-9]+)/\1/p' | head -1)
+  [ -z "$_vim_patch" ] && _vim_patch=0
   _vim_full="${_vim_ver}.${_vim_patch}"
   _vim_min="9.0.438"
 
@@ -93,4 +98,3 @@ if [ ! -f "$HOME/.vim/autoload/plug.vim" ]; then
   vim +'PlugInstall --sync' +qa
   install_dot_file .vimrc
 fi
-
