@@ -2,32 +2,37 @@
 #############################################################################
 # AI Tool Config Management
 #
-# Installs portable global configs for: claude-code, codex, opencode
-# from ~/.dotfiles into their expected locations, using the same
-# install_dot_file / install_dot_dir pattern as the rest of benvironment.
+# benvironment loads this module, but the AI assistant config source of truth
+# lives in ~/reverts/ai. Dotfiles remains responsible for shell/tmux/zsh files.
 #
-# To persist a change across all machines:
-#   1. Edit the file under ~/reverts/dotfiles/
-#   2. Commit and push from ~/reverts/dotfiles
-#   On next shell load, all machines pull and pick up the update.
-#
-# Managed:
-#   ~/.claude/CLAUDE.md         <- ~/.dotfiles/.claude/CLAUDE.md
-#   ~/.claude/settings.json     <- ~/.dotfiles/.claude/settings.json
-#   ~/.claude/commands/         <- ~/.dotfiles/.claude/commands/
-#   ~/.claude/skills/           <- ~/.dotfiles/.claude/skills/
-#   ~/.codex/AGENTS.md          <- ~/.dotfiles/.codex/AGENTS.md
-#   ~/.opencode/AGENTS.md       <- ~/.dotfiles/.opencode/AGENTS.md
+# Managed by ~/reverts/ai/install.sh:
+#   ~/.claude/CLAUDE.md
+#   ~/.claude/settings.json
+#   ~/.claude/skills/
+#   ~/.codex/AGENTS.md
+#   ~/.codex/skills/
+#   ~/.opencode/AGENTS.md
+#   ~/.config/opencode/commands/
 #############################################################################
 
-# Claude Code
-install_dot_file ".claude/CLAUDE.md"
-install_dot_file ".claude/settings.json"
-install_dot_dir  ".claude/commands"
-install_dot_dir  ".claude/skills"
+AI_TOOLS_REPO="${AI_TOOLS_REPO:-${HOME}/reverts/ai}"
 
-# Codex
-install_dot_file ".codex/AGENTS.md"
+_ai_tools_needs_bootstrap() {
+  [ ! -f "${HOME}/.codex/AGENTS.md" ] \
+  || [ ! -f "${HOME}/.claude/CLAUDE.md" ] \
+  || [ ! -f "${HOME}/.claude/settings.json" ] \
+  || [ ! -f "${HOME}/.opencode/AGENTS.md" ] \
+  || [ ! -d "${HOME}/.claude/skills" ] \
+  || [ ! -d "${HOME}/.codex/skills" ] \
+  || [ ! -d "${HOME}/.config/opencode/commands" ]
+}
 
-# OpenCode
-install_dot_file ".opencode/AGENTS.md"
+if [ -f "${AI_TOOLS_REPO}/install.sh" ] && _ai_tools_needs_bootstrap; then
+  if [ -x "${AI_TOOLS_REPO}/install.sh" ]; then
+    "${AI_TOOLS_REPO}/install.sh"
+  else
+    bash "${AI_TOOLS_REPO}/install.sh"
+  fi
+fi
+
+unset -f _ai_tools_needs_bootstrap
