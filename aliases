@@ -150,10 +150,4 @@ alias cisco="ssh -oKexAlgorithms=+diffie-hellman-group1-sha1,diffie-hellman-grou
 alias oc='opencode'
 alias cx='codex'
 
-# Grok Build: config [models].default is not always applied before the TUI paints;
-# force Composer 2.5 on every interactive launch (override with: command grok …).
-grok() {
-  command grok -m grok-composer-2.5-fast "$@"
-}
-
 # All finished
