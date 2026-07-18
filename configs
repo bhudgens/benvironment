@@ -14,9 +14,10 @@ if [ ! -d "$HOME/.dotfiles" ]; then
   2>&1 git clone "${DOT_FILES_REPO}" "$HOME/.dotfiles" > /dev/null
 fi
 
-pushd "$HOME/.dotfiles" > /dev/null
-  2>&1 git pull > /dev/null
-popd > /dev/null
+if [ -d "$HOME/.dotfiles" ]; then
+  pushd "$HOME/.dotfiles" > /dev/null
+  popd > /dev/null
+fi
 
 for dotfile in .zshrc .tmux.conf; do
   install_dot_file "$dotfile"
